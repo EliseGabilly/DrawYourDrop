@@ -23,6 +23,7 @@ public class BackgroundManager : MonoBehaviour {
         worldHeight = positionTop.y - positionBottom.y;
 
         position = positionTop;
+        position.z = 1;
         GameObject go;
         for(int i = 0; i<10; i++) {
             position.y -= worldHeight*Random.Range(0.1f, 0.6f);

@@ -55,7 +55,6 @@ public class LineManager : MonoBehaviour {
         GameObject goLine = new GameObject { name = "Line" };
         goLine.transform.parent = linesContainer;
         currentLinerRenderer = goLine.AddComponent<LineRenderer>();
-        currentLineEdgeCollider = goLine.AddComponent<EdgeCollider2D>();
 
         //Set values
         currentLinerRenderer.positionCount = 0;
@@ -66,7 +65,6 @@ public class LineManager : MonoBehaviour {
         currentLinerRenderer.startColor = lineColor;
         currentLinerRenderer.endColor = lineColor;
         currentLinerRenderer.sortingOrder = 20;
-        currentLineEdgeCollider.edgeRadius = lineWidth/2;
     }
 
     private Vector2 GetCurrentWorldPoitn() {
@@ -89,6 +87,8 @@ public class LineManager : MonoBehaviour {
     }
 
     private void EndLine() {
+        currentLineEdgeCollider = gameObject.AddComponent<EdgeCollider2D>();
+        currentLineEdgeCollider.edgeRadius = lineWidth / 2;
         currentLineEdgeCollider.SetPoints(currentLine);
     }
 }
