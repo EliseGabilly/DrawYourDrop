@@ -36,7 +36,7 @@ public class BackgroundSpawnManager : MonoBehaviour {
 
     private void Update() {
         Vector3 positionTop = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth / 2, mainCamera.pixelHeight, -mainCamera.transform.position.z));
-        if(backgroundOnTop.position.y > positionTop.y) {
+        if(backgroundOnTop.position.y > positionTop.y+1) {
             position.y -= worldHeight * Random.Range(0.1f, 0.6f);
             backgroundOnTop.position = position;
             backgroundImgs.Enqueue(backgroundOnTop);

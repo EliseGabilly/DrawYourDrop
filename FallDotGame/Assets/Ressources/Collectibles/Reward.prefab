@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 823377635619609281}
   - component: {fileID: 3221259843865897964}
   - component: {fileID: 3501594710241603734}
+  - component: {fileID: 7997861000731871452}
   m_Layer: 0
   m_Name: Reward
   m_TagString: Untagged
@@ -99,3 +100,15 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.5
+--- !u!114 &7997861000731871452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8232636793285923297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d87c81ac8abdc244db1bd548730283c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

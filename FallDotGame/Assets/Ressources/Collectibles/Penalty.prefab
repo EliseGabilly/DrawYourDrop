@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3618334446898024751}
   - component: {fileID: 3698852727778265835}
   - component: {fileID: 7369798187282357865}
+  - component: {fileID: 6205690311076175755}
   m_Layer: 0
   m_Name: Penalty
   m_TagString: Untagged
@@ -99,3 +100,15 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.5
+--- !u!114 &6205690311076175755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 311254921241355247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3293f098b65d49a4db57541f4cb2c829, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
