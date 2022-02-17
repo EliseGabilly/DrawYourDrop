@@ -9,6 +9,7 @@ public class ItemReward : Item {
         if (collision.CompareTag("Player")) {
             SR.enabled = false;
             Collider.enabled = false;
+            GameManager.Instance.IncreaseScore(5);
         }
     }
 
