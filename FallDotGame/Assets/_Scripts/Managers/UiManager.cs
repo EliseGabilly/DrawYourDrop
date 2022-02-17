@@ -9,6 +9,8 @@ public class UiManager : Singleton<UiManager> {
     private Text highScore;
     [SerializeField]
     private Text score;
+    [SerializeField]
+    private Animator fadeAnim;
 
     protected override void Awake() {
         base.Awake();
@@ -19,5 +21,9 @@ public class UiManager : Singleton<UiManager> {
 
     public void UpdateScore(int scoreVal) {
         score.text = scoreVal.ToString();
+    }
+
+    public void FadeIn() {
+        fadeAnim.SetTrigger("fade_in");
     }
 }
