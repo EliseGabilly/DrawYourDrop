@@ -20,6 +20,7 @@ public class LineManager : MonoBehaviour {
     List<Vector2> currentLine;
     LineRenderer currentLinerRenderer;
     private EdgeCollider2D currentLineEdgeCollider;
+    [SerializeField]
     private Material material;
 
     private bool isDrawing = false;
@@ -29,13 +30,12 @@ public class LineManager : MonoBehaviour {
 
     private void Awake() {
         mainCamera = Camera.main;
-        material = new Material(Shader.Find("Particles/Standard Unlit"));
     }
 
     private void Update() {
-        if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) || Input.GetMouseButtonDown(0)) {
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began || Input.GetMouseButtonDown(0)) {
             StartCoroutine(nameof(Drawing));
-        } else if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended) || Input.GetMouseButtonUp(0)) {
+        } else if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended || Input.GetMouseButtonUp(0)) {
             isDrawing = false;
         }
     }
