@@ -1,9 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class BackgroundSpawnManager : MonoBehaviour {
 
+    #region Variables
     [SerializeField]
     private GameObject backgroundImg;
     [SerializeField]
@@ -14,6 +14,7 @@ public class BackgroundSpawnManager : MonoBehaviour {
     private Camera mainCamera;
     private float worldHeight;
     private Vector3 position;
+    #endregion
 
     private void Awake() {
         mainCamera = Camera.main;

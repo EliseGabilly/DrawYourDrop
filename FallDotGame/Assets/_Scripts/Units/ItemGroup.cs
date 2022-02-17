@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class ItemGroup : MonoBehaviour {
 
+    #region Variables
     [SerializeField]
     private Items items;
     public GameObject Prefab { get; private set; }
@@ -12,6 +13,7 @@ public class ItemGroup : MonoBehaviour {
     public Queue<Item> ItemList { get; set; } = new Queue<Item>();
     public Item HighestItem { get; set; }
     public Vector3 LowestPos { get; set; }
+    #endregion
 
 
     private Camera mainCamera;

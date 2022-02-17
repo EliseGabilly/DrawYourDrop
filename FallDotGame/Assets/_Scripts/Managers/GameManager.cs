@@ -3,8 +3,10 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager> {
 
+    #region Variables
     private GameObject player;
     private Camera mainCamera;
+    #endregion
 
     public int Score { get; set; }
 

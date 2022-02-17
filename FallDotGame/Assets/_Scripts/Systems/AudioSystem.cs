@@ -5,8 +5,10 @@ using UnityEngine;
 /// Ensure you change the 'Sounds' audio source to use 3D spatial blend if you intend to use 3D sounds.
 /// </summary>
 public class AudioSystem : StaticInstance<AudioSystem> {
+    #region Variables
     [SerializeField] private AudioSource _musicSource;
     [SerializeField] private AudioSource _soundsSource;
+    #endregion
 
     public void PlayMusic(AudioClip clip) {
         _musicSource.clip = clip;

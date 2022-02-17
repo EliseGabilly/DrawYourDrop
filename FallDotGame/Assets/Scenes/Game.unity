@@ -816,7 +816,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   highScore: {fileID: 1890872283}
   score: {fileID: 1306637986}
-  fadeAnim: {fileID: 0}
+  fadeAnim: {fileID: 1465198062}
 --- !u!1 &1223814030
 GameObject:
   m_ObjectHideFlags: 0

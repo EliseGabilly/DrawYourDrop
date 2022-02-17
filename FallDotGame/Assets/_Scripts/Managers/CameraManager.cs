@@ -1,13 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraManager : MonoBehaviour {
 
+    #region Variables
     private Camera mainCamera;
     private Transform playerTransform; 
     [SerializeField]
     private float movingSpeed = 1.2f;
+    #endregion
 
     private void Awake() {
         mainCamera = Camera.main;

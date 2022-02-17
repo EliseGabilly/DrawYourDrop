@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class LineManager : MonoBehaviour {
+
+    #region Variables
     [SerializeField]
     private float lineSeparationDistance = .2f;
     [SerializeField]
@@ -14,7 +16,6 @@ public class LineManager : MonoBehaviour {
     [SerializeField]
     private Transform linesContainer;
 
-    #region Private
     readonly List<GameObject> lines;
     List<Vector2> currentLine;
     LineRenderer currentLinerRenderer;
@@ -32,9 +33,9 @@ public class LineManager : MonoBehaviour {
     }
 
     private void Update() {
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began || Input.GetMouseButtonDown(0)) {
+        if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) || Input.GetMouseButtonDown(0)) {
             StartCoroutine(nameof(Drawing));
-        } else if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended || Input.GetMouseButtonUp(0)) {
+        } else if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended) || Input.GetMouseButtonUp(0)) {
             isDrawing = false;
         }
     }

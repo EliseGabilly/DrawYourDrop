@@ -1,15 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ItemSpawnManager : Singleton<ItemSpawnManager> {
 
+    #region Variables
     [SerializeField]
     private Transform itemParent;
 
     private Camera mainCamera;
     public float WorldHeight { get; private set; }
     public float WorldWidth { get; private set; }
+    #endregion
 
     protected override void Awake() {
         base.Awake();
