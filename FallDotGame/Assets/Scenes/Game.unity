@@ -162,6 +162,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 715220601, guid: 1a32bb5aaf21df040a86121d1db770fb, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 715220603, guid: 1a32bb5aaf21df040a86121d1db770fb, type: 3}
       propertyPath: col.Array.size
       value: 3
@@ -178,9 +182,17 @@ PrefabInstance:
       propertyPath: col.Array.data[2]
       value: 
       objectReference: {fileID: 11400000, guid: a5ec6e6f43518234bbd07d406453bba3, type: 2}
+    - target: {fileID: 1163341469097971918, guid: 1a32bb5aaf21df040a86121d1db770fb, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1163341471010937456, guid: 1a32bb5aaf21df040a86121d1db770fb, type: 3}
       propertyPath: m_Name
       value: Systems
+      objectReference: {fileID: 0}
+    - target: {fileID: 1163341471010937456, guid: 1a32bb5aaf21df040a86121d1db770fb, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1163341471010937462, guid: 1a32bb5aaf21df040a86121d1db770fb, type: 3}
       propertyPath: m_RootOrder
