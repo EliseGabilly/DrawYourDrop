@@ -12,7 +12,7 @@ public class ItemPowerUp : MonoBehaviour {
     public float MaxDiff { get; } = 1.5f;
 
     public List<Item> FreeItems { get; set; } = new List<Item>();
-    public List<Item> UsedItems { get; set; }
+    public List<Item> UsedItems { get; set; } = new List<Item>();
     public Vector3 LowestPos { get; set; }
     #endregion
 
@@ -23,7 +23,7 @@ public class ItemPowerUp : MonoBehaviour {
         mainCamera = Camera.main;
 
         Prefabs = new List<GameObject>();
-        foreach(Items itm in powersUps) {
+        foreach (Items itm in powersUps) {
             Prefabs.Add(itm.GO);
         }
     }
@@ -42,6 +42,8 @@ public class ItemPowerUp : MonoBehaviour {
                 freeItm.transform.position = LowestPos;
                 freeItm.SR.enabled = true;
                 freeItm.Collider.enabled = true;
+
+                break;
             }
         }
     }
@@ -53,4 +55,14 @@ public class ItemPowerUp : MonoBehaviour {
         return itm;
     }
 
+    public void SetFirstUsedItems(Vector3 pos) {
+        LowestPos = pos;
+        for(int i=0; i<4; i++) {
+            Item itm = GetRdmFreeItem();
+            LowestPos = new Vector3(Random.Range(-(ItemSpawnManager.Instance.WorldWidth / 2) * 0.8f, (ItemSpawnManager.Instance.WorldWidth / 2) * 0.8f), LowestPos.y - ItemSpawnManager.Instance.WorldHeight * Random.Range(MinDiff, MaxDiff), 0);
+            itm.transform.position = LowestPos;
+            itm.SR.enabled = true;
+            itm.Collider.enabled = true;
+        }
+    }
 }
