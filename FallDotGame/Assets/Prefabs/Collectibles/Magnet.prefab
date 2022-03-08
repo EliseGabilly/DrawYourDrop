@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &311254921241355247
+--- !u!1 &3906081934833098337
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,24 +8,24 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 3618334446898024751}
-  - component: {fileID: 3698852727778265835}
-  - component: {fileID: 7369798187282357865}
-  - component: {fileID: 6205690311076175755}
+  - component: {fileID: 233765504382528421}
+  - component: {fileID: 5069342272337431116}
+  - component: {fileID: 6683643255652872927}
+  - component: {fileID: 2526688818065079571}
   m_Layer: 0
-  m_Name: Penalty
+  m_Name: Magnet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &3618334446898024751
+--- !u!4 &233765504382528421
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 311254921241355247}
+  m_GameObject: {fileID: 3906081934833098337}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -33,13 +33,13 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &3698852727778265835
+--- !u!212 &5069342272337431116
 SpriteRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 311254921241355247}
+  m_GameObject: {fileID: 3906081934833098337}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -73,7 +73,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 21300000, guid: 8e8e1d4f236f8644c9e20be3094da5b9, type: 3}
+  m_Sprite: {fileID: 21300000, guid: adb9c9cf844a963469eaebaa9cc5e81a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -84,13 +84,13 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!58 &7369798187282357865
+--- !u!58 &6683643255652872927
 CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 311254921241355247}
+  m_GameObject: {fileID: 3906081934833098337}
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
@@ -100,15 +100,15 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.5
---- !u!114 &6205690311076175755
+--- !u!114 &2526688818065079571
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 311254921241355247}
+  m_GameObject: {fileID: 3906081934833098337}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3293f098b65d49a4db57541f4cb2c829, type: 3}
+  m_Script: {fileID: 11500000, guid: 04494e78e87d4c24b998ae750b09e9d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

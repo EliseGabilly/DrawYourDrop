@@ -15,4 +15,8 @@ public class Items : ScriptableObject {
     private float maxDiff;
     public float MaxDiff { get => maxDiff; }
 
+    [SerializeField]
+    private bool isPowerUp = false;
+    public bool IsPowerUp { get => isPowerUp; }
+
 }

@@ -23,17 +23,18 @@ public class ItemSpawnManager : Singleton<ItemSpawnManager> {
         WorldWidth = positionTopLeft.x - positionBottomRight.x;
 
         GameObject go;
-        foreach(ItemGroup itemGroup in itemGroups) {
+        foreach (ItemGroup itemGroup in itemGroups) {
             GameObject prefab = itemGroup.Prefab;
-            itemGroup.LowestPos = new Vector3(0, positionTopLeft.y-WorldHeight/2, 0);
+            itemGroup.LowestPos = new Vector3(0, positionTopLeft.y - WorldHeight / 2, 0);
 
             for (int i = 0; i < 10; i++) {
-                itemGroup.LowestPos = new Vector3(Random.Range(-(WorldWidth/2)*0.8f, (WorldWidth/2)*0.8f), itemGroup.LowestPos.y - WorldHeight * Random.Range(itemGroup.MinDiff, itemGroup.MaxDiff), 0);
+                itemGroup.LowestPos = new Vector3(Random.Range(-(WorldWidth / 2) * 0.8f, (WorldWidth / 2) * 0.8f), itemGroup.LowestPos.y - WorldHeight * Random.Range(itemGroup.MinDiff, itemGroup.MaxDiff), 0);
                 go = Instantiate(prefab, itemGroup.LowestPos, Quaternion.identity) as GameObject;
                 go.transform.parent = itemGroup.gameObject.transform;
                 itemGroup.ItemList.Enqueue(go.GetComponent<Item>());
             }
             itemGroup.HighestItem = itemGroup.ItemList.Dequeue();
         }
+
     }
 }

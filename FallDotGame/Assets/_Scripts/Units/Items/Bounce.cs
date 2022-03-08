@@ -1,11 +1,10 @@
 using UnityEngine;
 
-public class ItemPenalty : Item {
+public class Bounce : Item {
 
     protected override void OnTriggerEnter2D(Collider2D collision) {
         if (collision.CompareTag("Player")) {
-            UiManager.Instance.FadeIn();
+            Debug.Log("Bounce");
         }
     }
-
 }
