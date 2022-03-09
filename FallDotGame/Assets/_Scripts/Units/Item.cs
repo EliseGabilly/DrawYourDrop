@@ -9,7 +9,7 @@ public abstract class Item : MonoBehaviour {
 
     protected abstract void OnTriggerEnter2D(Collider2D collision);
 
-    private void Awake() {
+    protected virtual void Awake() {
         SR = GetComponent<SpriteRenderer>();
         Collider = GetComponent<CircleCollider2D>();
     }

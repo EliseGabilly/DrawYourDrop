@@ -40,7 +40,7 @@ public class ItemSpawnManager : Singleton<ItemSpawnManager> {
         //spawn two of each power ups out of frame
         ItemPowerUp powerUp = itemParent.GetComponentInChildren<ItemPowerUp>();
         foreach(GameObject itm in powerUp.Prefabs) {
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 10; i++) {
                 go = Instantiate(itm, positionTopLeft, Quaternion.identity) as GameObject;
                 go.transform.parent = powerUp.gameObject.transform;
                 powerUp.FreeItems.Add(go.GetComponent<Item>());

@@ -33,6 +33,9 @@ public class ItemGroup : MonoBehaviour {
             HighestItem.transform.position = LowestPos;
             HighestItem.SR.enabled = true;
             HighestItem.Collider.enabled = true;
+            //if reward reset velocity in case of magnet
+            Rigidbody2D rb =  HighestItem.GetComponent<Rigidbody2D>();
+            if (rb != null) rb.velocity = Vector3.zero ;
             //replace the highest item
             ItemList.Enqueue(HighestItem);
             HighestItem = ItemList.Dequeue();
