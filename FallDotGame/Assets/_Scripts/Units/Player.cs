@@ -5,13 +5,15 @@ using UnityEngine;
 public class Player : Singleton<Player> {
 
     #region Variables
-
     [SerializeField]
     private Animator animShield;
     private bool isImune = false;
     [SerializeField]
     private Animator animMagnet;
     public bool IsMagnet { get; private set; } = false;
+    [SerializeField]
+    private Animator animBounce;
+    public bool IsBounce { get; private set; } = false;
     #endregion
 
     public void TakeDamage() {
@@ -53,4 +55,31 @@ public class Player : Singleton<Player> {
         animMagnet.SetBool("isActive", isImune);
     }
 
+    public void TakeBounce() {
+        StopCoroutine(BounceCountDown());
+        StartCoroutine(BounceCountDown());
+    }
+
+    private IEnumerator BounceCountDown() {
+        animBounce.SetTrigger("start");
+        IsBounce = true;
+        yield return new WaitForSeconds(6f);
+        animBounce.SetTrigger("near_end");
+        yield return new WaitForSeconds(3f);
+        EndBounce();
+    }
+
+    private void EndBounce() {
+        animBounce.SetTrigger("end");
+        IsBounce = false;
+    }
+
+    public void WentOutOfFrame() {
+        if (!IsBounce) {
+            UiManager.Instance.FadeIn();
+        } else {
+            Rigidbody2D rb = GetComponent<Rigidbody2D>();
+            rb.velocity = new Vector2(-transform.position.normalized.x*40, rb.velocity.y);
+        }
+    }
 }

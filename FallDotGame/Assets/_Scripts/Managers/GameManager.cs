@@ -20,7 +20,7 @@ public class GameManager : Singleton<GameManager> {
 
     private void Update() {
         if (!IsPlayerInFrame()) {
-            UiManager.Instance.FadeIn();
+            Player.Instance.WentOutOfFrame();
         } else {
             DistanceScore = Mathf.Max(DistanceScore, -Mathf.FloorToInt(player.transform.position.y/5));
             UiManager.Instance.UpdateScore(RewardScore + DistanceScore);
