@@ -29,7 +29,6 @@ public class Reward : Item {
             GameManager.Instance.IncreaseScore(10);
             isMagnet = false;
         } else if (collision.CompareTag("Magnet")) {
-            Debug.Log("Magnet");
             isMagnet = Player.Instance.IsMagnet;
         }
     }
