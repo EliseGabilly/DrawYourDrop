@@ -25,7 +25,7 @@ public class UiManager : Singleton<UiManager> {
     protected override void Awake() {
         base.Awake();
 
-        highScore.text = PlayerPrefs.GetInt("highScore", 0).ToString();
+        highScore.text = Player.Instance.highScore.ToString();
         score.text = "0";
     }
     private void Update() {

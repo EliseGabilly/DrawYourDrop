@@ -6,7 +6,7 @@ public class Penalty : Item {
         if (collision.CompareTag("Player")) {
             SR.enabled = false;
             Collider.enabled = false;
-            collision.gameObject.GetComponent<Player>().TakeDamage();
+            collision.gameObject.GetComponent<Ball>().TakeDamage();
         }
     }
 

@@ -20,7 +20,7 @@ public class GameManager : Singleton<GameManager> {
 
     private void Update() {
         if (!IsPlayerInFrame()) {
-            Player.Instance.WentOutOfFrame();
+            Ball.Instance.WentOutOfFrame();
         } else {
             DistanceScore = Mathf.Max(DistanceScore, -Mathf.FloorToInt(player.transform.position.y/5));
             UiManager.Instance.UpdateScore(RewardScore + DistanceScore);
@@ -35,9 +35,7 @@ public class GameManager : Singleton<GameManager> {
     }
 
     public void GameOver() {
-        PlayerPrefs.SetInt("highRewardScore", Mathf.Max(PlayerPrefs.GetInt("highRewardScore", 0), RewardScore));
-        PlayerPrefs.SetInt("highDistanceScore", Mathf.Max(PlayerPrefs.GetInt("highDistanceScore", 0), DistanceScore));
-        PlayerPrefs.SetInt("highScore", Mathf.Max(PlayerPrefs.GetInt("highScore", 0), RewardScore + DistanceScore));
+        Player.Instance.ChangeHighScores(RewardScore + DistanceScore, DistanceScore, RewardScore);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 

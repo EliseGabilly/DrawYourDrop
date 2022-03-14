@@ -29,7 +29,7 @@ public class Reward : Item {
             GameManager.Instance.IncreaseScore(10);
             isMagnet = false;
         } else if (collision.CompareTag("Magnet")) {
-            isMagnet = Player.Instance.IsMagnet;
+            isMagnet = Ball.Instance.IsMagnet;
         }
     }
 }
