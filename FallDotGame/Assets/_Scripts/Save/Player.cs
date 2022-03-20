@@ -55,10 +55,12 @@ public class Player : Singleton<Player> {
         return this;
     }
 
-    public void ChangeHighScores(int highScore, int highDistanceScore, int highBonusScore) {
+    public void ChangeHighScores(int highScore, int highDistanceScore, int highBonusScore, bool isLeapOfFaith) {
         this.highScore = Mathf.Max(this.highScore, highScore);
         this.highDistanceScore = Mathf.Max(this.highDistanceScore, highDistanceScore);
         this.highBonusScore = Mathf.Max(this.highBonusScore, highBonusScore);
+        gamePlayed++;
+        haveLeapOfFaith = haveLeapOfFaith || isLeapOfFaith;
 
         SaveSystem.SavePlayer(this);
     }

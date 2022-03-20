@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LineManager : MonoBehaviour {
+public class LineManager : Singleton<LineManager> {
 
     #region Variables
     [SerializeField]
@@ -26,10 +26,14 @@ public class LineManager : MonoBehaviour {
     private bool isDrawing = false;
 
     private Camera mainCamera;
+
+    public bool IsLeapOfFaith { get; private set; }
     #endregion
 
-    private void Awake() {
+    protected override void Awake() {
+        base.Awake();
         mainCamera = Camera.main;
+        IsLeapOfFaith = true;
     }
 
     private void Update() {
@@ -41,6 +45,7 @@ public class LineManager : MonoBehaviour {
     }
 
     private IEnumerator Drawing() {
+        IsLeapOfFaith = false;
         isDrawing = true;
         StartLine();
         while (isDrawing) {

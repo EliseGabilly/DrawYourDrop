@@ -40,7 +40,7 @@ public class GameManager : Singleton<GameManager> {
     }
 
     public void GameOver() {
-        Player.Instance.ChangeHighScores(RewardScore + DistanceScore, DistanceScore, RewardScore);
+        Player.Instance.ChangeHighScores(RewardScore + DistanceScore, DistanceScore, RewardScore, LineManager.Instance.IsLeapOfFaith);
         Player.Instance.ChangSuccesCount(inGameMagnetCount, inGameShieldCount, inGameEraseCount, inGameBounceCount);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
