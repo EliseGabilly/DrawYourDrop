@@ -24,19 +24,26 @@ public class GameManager : Singleton<GameManager> {
     }
 
     private void Update() {
-        if (!IsPlayerInFrame()) {
-            Ball.Instance.WentOutOfFrame();
-        } else {
+        if (IsPlayerInFrame()) {
             DistanceScore = Mathf.Max(DistanceScore, -Mathf.FloorToInt(player.transform.position.y/5));
             UiManager.Instance.UpdateScore(RewardScore + DistanceScore);
         }
     }
 
     private bool IsPlayerInFrame() {
+        bool isInFrame = true;
         Vector3 screenPos = mainCamera.WorldToScreenPoint(player.transform.position);
         float xRatio = screenPos.x / mainCamera.pixelWidth; //horizontal check
         float yRatio = screenPos.y / mainCamera.pixelHeight; //vertical chack
-        return !(xRatio > 1.05f || xRatio < -.05f || yRatio > 1.05f || yRatio < -.05f);
+        if(xRatio > 1.05f || xRatio < -.05f) {
+            isInFrame = false;
+            Ball.Instance.WentOutOfFrame();
+        }
+        if(yRatio > 1.05f || yRatio < -.05f) {
+            isInFrame = false;
+            UiManager.Instance.FadeIn();
+        }
+        return isInFrame;
     }
 
     public void GameOver() {
