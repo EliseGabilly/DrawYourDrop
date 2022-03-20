@@ -22,12 +22,11 @@ public class UiManager : Singleton<UiManager> {
     private Canvas creditsCanvas;
     #endregion
 
-    protected override void Awake() {
-        base.Awake();
-
+    private void Start() {
         highScore.text = Player.Instance.highScore.ToString();
         score.text = "0";
     }
+
     private void Update() {
         if (Input.GetKey("escape")) {
             Application.Quit();
@@ -44,6 +43,7 @@ public class UiManager : Singleton<UiManager> {
 
     public void OpenMenu() {
         OpenCanvas(menuCanvas);
+        UISuccessManager.Instance.LoadSuccess();
         Time.timeScale = 0;
     }
 

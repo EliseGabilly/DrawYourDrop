@@ -5418,6 +5418,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1189463400}
   - component: {fileID: 1189463401}
+  - component: {fileID: 1189463402}
   m_Layer: 0
   m_Name: UiManager
   m_TagString: Untagged
@@ -5458,6 +5459,28 @@ MonoBehaviour:
   succesCanvas: {fileID: 1452992098}
   optionCanvas: {fileID: 324632427}
   creditsCanvas: {fileID: 1907808413}
+--- !u!114 &1189463402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1189463399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94915addcef8a54409ace6e116fb33b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scores: {fileID: 381905573}
+  successHightScore: {fileID: 1632745293}
+  successHightDistanceScore: {fileID: 671272163}
+  successHightBonusScore: {fileID: 670020661}
+  successLeepOfFaith: {fileID: 470791941}
+  successShieldCount: {fileID: 2022434914}
+  successBounceCount: {fileID: 784736308}
+  successEraseCount: {fileID: 224900472}
+  successMagnetCount: {fileID: 1589710694}
+  successGamePlayed: {fileID: 1402840292}
 --- !u!1 &1194640078
 GameObject:
   m_ObjectHideFlags: 0

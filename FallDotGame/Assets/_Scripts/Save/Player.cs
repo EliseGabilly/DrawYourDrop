@@ -63,4 +63,12 @@ public class Player : Singleton<Player> {
         SaveSystem.SavePlayer(this);
     }
 
+    public void ChangSuccesCount(int addedMagnetCount, int addedShieldCount, int addedEraseCount, int addedBounceCount) {
+        succesMagnetCount += addedMagnetCount;
+        succesShieldCount += addedShieldCount;
+        succesEraseCount += addedEraseCount;
+        succesBounceCount += addedBounceCount;
+        SaveSystem.SavePlayer(this);
+    }
+
 }

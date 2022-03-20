@@ -9,6 +9,11 @@ public class GameManager : Singleton<GameManager> {
 
     public int RewardScore { get; set; }
     public int DistanceScore { get; set; }
+
+    private int inGameBounceCount = 0;
+    private int inGameShieldCount = 0;
+    private int inGameEraseCount = 0;
+    private int inGameMagnetCount = 0;
     #endregion
 
 
@@ -36,6 +41,7 @@ public class GameManager : Singleton<GameManager> {
 
     public void GameOver() {
         Player.Instance.ChangeHighScores(RewardScore + DistanceScore, DistanceScore, RewardScore);
+        Player.Instance.ChangSuccesCount(inGameMagnetCount, inGameShieldCount, inGameEraseCount, inGameBounceCount);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
@@ -44,4 +50,19 @@ public class GameManager : Singleton<GameManager> {
         UiManager.Instance.UpdateScore(RewardScore+ DistanceScore);
     }
 
+    public void AddToInGameBounceCount() {
+        inGameBounceCount++;
+    }
+
+    public void AddToInGameEraseCount() {
+        inGameEraseCount++;
+    }
+
+    public void AddToInGameMagnetCount() {
+        inGameMagnetCount++;
+    }
+
+    public void AddToInGameShieldCount() {
+        inGameShieldCount++;
+    }
 }
