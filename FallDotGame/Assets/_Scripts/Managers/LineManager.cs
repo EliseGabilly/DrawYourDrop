@@ -96,8 +96,12 @@ public class LineManager : Singleton<LineManager> {
     }
 
     private void EndLine() {
-        currentLineEdgeCollider = gameObject.AddComponent<EdgeCollider2D>();
-        currentLineEdgeCollider.edgeRadius = lineWidth / 2;
-        currentLineEdgeCollider.SetPoints(currentLine);
+        if(currentLine.Count == 1) {
+            Destroy(currentLineEdgeCollider);
+        } else {
+            currentLineEdgeCollider = gameObject.AddComponent<EdgeCollider2D>();
+            currentLineEdgeCollider.edgeRadius = lineWidth / 2;
+            currentLineEdgeCollider.SetPoints(currentLine);
+        }
     }
 }
