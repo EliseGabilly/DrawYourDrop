@@ -43,7 +43,7 @@ public class UiManager : Singleton<UiManager> {
 
     public void OpenMenu() {
         OpenCanvas(menuCanvas);
-        UISuccessManager.Instance.LoadSuccess();
+        SuccessManager.Instance.LoadSuccess();
         Time.timeScale = 0;
     }
 
@@ -72,12 +72,5 @@ public class UiManager : Singleton<UiManager> {
 
     public void Quit() {
         Application.Quit();
-    }
-
-    public void SuccesToggleView(GameObject go) {
-        Image img = go.GetComponent<Image>();
-        img.enabled = !img.enabled;
-        Text text = go.GetComponentInChildren<Text>();
-        text.enabled = !text.enabled;
     }
 }

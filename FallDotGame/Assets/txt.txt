@@ -6,7 +6,11 @@ Succes :
 - Leep of faith
 - Use bounce
 - Use shield
-
 - Use magnet
 - Use erase
 - Play over x game
+
+
+
+TODO
+ - stop drawing went in pause

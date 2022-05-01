@@ -47,7 +47,8 @@ public class GameManager : Singleton<GameManager> {
     }
 
     public void GameOver() {
-        Player.Instance.ChangeHighScores(RewardScore + DistanceScore, DistanceScore, RewardScore, LineManager.Instance.IsLeapOfFaith);
+        int leapOfFaithScore = LineManager.Instance.IsLeapOfFaith ? GameManager.Instance.DistanceScore + GameManager.Instance.RewardScore : LineManager.Instance.LeapOfFaith;
+        Player.Instance.ChangeHighScores(RewardScore + DistanceScore, DistanceScore, RewardScore, leapOfFaithScore);
         Player.Instance.ChangSuccesCount(inGameMagnetCount, inGameShieldCount, inGameEraseCount, inGameBounceCount);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }

@@ -28,16 +28,18 @@ public class LineManager : Singleton<LineManager> {
     private Camera mainCamera;
 
     public bool IsLeapOfFaith { get; private set; }
+    public int LeapOfFaith { get; private set; }
     #endregion
 
     protected override void Awake() {
         base.Awake();
         mainCamera = Camera.main;
         IsLeapOfFaith = true;
+        LeapOfFaith = 0;
     }
 
     private void Update() {
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began || Input.GetMouseButtonDown(0)) {
+        if (((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) || Input.GetMouseButtonDown(0)) && Time.timeScale == 1) {
             StartCoroutine(nameof(Drawing));
         } else if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended || Input.GetMouseButtonUp(0)) {
             isDrawing = false;
@@ -45,6 +47,7 @@ public class LineManager : Singleton<LineManager> {
     }
 
     private IEnumerator Drawing() {
+        LeapOfFaith = IsLeapOfFaith ? GameManager.Instance.RewardScore + GameManager.Instance.DistanceScore : LeapOfFaith;
         IsLeapOfFaith = false;
         isDrawing = true;
         StartLine();

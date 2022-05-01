@@ -10,7 +10,7 @@ public class PlayerData {
     public int highBonusScore;
 
     public int gamePlayed;
-    public bool haveLeapOfFaith;
+    public int leapOfFaith;
 
     public int succesMagnetCount;
     public int succesShieldCount;
@@ -31,7 +31,7 @@ public class PlayerData {
         this.highBonusScore = player.highBonusScore;
 
         this.gamePlayed = player.gamePlayed;
-        this.haveLeapOfFaith = player.haveLeapOfFaith;
+        this.leapOfFaith = player.leapOfFaith;
 
         this.succesMagnetCount = player.succesMagnetCount;
         this.succesShieldCount = player.succesShieldCount;

@@ -12,7 +12,7 @@ public class Player : Singleton<Player> {
     public int highBonusScore = 0;
 
     public int gamePlayed = 0;
-    public bool haveLeapOfFaith = false;
+    public int leapOfFaith = 0;
 
     public int succesMagnetCount = 0;
     public int succesShieldCount = 0;
@@ -38,7 +38,7 @@ public class Player : Singleton<Player> {
         this.highBonusScore = data.highBonusScore;
 
         this.gamePlayed = data.gamePlayed;
-        this.haveLeapOfFaith = data.haveLeapOfFaith;
+        this.leapOfFaith = data.leapOfFaith;
 
         this.succesMagnetCount = data.succesMagnetCount;
         this.succesShieldCount = data.succesShieldCount;
@@ -55,12 +55,12 @@ public class Player : Singleton<Player> {
         return this;
     }
 
-    public void ChangeHighScores(int highScore, int highDistanceScore, int highBonusScore, bool isLeapOfFaith) {
+    public void ChangeHighScores(int highScore, int highDistanceScore, int highBonusScore, int leapOfFaith) {
         this.highScore = Mathf.Max(this.highScore, highScore);
         this.highDistanceScore = Mathf.Max(this.highDistanceScore, highDistanceScore);
         this.highBonusScore = Mathf.Max(this.highBonusScore, highBonusScore);
         gamePlayed++;
-        haveLeapOfFaith = haveLeapOfFaith || isLeapOfFaith;
+        this.leapOfFaith = Mathf.Max(this.leapOfFaith, leapOfFaith);
 
         SaveSystem.SavePlayer(this);
     }
