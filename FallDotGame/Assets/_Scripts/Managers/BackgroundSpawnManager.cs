@@ -14,6 +14,7 @@ public class BackgroundSpawnManager : MonoBehaviour {
     private Camera mainCamera;
     private float worldHeight;
     private Vector3 position;
+    private int layerOrder = 0;
     #endregion
 
     private void Awake() {
@@ -23,10 +24,8 @@ public class BackgroundSpawnManager : MonoBehaviour {
         Vector3 positionBottom = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth/2, 0, -mainCamera.transform.position.z));
         worldHeight = positionTop.y - positionBottom.y;
 
-        position = positionTop;
-        position.z = 1;
+        position = new Vector3(position.x, position.y+1.5f*worldHeight, 5);
         GameObject go;
-        SpriteRenderer sr;
         for(int i = 0; i<10; i++) {
             position.y -= worldHeight*Random.Range(0.1f, 0.6f);
             go = Instantiate(backgroundImg, position, Quaternion.identity) as GameObject;
@@ -43,7 +42,7 @@ public class BackgroundSpawnManager : MonoBehaviour {
     private void Resize(GameObject go) {
         float worldWidth = mainCamera.pixelWidth;
         float worldHeight = mainCamera.pixelHeight;
-        float scale = 27 * worldWidth / worldHeight;
+        float scale = 40 * worldWidth / worldHeight;
         go.transform.localScale = new Vector2(scale, scale*2);
     }
 
@@ -66,13 +65,13 @@ public class BackgroundSpawnManager : MonoBehaviour {
         sr.material.SetFloat("_CutOffHeight", position.y);
         sr.material.SetFloat("_Shift", Random.Range(-100, 100));
         sr.material.SetColor("_ColorShift", Random.ColorHSV(0.9f, 1f, 0.9f, 1f, 0.9f, 1f));
+        sr.sortingOrder = layerOrder;
+        layerOrder++;
     }
 
     private void Update() {
         Vector3 positionTop = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth / 2, mainCamera.pixelHeight, -mainCamera.transform.position.z));
-        Vector3 positionBottom = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth / 2, 0, -mainCamera.transform.position.z));
-        float screenHeight = Mathf.Abs(positionTop.y - positionBottom.y);
-        if(backgroundOnTop.transform.position.y > positionTop.y + screenHeight) {
+        if(backgroundOnTop.transform.position.y > positionTop.y + worldHeight*1.5f) {
             position.y -= worldHeight * Random.Range(0.1f, 0.6f);
             backgroundOnTop.transform.position = position;
             Restyle(backgroundOnTop);
