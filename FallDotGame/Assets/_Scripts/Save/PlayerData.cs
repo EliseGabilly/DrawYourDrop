@@ -20,9 +20,15 @@ public class PlayerData {
     public float volumeMusic;
     public float volumeSound;
 
-    public int colorBall;
-    public int colorMagic;
-    public int colorBackground;
+    public float colorBallR;
+    public float colorBallG;
+    public float colorBallB;
+    public float colorMagicR;
+    public float colorMagicG;
+    public float colorMagicB;
+    public float colorBackgroundR;
+    public float colorBackgroundG;
+    public float colorBackgroundB;
     #endregion
 
     public PlayerData(Player player) {
@@ -41,9 +47,15 @@ public class PlayerData {
         this.volumeMusic = player.volumeMusic;
         this.volumeSound = player.volumeSound;
 
-        this.colorBall = player.colorBall;
-        this.colorMagic = player.colorMagic;
-        this.colorBackground = player.colorBackground;
+        this.colorBallR = player.colorBall.r;
+        this.colorBallG = player.colorBall.g;
+        this.colorBallB = player.colorBall.b;
+        this.colorMagicR = player.colorMagic.r;
+        this.colorMagicG = player.colorMagic.g;
+        this.colorMagicB = player.colorMagic.b;
+        this.colorBackgroundR = player.colorBackground.r;
+        this.colorBackgroundG = player.colorBackground.g;
+        this.colorBackgroundB = player.colorBackground.b;
 
     }
 

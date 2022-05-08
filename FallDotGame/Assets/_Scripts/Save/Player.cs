@@ -22,9 +22,9 @@ public class Player : Singleton<Player> {
     public float volumeMusic = 0.5f;
     public float volumeSound = 0.5f;
 
-    public int colorBall = 0;
-    public int colorMagic = 0;
-    public int colorBackground = 0;
+    public Color colorBall = Color.white;
+    public Color colorMagic = Color.blue;
+    public Color colorBackground = Color.cyan;
     #endregion
 
     protected override void Awake() {
@@ -48,9 +48,9 @@ public class Player : Singleton<Player> {
         this.volumeMusic = data.volumeMusic;
         this.volumeSound = data.volumeSound;
 
-        this.colorBall = data.colorBall;
-        this.colorMagic = data.colorMagic;
-        this.colorBackground = data.colorBackground;
+        this.colorBall = new Color(data.colorBallR, data.colorBallG, data.colorBallB);
+        this.colorMagic = new Color(data.colorMagicR, data.colorMagicG, data.colorMagicB);
+        this.colorBackground = new Color(data.colorBackgroundR, data.colorBackgroundG, data.colorBackgroundB);
 
         return this;
     }
@@ -73,4 +73,12 @@ public class Player : Singleton<Player> {
         SaveSystem.SavePlayer(this);
     }
 
+    public void ChangeOptions(float volumeMusic, float volumeSound, Color colorBall, Color colorMagic, Color colorBackground) {
+        this.volumeMusic = volumeMusic;
+        this.volumeSound = volumeSound;
+        this.colorBall = colorBall;
+        this.colorMagic = colorMagic;
+        this.colorBackground = colorBackground;
+        SaveSystem.SavePlayer(this);
+    }
 }

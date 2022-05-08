@@ -43,10 +43,23 @@ public class ItemSpawnManager : Singleton<ItemSpawnManager> {
             for (int i = 0; i < 10; i++) {
                 go = Instantiate(itm, positionTopLeft, Quaternion.identity) as GameObject;
                 go.transform.parent = powerUp.gameObject.transform;
+                ColorItem(go);
                 powerUp.FreeItems.Add(go.GetComponent<Item>());
             }
         }
         //replace four of them randomly
         powerUp.SetFirstUsedItems(new Vector3(0, positionTopLeft.y - WorldHeight / 2, 0));
+    }
+
+    private void ColorItem(GameObject go) {
+        SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
+        if(sr != null) {
+            sr.color = Player.Instance.colorMagic;
+        } else {
+            SpriteRenderer[] srList = go.GetComponentsInChildren<SpriteRenderer>();
+            foreach(SpriteRenderer aSr in srList){
+                aSr.color = Player.Instance.colorMagic;
+            }
+        }
     }
 }

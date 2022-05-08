@@ -1,20 +1,43 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Ball : Singleton<Ball> {
 
     #region Variables
     [SerializeField]
+    private GameObject goShield;
     private Animator animShield;
     private bool isImune = false;
     [SerializeField]
+    private GameObject goMagnet;
     private Animator animMagnet;
     public bool IsMagnet { get; private set; } = false;
     [SerializeField]
+    private GameObject goBounce;
     private Animator animBounce;
     public bool IsBounce { get; private set; } = false;
     #endregion
+
+    protected override void Awake() {
+        base.Awake();
+        animShield = goShield.GetComponent<Animator>();
+        animMagnet = goMagnet.GetComponent<Animator>();
+        animBounce = goBounce.GetComponent<Animator>();
+
+        SpriteRenderer srShield = goShield.GetComponent<SpriteRenderer>();
+        srShield.color = Player.Instance.colorMagic;
+        SpriteRenderer srMagnet = goMagnet.GetComponent<SpriteRenderer>();
+        srMagnet.color = Player.Instance.colorMagic;
+        Image imgBounceA = goBounce.GetComponentsInChildren<Image>()[0];
+        Image imgBounceB = goBounce.GetComponentsInChildren<Image>()[1];
+        imgBounceA.color = Player.Instance.colorMagic;
+        imgBounceB.color = Player.Instance.colorMagic;
+
+        SpriteRenderer srBall = GetComponent<SpriteRenderer>();
+        srBall.color = Player.Instance.colorBall;
+    }
 
     public void TakeDamage() {
         if (!isImune) UiManager.Instance.FadeIn();

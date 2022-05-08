@@ -15,10 +15,15 @@ public class BackgroundSpawnManager : MonoBehaviour {
     private float worldHeight;
     private Vector3 position;
     private int layerOrder = 0;
+
+    private float H, S, V;
     #endregion
 
     private void Awake() {
         mainCamera = Camera.main;
+
+        Color baseColor = Player.Instance.colorBackground;
+        Color.RGBToHSV(baseColor, out H, out S, out V);
 
         Vector3 positionTop = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth/2, mainCamera.pixelHeight, -mainCamera.transform.position.z));
         Vector3 positionBottom = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth/2, 0, -mainCamera.transform.position.z));
@@ -64,9 +69,13 @@ public class BackgroundSpawnManager : MonoBehaviour {
         sr.material.shader = Shader.Find("Disolve");
         sr.material.SetFloat("_CutOffHeight", position.y);
         sr.material.SetFloat("_Shift", Random.Range(-100, 100));
-        sr.material.SetColor("_ColorShift", Random.ColorHSV(0.9f, 1f, 0.9f, 1f, 0.9f, 1f));
+        sr.material.SetColor("_ColorShift", RandomColorFromOption());
         sr.sortingOrder = layerOrder;
         layerOrder++;
+    }
+
+    private Color RandomColorFromOption() {
+        return Random.ColorHSV(H - 0.05f, H + 0.05f, S - 0.05f, S + 0.05f, V - 0.05f, V + 0.05f);
     }
 
     private void Update() {
