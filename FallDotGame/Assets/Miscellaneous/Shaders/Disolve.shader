@@ -2,13 +2,13 @@ Shader "Disolve"
 {
     Properties
     {
-        _Color("Color", Color) = (0.492613, 0.662088, 0.7735849, 0)
-        _NoiseScale("NoiseScale", Float) = 50
-        _NoiseStrenght("NoiseStrenght", Float) = 1
+        _NoiseScale("NoiseScale", Float) = 20
+        _NoiseStrenght("NoiseStrenght", Float) = 10
         _CutOffHeight("CutOffHeight", Float) = 0
-        _EdgeHeight("EdgeHeight", Float) = -0.1
-        _ColorShift("ColorShift", Color) = (0.8113208, 0.8113208, 0.8113208, 1)
+        _EdgeHeight("EdgeHeight", Float) = 2
         _Shift("Shift", Float) = 0
+        _Color("Color", Color) = (0, 0.6155148, 1, 1)
+        _ColorShift("ColorShift", Color) = (0.1600404, 0, 1, 1)
         [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset]unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
@@ -19,15 +19,15 @@ Shader "Disolve"
         {
             "RenderPipeline"="UniversalPipeline"
             "RenderType"="Transparent"
-            "UniversalMaterialType" = "Lit"
+            "UniversalMaterialType" = "Unlit"
             "Queue"="Transparent"
         }
         Pass
         {
-            Name "Universal Forward"
+            Name "Pass"
             Tags
             {
-                "LightMode" = "UniversalForward"
+                // LightMode: <None>
             }
 
             // Render State
@@ -45,11 +45,10 @@ Shader "Disolve"
             HLSLPROGRAM
 
             // Pragmas
-            #pragma target 4.5
-        #pragma exclude_renderers gles gles3 glcore
+            #pragma target 2.0
+        #pragma only_renderers gles gles3 glcore
         #pragma multi_compile_instancing
         #pragma multi_compile_fog
-        #pragma multi_compile _ DOTS_INSTANCING_ON
         #pragma vertex vert
         #pragma fragment frag
 
@@ -57,36 +56,21 @@ Shader "Disolve"
             // HybridV1InjectedBuiltinProperties: <None>
 
             // Keywords
-            #pragma multi_compile _ _SCREEN_SPACE_OCCLUSION
-        #pragma multi_compile _ LIGHTMAP_ON
+            #pragma multi_compile _ LIGHTMAP_ON
         #pragma multi_compile _ DIRLIGHTMAP_COMBINED
-        #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
-        #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
-        #pragma multi_compile _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS _ADDITIONAL_OFF
-        #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
-        #pragma multi_compile _ _SHADOWS_SOFT
-        #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
-        #pragma multi_compile _ SHADOWS_SHADOWMASK
+        #pragma shader_feature _ _SAMPLE_GI
             // GraphKeywords: <None>
 
             // Defines
             #define _SURFACE_TYPE_TRANSPARENT 1
-            #define _AlphaClip 1
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
             #define ATTRIBUTES_NEED_NORMAL
             #define ATTRIBUTES_NEED_TANGENT
             #define ATTRIBUTES_NEED_TEXCOORD0
-            #define ATTRIBUTES_NEED_TEXCOORD1
             #define VARYINGS_NEED_POSITION_WS
-            #define VARYINGS_NEED_NORMAL_WS
-            #define VARYINGS_NEED_TANGENT_WS
             #define VARYINGS_NEED_TEXCOORD0
-            #define VARYINGS_NEED_VIEWDIRECTION_WS
-            #define VARYINGS_NEED_FOG_AND_VERTEX_LIGHT
             #define FEATURES_GRAPH_VERTEX
             /* WARNING: $splice Could not find named fragment 'PassInstancing' */
-            #define SHADERPASS SHADERPASS_FORWARD
+            #define SHADERPASS SHADERPASS_UNLIT
             /* WARNING: $splice Could not find named fragment 'DotsInstancingVars' */
 
             // Includes
@@ -95,7 +79,6 @@ Shader "Disolve"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 
             // --------------------------------------------------
@@ -107,7 +90,6 @@ Shader "Disolve"
             float3 normalOS : NORMAL;
             float4 tangentOS : TANGENT;
             float4 uv0 : TEXCOORD0;
-            float4 uv1 : TEXCOORD1;
             #if UNITY_ANY_INSTANCING_ENABLED
             uint instanceID : INSTANCEID_SEMANTIC;
             #endif
@@ -116,18 +98,7 @@ Shader "Disolve"
         {
             float4 positionCS : SV_POSITION;
             float3 positionWS;
-            float3 normalWS;
-            float4 tangentWS;
             float4 texCoord0;
-            float3 viewDirectionWS;
-            #if defined(LIGHTMAP_ON)
-            float2 lightmapUV;
-            #endif
-            #if !defined(LIGHTMAP_ON)
-            float3 sh;
-            #endif
-            float4 fogFactorAndVertexLight;
-            float4 shadowCoord;
             #if UNITY_ANY_INSTANCING_ENABLED
             uint instanceID : CUSTOM_INSTANCE_ID;
             #endif
@@ -143,7 +114,6 @@ Shader "Disolve"
         };
         struct SurfaceDescriptionInputs
         {
-            float3 TangentSpaceNormal;
             float3 WorldSpacePosition;
             float4 uv0;
         };
@@ -157,18 +127,7 @@ Shader "Disolve"
         {
             float4 positionCS : SV_POSITION;
             float3 interp0 : TEXCOORD0;
-            float3 interp1 : TEXCOORD1;
-            float4 interp2 : TEXCOORD2;
-            float4 interp3 : TEXCOORD3;
-            float3 interp4 : TEXCOORD4;
-            #if defined(LIGHTMAP_ON)
-            float2 interp5 : TEXCOORD5;
-            #endif
-            #if !defined(LIGHTMAP_ON)
-            float3 interp6 : TEXCOORD6;
-            #endif
-            float4 interp7 : TEXCOORD7;
-            float4 interp8 : TEXCOORD8;
+            float4 interp1 : TEXCOORD1;
             #if UNITY_ANY_INSTANCING_ENABLED
             uint instanceID : CUSTOM_INSTANCE_ID;
             #endif
@@ -188,18 +147,7 @@ Shader "Disolve"
             PackedVaryings output;
             output.positionCS = input.positionCS;
             output.interp0.xyz =  input.positionWS;
-            output.interp1.xyz =  input.normalWS;
-            output.interp2.xyzw =  input.tangentWS;
-            output.interp3.xyzw =  input.texCoord0;
-            output.interp4.xyz =  input.viewDirectionWS;
-            #if defined(LIGHTMAP_ON)
-            output.interp5.xy =  input.lightmapUV;
-            #endif
-            #if !defined(LIGHTMAP_ON)
-            output.interp6.xyz =  input.sh;
-            #endif
-            output.interp7.xyzw =  input.fogFactorAndVertexLight;
-            output.interp8.xyzw =  input.shadowCoord;
+            output.interp1.xyzw =  input.texCoord0;
             #if UNITY_ANY_INSTANCING_ENABLED
             output.instanceID = input.instanceID;
             #endif
@@ -219,18 +167,7 @@ Shader "Disolve"
             Varyings output;
             output.positionCS = input.positionCS;
             output.positionWS = input.interp0.xyz;
-            output.normalWS = input.interp1.xyz;
-            output.tangentWS = input.interp2.xyzw;
-            output.texCoord0 = input.interp3.xyzw;
-            output.viewDirectionWS = input.interp4.xyz;
-            #if defined(LIGHTMAP_ON)
-            output.lightmapUV = input.interp5.xy;
-            #endif
-            #if !defined(LIGHTMAP_ON)
-            output.sh = input.interp6.xyz;
-            #endif
-            output.fogFactorAndVertexLight = input.interp7.xyzw;
-            output.shadowCoord = input.interp8.xyzw;
+            output.texCoord0 = input.interp1.xyzw;
             #if UNITY_ANY_INSTANCING_ENABLED
             output.instanceID = input.instanceID;
             #endif
@@ -251,13 +188,400 @@ Shader "Disolve"
 
             // Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 _Color;
         float _NoiseScale;
         float _NoiseStrenght;
         float _CutOffHeight;
         float _EdgeHeight;
-        float4 _ColorShift;
         float _Shift;
+        float4 _Color;
+        float4 _ColorShift;
+        CBUFFER_END
+
+        // Object and Global properties
+
+            // Graph Functions
+            
+        void Unity_Add_float(float A, float B, out float Out)
+        {
+            Out = A + B;
+        }
+
+        void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
+        {
+            Out = UV * Tiling + Offset;
+        }
+
+
+        inline float Unity_SimpleNoise_RandomValue_float (float2 uv)
+        {
+            return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
+        }
+
+        inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
+        {
+            return (1.0-t)*a + (t*b);
+        }
+
+
+        inline float Unity_SimpleNoise_ValueNoise_float (float2 uv)
+        {
+            float2 i = floor(uv);
+            float2 f = frac(uv);
+            f = f * f * (3.0 - 2.0 * f);
+
+            uv = abs(frac(uv) - 0.5);
+            float2 c0 = i + float2(0.0, 0.0);
+            float2 c1 = i + float2(1.0, 0.0);
+            float2 c2 = i + float2(0.0, 1.0);
+            float2 c3 = i + float2(1.0, 1.0);
+            float r0 = Unity_SimpleNoise_RandomValue_float(c0);
+            float r1 = Unity_SimpleNoise_RandomValue_float(c1);
+            float r2 = Unity_SimpleNoise_RandomValue_float(c2);
+            float r3 = Unity_SimpleNoise_RandomValue_float(c3);
+
+            float bottomOfGrid = Unity_SimpleNnoise_Interpolate_float(r0, r1, f.x);
+            float topOfGrid = Unity_SimpleNnoise_Interpolate_float(r2, r3, f.x);
+            float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
+            return t;
+        }
+        void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
+        {
+            float t = 0.0;
+
+            float freq = pow(2.0, float(0));
+            float amp = pow(0.5, float(3-0));
+            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
+
+            freq = pow(2.0, float(1));
+            amp = pow(0.5, float(3-1));
+            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
+
+            freq = pow(2.0, float(2));
+            amp = pow(0.5, float(3-2));
+            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
+
+            Out = t;
+        }
+
+        void Unity_Negate_float(float In, out float Out)
+        {
+            Out = -1 * In;
+        }
+
+        void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
+        {
+            Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
+        }
+
+        void Unity_Step_float(float Edge, float In, out float Out)
+        {
+            Out = step(Edge, In);
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        void Unity_InvertColors_float(float In, float InvertColors, out float Out)
+        {
+            Out = abs(InvertColors - In);
+        }
+
+        void Unity_Add_float4(float4 A, float4 B, out float4 Out)
+        {
+            Out = A + B;
+        }
+
+            // Graph Vertex
+            struct VertexDescription
+        {
+            float3 Position;
+            float3 Normal;
+            float3 Tangent;
+        };
+
+        VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
+        {
+            VertexDescription description = (VertexDescription)0;
+            description.Position = IN.ObjectSpacePosition;
+            description.Normal = IN.ObjectSpaceNormal;
+            description.Tangent = IN.ObjectSpaceTangent;
+            return description;
+        }
+
+            // Graph Pixel
+            struct SurfaceDescription
+        {
+            float3 BaseColor;
+            float Alpha;
+        };
+
+        SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
+        {
+            SurfaceDescription surface = (SurfaceDescription)0;
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_R_1 = IN.WorldSpacePosition[0];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_G_2 = IN.WorldSpacePosition[1];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_B_3 = IN.WorldSpacePosition[2];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_A_4 = 0;
+            float _Property_c318a4d5df774218ab3f39b8fdb7619c_Out_0 = _EdgeHeight;
+            float _Add_1c8bd51470884762a7f1dd84c7efdf02_Out_2;
+            Unity_Add_float(_Split_8fd5cd931c1443078da7ded728f1b2fe_G_2, _Property_c318a4d5df774218ab3f39b8fdb7619c_Out_0, _Add_1c8bd51470884762a7f1dd84c7efdf02_Out_2);
+            float _Property_1ac9737eb1a14c05b1c5a15e474e94e9_Out_0 = _Shift;
+            float2 _TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3;
+            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_1ac9737eb1a14c05b1c5a15e474e94e9_Out_0.xx), _TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3);
+            float _Property_63eb73f720e14219bd8da1a652d00204_Out_0 = _NoiseScale;
+            float _SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2;
+            Unity_SimpleNoise_float(_TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3, _Property_63eb73f720e14219bd8da1a652d00204_Out_0, _SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2);
+            float _Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0 = _NoiseStrenght;
+            float _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1;
+            Unity_Negate_float(_Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0, _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1);
+            float2 _Vector2_c1c6e2bd0b554ec990a205d291a5d045_Out_0 = float2(_Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0, _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1);
+            float _Remap_7571b2862b044c64866e741f33266bdd_Out_3;
+            Unity_Remap_float(_SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2, float2 (0, 1), _Vector2_c1c6e2bd0b554ec990a205d291a5d045_Out_0, _Remap_7571b2862b044c64866e741f33266bdd_Out_3);
+            float _Property_86a52650aa314cbea69928fc08d5ab70_Out_0 = _CutOffHeight;
+            float _Add_86ebb8d26331497e99e74a76297467b1_Out_2;
+            Unity_Add_float(_Remap_7571b2862b044c64866e741f33266bdd_Out_3, _Property_86a52650aa314cbea69928fc08d5ab70_Out_0, _Add_86ebb8d26331497e99e74a76297467b1_Out_2);
+            float _Step_92a6cefadb234c659618a3bbd69edcd7_Out_2;
+            Unity_Step_float(_Add_1c8bd51470884762a7f1dd84c7efdf02_Out_2, _Add_86ebb8d26331497e99e74a76297467b1_Out_2, _Step_92a6cefadb234c659618a3bbd69edcd7_Out_2);
+            float4 _Property_f0b35fd57a27401eb1b831344a52a17f_Out_0 = _Color;
+            float4 _Multiply_526badf36ff24656b849ab533b07c350_Out_2;
+            Unity_Multiply_float((_Step_92a6cefadb234c659618a3bbd69edcd7_Out_2.xxxx), _Property_f0b35fd57a27401eb1b831344a52a17f_Out_0, _Multiply_526badf36ff24656b849ab533b07c350_Out_2);
+            float _Step_5ee290f992b84028845ab1cd66a0455a_Out_2;
+            Unity_Step_float(_Split_8fd5cd931c1443078da7ded728f1b2fe_G_2, _Add_86ebb8d26331497e99e74a76297467b1_Out_2, _Step_5ee290f992b84028845ab1cd66a0455a_Out_2);
+            float _InvertColors_e15b70cfaf7645c2b67de0fa55318947_Out_1;
+            float _InvertColors_e15b70cfaf7645c2b67de0fa55318947_InvertColors = float (1
+        );    Unity_InvertColors_float(_Step_5ee290f992b84028845ab1cd66a0455a_Out_2, _InvertColors_e15b70cfaf7645c2b67de0fa55318947_InvertColors, _InvertColors_e15b70cfaf7645c2b67de0fa55318947_Out_1);
+            float _Add_920406a61b7d4711a585aab70d747bbf_Out_2;
+            Unity_Add_float(_Step_92a6cefadb234c659618a3bbd69edcd7_Out_2, _InvertColors_e15b70cfaf7645c2b67de0fa55318947_Out_1, _Add_920406a61b7d4711a585aab70d747bbf_Out_2);
+            float _InvertColors_ff9ad7db1bfc4b9db93d99d713ffce79_Out_1;
+            float _InvertColors_ff9ad7db1bfc4b9db93d99d713ffce79_InvertColors = float (1
+        );    Unity_InvertColors_float(_Add_920406a61b7d4711a585aab70d747bbf_Out_2, _InvertColors_ff9ad7db1bfc4b9db93d99d713ffce79_InvertColors, _InvertColors_ff9ad7db1bfc4b9db93d99d713ffce79_Out_1);
+            float4 _Property_86bdb483e8c547a1bbb9a63f40205eb0_Out_0 = _ColorShift;
+            float4 _Multiply_f2f4b76a9e114d74aa02a3bcd46cbdb5_Out_2;
+            Unity_Multiply_float((_InvertColors_ff9ad7db1bfc4b9db93d99d713ffce79_Out_1.xxxx), _Property_86bdb483e8c547a1bbb9a63f40205eb0_Out_0, _Multiply_f2f4b76a9e114d74aa02a3bcd46cbdb5_Out_2);
+            float4 _Add_03b730e210bb4d2a88426d5a1a369bf9_Out_2;
+            Unity_Add_float4(_Multiply_526badf36ff24656b849ab533b07c350_Out_2, _Multiply_f2f4b76a9e114d74aa02a3bcd46cbdb5_Out_2, _Add_03b730e210bb4d2a88426d5a1a369bf9_Out_2);
+            surface.BaseColor = (_Add_03b730e210bb4d2a88426d5a1a369bf9_Out_2.xyz);
+            surface.Alpha = _Step_5ee290f992b84028845ab1cd66a0455a_Out_2;
+            return surface;
+        }
+
+            // --------------------------------------------------
+            // Build Graph Inputs
+
+            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
+        {
+            VertexDescriptionInputs output;
+            ZERO_INITIALIZE(VertexDescriptionInputs, output);
+
+            output.ObjectSpaceNormal =           input.normalOS;
+            output.ObjectSpaceTangent =          input.tangentOS;
+            output.ObjectSpacePosition =         input.positionOS;
+
+            return output;
+        }
+            SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
+        {
+            SurfaceDescriptionInputs output;
+            ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
+
+
+
+
+
+            output.WorldSpacePosition =          input.positionWS;
+            output.uv0 =                         input.texCoord0;
+        #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
+        #else
+        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
+        #endif
+        #undef BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
+
+            return output;
+        }
+
+            // --------------------------------------------------
+            // Main
+
+            #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/UnlitPass.hlsl"
+
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags
+            {
+                "LightMode" = "ShadowCaster"
+            }
+
+            // Render State
+            Cull Back
+        Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
+        ZTest LEqual
+        ZWrite On
+        ColorMask 0
+
+            // Debug
+            // <None>
+
+            // --------------------------------------------------
+            // Pass
+
+            HLSLPROGRAM
+
+            // Pragmas
+            #pragma target 2.0
+        #pragma only_renderers gles gles3 glcore
+        #pragma multi_compile_instancing
+        #pragma vertex vert
+        #pragma fragment frag
+
+            // DotsInstancingOptions: <None>
+            // HybridV1InjectedBuiltinProperties: <None>
+
+            // Keywords
+            // PassKeywords: <None>
+            // GraphKeywords: <None>
+
+            // Defines
+            #define _SURFACE_TYPE_TRANSPARENT 1
+            #define ATTRIBUTES_NEED_NORMAL
+            #define ATTRIBUTES_NEED_TANGENT
+            #define ATTRIBUTES_NEED_TEXCOORD0
+            #define VARYINGS_NEED_POSITION_WS
+            #define VARYINGS_NEED_TEXCOORD0
+            #define FEATURES_GRAPH_VERTEX
+            /* WARNING: $splice Could not find named fragment 'PassInstancing' */
+            #define SHADERPASS SHADERPASS_SHADOWCASTER
+            /* WARNING: $splice Could not find named fragment 'DotsInstancingVars' */
+
+            // Includes
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
+
+            // --------------------------------------------------
+            // Structs and Packing
+
+            struct Attributes
+        {
+            float3 positionOS : POSITION;
+            float3 normalOS : NORMAL;
+            float4 tangentOS : TANGENT;
+            float4 uv0 : TEXCOORD0;
+            #if UNITY_ANY_INSTANCING_ENABLED
+            uint instanceID : INSTANCEID_SEMANTIC;
+            #endif
+        };
+        struct Varyings
+        {
+            float4 positionCS : SV_POSITION;
+            float3 positionWS;
+            float4 texCoord0;
+            #if UNITY_ANY_INSTANCING_ENABLED
+            uint instanceID : CUSTOM_INSTANCE_ID;
+            #endif
+            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
+            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
+            #endif
+            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
+            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
+            #endif
+            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
+            #endif
+        };
+        struct SurfaceDescriptionInputs
+        {
+            float3 WorldSpacePosition;
+            float4 uv0;
+        };
+        struct VertexDescriptionInputs
+        {
+            float3 ObjectSpaceNormal;
+            float3 ObjectSpaceTangent;
+            float3 ObjectSpacePosition;
+        };
+        struct PackedVaryings
+        {
+            float4 positionCS : SV_POSITION;
+            float3 interp0 : TEXCOORD0;
+            float4 interp1 : TEXCOORD1;
+            #if UNITY_ANY_INSTANCING_ENABLED
+            uint instanceID : CUSTOM_INSTANCE_ID;
+            #endif
+            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
+            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
+            #endif
+            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
+            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
+            #endif
+            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
+            #endif
+        };
+
+            PackedVaryings PackVaryings (Varyings input)
+        {
+            PackedVaryings output;
+            output.positionCS = input.positionCS;
+            output.interp0.xyz =  input.positionWS;
+            output.interp1.xyzw =  input.texCoord0;
+            #if UNITY_ANY_INSTANCING_ENABLED
+            output.instanceID = input.instanceID;
+            #endif
+            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
+            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
+            #endif
+            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
+            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
+            #endif
+            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+            output.cullFace = input.cullFace;
+            #endif
+            return output;
+        }
+        Varyings UnpackVaryings (PackedVaryings input)
+        {
+            Varyings output;
+            output.positionCS = input.positionCS;
+            output.positionWS = input.interp0.xyz;
+            output.texCoord0 = input.interp1.xyzw;
+            #if UNITY_ANY_INSTANCING_ENABLED
+            output.instanceID = input.instanceID;
+            #endif
+            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
+            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
+            #endif
+            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
+            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
+            #endif
+            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+            output.cullFace = input.cullFace;
+            #endif
+            return output;
+        }
+
+            // --------------------------------------------------
+            // Graph
+
+            // Graph Properties
+            CBUFFER_START(UnityPerMaterial)
+        float _NoiseScale;
+        float _NoiseStrenght;
+        float _CutOffHeight;
+        float _EdgeHeight;
+        float _Shift;
+        float4 _Color;
+        float4 _ColorShift;
         CBUFFER_END
 
         // Object and Global properties
@@ -341,16 +665,6 @@ Shader "Disolve"
             Out = step(Edge, In);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
-        void Unity_InverseLerp_float(float A, float B, float T, out float Out)
-        {
-            Out = (T - A)/(B - A);
-        }
-
             // Graph Vertex
             struct VertexDescription
         {
@@ -371,61 +685,34 @@ Shader "Disolve"
             // Graph Pixel
             struct SurfaceDescription
         {
-            float3 BaseColor;
-            float3 NormalTS;
-            float3 Emission;
-            float Metallic;
-            float Smoothness;
-            float Occlusion;
             float Alpha;
-            float AlphaClipThreshold;
         };
 
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            float _Split_1103c935c6a4468ab421e86871b91930_R_1 = IN.WorldSpacePosition[0];
-            float _Split_1103c935c6a4468ab421e86871b91930_G_2 = IN.WorldSpacePosition[1];
-            float _Split_1103c935c6a4468ab421e86871b91930_B_3 = IN.WorldSpacePosition[2];
-            float _Split_1103c935c6a4468ab421e86871b91930_A_4 = 0;
-            float _Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0 = _Shift;
-            float2 _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0.xx), _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3);
-            float _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0 = _NoiseScale;
-            float _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2;
-            Unity_SimpleNoise_float(_TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3, _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0, _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2);
-            float _Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0 = _NoiseStrenght;
-            float _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1;
-            Unity_Negate_float(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float2 _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0 = float2(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float _Remap_d685bc1aa488497f91dc571549adae5f_Out_3;
-            Unity_Remap_float(_SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2, float2 (0, 1), _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0, _Remap_d685bc1aa488497f91dc571549adae5f_Out_3);
-            float _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0 = _CutOffHeight;
-            float _Add_86130490412e4e3589fd1fc3a763a266_Out_2;
-            Unity_Add_float(_Remap_d685bc1aa488497f91dc571549adae5f_Out_3, _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0, _Add_86130490412e4e3589fd1fc3a763a266_Out_2);
-            float _Step_bc5e1ec54eff474bbc022279af008206_Out_2;
-            Unity_Step_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_bc5e1ec54eff474bbc022279af008206_Out_2);
-            float4 _Property_18efa9b9e0854782a74518ffec19fe62_Out_0 = _Color;
-            float4 _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2;
-            Unity_Multiply_float((_Step_bc5e1ec54eff474bbc022279af008206_Out_2.xxxx), _Property_18efa9b9e0854782a74518ffec19fe62_Out_0, _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2);
-            float _Property_844d526415994a5492317b7bcebd737e_Out_0 = _EdgeHeight;
-            float _Add_17593e632e7643ff944f74055cb21fe9_Out_2;
-            Unity_Add_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Property_844d526415994a5492317b7bcebd737e_Out_0, _Add_17593e632e7643ff944f74055cb21fe9_Out_2);
-            float _Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2;
-            Unity_Step_float(_Add_17593e632e7643ff944f74055cb21fe9_Out_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2);
-            float4 _Property_32ce72f6875941f3808e74c876168054_Out_0 = _ColorShift;
-            float4 _Multiply_cdf67173af2446438fe178304d51218d_Out_2;
-            Unity_Multiply_float((_Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2.xxxx), _Property_32ce72f6875941f3808e74c876168054_Out_0, _Multiply_cdf67173af2446438fe178304d51218d_Out_2);
-            float _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            Unity_InverseLerp_float(0, 1, _Step_bc5e1ec54eff474bbc022279af008206_Out_2, _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3);
-            surface.BaseColor = (_Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2.xyz);
-            surface.NormalTS = IN.TangentSpaceNormal;
-            surface.Emission = (_Multiply_cdf67173af2446438fe178304d51218d_Out_2.xyz);
-            surface.Metallic = 0;
-            surface.Smoothness = 0.5;
-            surface.Occlusion = 1;
-            surface.Alpha = _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            surface.AlphaClipThreshold = 0.5;
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_R_1 = IN.WorldSpacePosition[0];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_G_2 = IN.WorldSpacePosition[1];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_B_3 = IN.WorldSpacePosition[2];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_A_4 = 0;
+            float _Property_1ac9737eb1a14c05b1c5a15e474e94e9_Out_0 = _Shift;
+            float2 _TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3;
+            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_1ac9737eb1a14c05b1c5a15e474e94e9_Out_0.xx), _TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3);
+            float _Property_63eb73f720e14219bd8da1a652d00204_Out_0 = _NoiseScale;
+            float _SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2;
+            Unity_SimpleNoise_float(_TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3, _Property_63eb73f720e14219bd8da1a652d00204_Out_0, _SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2);
+            float _Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0 = _NoiseStrenght;
+            float _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1;
+            Unity_Negate_float(_Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0, _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1);
+            float2 _Vector2_c1c6e2bd0b554ec990a205d291a5d045_Out_0 = float2(_Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0, _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1);
+            float _Remap_7571b2862b044c64866e741f33266bdd_Out_3;
+            Unity_Remap_float(_SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2, float2 (0, 1), _Vector2_c1c6e2bd0b554ec990a205d291a5d045_Out_0, _Remap_7571b2862b044c64866e741f33266bdd_Out_3);
+            float _Property_86a52650aa314cbea69928fc08d5ab70_Out_0 = _CutOffHeight;
+            float _Add_86ebb8d26331497e99e74a76297467b1_Out_2;
+            Unity_Add_float(_Remap_7571b2862b044c64866e741f33266bdd_Out_3, _Property_86a52650aa314cbea69928fc08d5ab70_Out_0, _Add_86ebb8d26331497e99e74a76297467b1_Out_2);
+            float _Step_5ee290f992b84028845ab1cd66a0455a_Out_2;
+            Unity_Step_float(_Split_8fd5cd931c1443078da7ded728f1b2fe_G_2, _Add_86ebb8d26331497e99e74a76297467b1_Out_2, _Step_5ee290f992b84028845ab1cd66a0455a_Out_2);
+            surface.Alpha = _Step_5ee290f992b84028845ab1cd66a0455a_Out_2;
             return surface;
         }
 
@@ -450,7 +737,6 @@ Shader "Disolve"
 
 
 
-            output.TangentSpaceNormal =          float3(0.0f, 0.0f, 1.0f);
 
 
             output.WorldSpacePosition =          input.positionWS;
@@ -470,16 +756,375 @@ Shader "Disolve"
 
             #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/PBRForwardPass.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShadowCasterPass.hlsl"
 
             ENDHLSL
         }
         Pass
         {
-            Name "GBuffer"
+            Name "DepthOnly"
             Tags
             {
-                "LightMode" = "UniversalGBuffer"
+                "LightMode" = "DepthOnly"
+            }
+
+            // Render State
+            Cull Back
+        Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
+        ZTest LEqual
+        ZWrite On
+        ColorMask 0
+
+            // Debug
+            // <None>
+
+            // --------------------------------------------------
+            // Pass
+
+            HLSLPROGRAM
+
+            // Pragmas
+            #pragma target 2.0
+        #pragma only_renderers gles gles3 glcore
+        #pragma multi_compile_instancing
+        #pragma vertex vert
+        #pragma fragment frag
+
+            // DotsInstancingOptions: <None>
+            // HybridV1InjectedBuiltinProperties: <None>
+
+            // Keywords
+            // PassKeywords: <None>
+            // GraphKeywords: <None>
+
+            // Defines
+            #define _SURFACE_TYPE_TRANSPARENT 1
+            #define ATTRIBUTES_NEED_NORMAL
+            #define ATTRIBUTES_NEED_TANGENT
+            #define ATTRIBUTES_NEED_TEXCOORD0
+            #define VARYINGS_NEED_POSITION_WS
+            #define VARYINGS_NEED_TEXCOORD0
+            #define FEATURES_GRAPH_VERTEX
+            /* WARNING: $splice Could not find named fragment 'PassInstancing' */
+            #define SHADERPASS SHADERPASS_DEPTHONLY
+            /* WARNING: $splice Could not find named fragment 'DotsInstancingVars' */
+
+            // Includes
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
+
+            // --------------------------------------------------
+            // Structs and Packing
+
+            struct Attributes
+        {
+            float3 positionOS : POSITION;
+            float3 normalOS : NORMAL;
+            float4 tangentOS : TANGENT;
+            float4 uv0 : TEXCOORD0;
+            #if UNITY_ANY_INSTANCING_ENABLED
+            uint instanceID : INSTANCEID_SEMANTIC;
+            #endif
+        };
+        struct Varyings
+        {
+            float4 positionCS : SV_POSITION;
+            float3 positionWS;
+            float4 texCoord0;
+            #if UNITY_ANY_INSTANCING_ENABLED
+            uint instanceID : CUSTOM_INSTANCE_ID;
+            #endif
+            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
+            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
+            #endif
+            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
+            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
+            #endif
+            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
+            #endif
+        };
+        struct SurfaceDescriptionInputs
+        {
+            float3 WorldSpacePosition;
+            float4 uv0;
+        };
+        struct VertexDescriptionInputs
+        {
+            float3 ObjectSpaceNormal;
+            float3 ObjectSpaceTangent;
+            float3 ObjectSpacePosition;
+        };
+        struct PackedVaryings
+        {
+            float4 positionCS : SV_POSITION;
+            float3 interp0 : TEXCOORD0;
+            float4 interp1 : TEXCOORD1;
+            #if UNITY_ANY_INSTANCING_ENABLED
+            uint instanceID : CUSTOM_INSTANCE_ID;
+            #endif
+            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
+            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
+            #endif
+            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
+            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
+            #endif
+            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
+            #endif
+        };
+
+            PackedVaryings PackVaryings (Varyings input)
+        {
+            PackedVaryings output;
+            output.positionCS = input.positionCS;
+            output.interp0.xyz =  input.positionWS;
+            output.interp1.xyzw =  input.texCoord0;
+            #if UNITY_ANY_INSTANCING_ENABLED
+            output.instanceID = input.instanceID;
+            #endif
+            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
+            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
+            #endif
+            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
+            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
+            #endif
+            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+            output.cullFace = input.cullFace;
+            #endif
+            return output;
+        }
+        Varyings UnpackVaryings (PackedVaryings input)
+        {
+            Varyings output;
+            output.positionCS = input.positionCS;
+            output.positionWS = input.interp0.xyz;
+            output.texCoord0 = input.interp1.xyzw;
+            #if UNITY_ANY_INSTANCING_ENABLED
+            output.instanceID = input.instanceID;
+            #endif
+            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
+            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
+            #endif
+            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
+            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
+            #endif
+            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+            output.cullFace = input.cullFace;
+            #endif
+            return output;
+        }
+
+            // --------------------------------------------------
+            // Graph
+
+            // Graph Properties
+            CBUFFER_START(UnityPerMaterial)
+        float _NoiseScale;
+        float _NoiseStrenght;
+        float _CutOffHeight;
+        float _EdgeHeight;
+        float _Shift;
+        float4 _Color;
+        float4 _ColorShift;
+        CBUFFER_END
+
+        // Object and Global properties
+
+            // Graph Functions
+            
+        void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
+        {
+            Out = UV * Tiling + Offset;
+        }
+
+
+        inline float Unity_SimpleNoise_RandomValue_float (float2 uv)
+        {
+            return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
+        }
+
+        inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
+        {
+            return (1.0-t)*a + (t*b);
+        }
+
+
+        inline float Unity_SimpleNoise_ValueNoise_float (float2 uv)
+        {
+            float2 i = floor(uv);
+            float2 f = frac(uv);
+            f = f * f * (3.0 - 2.0 * f);
+
+            uv = abs(frac(uv) - 0.5);
+            float2 c0 = i + float2(0.0, 0.0);
+            float2 c1 = i + float2(1.0, 0.0);
+            float2 c2 = i + float2(0.0, 1.0);
+            float2 c3 = i + float2(1.0, 1.0);
+            float r0 = Unity_SimpleNoise_RandomValue_float(c0);
+            float r1 = Unity_SimpleNoise_RandomValue_float(c1);
+            float r2 = Unity_SimpleNoise_RandomValue_float(c2);
+            float r3 = Unity_SimpleNoise_RandomValue_float(c3);
+
+            float bottomOfGrid = Unity_SimpleNnoise_Interpolate_float(r0, r1, f.x);
+            float topOfGrid = Unity_SimpleNnoise_Interpolate_float(r2, r3, f.x);
+            float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
+            return t;
+        }
+        void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
+        {
+            float t = 0.0;
+
+            float freq = pow(2.0, float(0));
+            float amp = pow(0.5, float(3-0));
+            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
+
+            freq = pow(2.0, float(1));
+            amp = pow(0.5, float(3-1));
+            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
+
+            freq = pow(2.0, float(2));
+            amp = pow(0.5, float(3-2));
+            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
+
+            Out = t;
+        }
+
+        void Unity_Negate_float(float In, out float Out)
+        {
+            Out = -1 * In;
+        }
+
+        void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
+        {
+            Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
+        }
+
+        void Unity_Add_float(float A, float B, out float Out)
+        {
+            Out = A + B;
+        }
+
+        void Unity_Step_float(float Edge, float In, out float Out)
+        {
+            Out = step(Edge, In);
+        }
+
+            // Graph Vertex
+            struct VertexDescription
+        {
+            float3 Position;
+            float3 Normal;
+            float3 Tangent;
+        };
+
+        VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
+        {
+            VertexDescription description = (VertexDescription)0;
+            description.Position = IN.ObjectSpacePosition;
+            description.Normal = IN.ObjectSpaceNormal;
+            description.Tangent = IN.ObjectSpaceTangent;
+            return description;
+        }
+
+            // Graph Pixel
+            struct SurfaceDescription
+        {
+            float Alpha;
+        };
+
+        SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
+        {
+            SurfaceDescription surface = (SurfaceDescription)0;
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_R_1 = IN.WorldSpacePosition[0];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_G_2 = IN.WorldSpacePosition[1];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_B_3 = IN.WorldSpacePosition[2];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_A_4 = 0;
+            float _Property_1ac9737eb1a14c05b1c5a15e474e94e9_Out_0 = _Shift;
+            float2 _TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3;
+            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_1ac9737eb1a14c05b1c5a15e474e94e9_Out_0.xx), _TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3);
+            float _Property_63eb73f720e14219bd8da1a652d00204_Out_0 = _NoiseScale;
+            float _SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2;
+            Unity_SimpleNoise_float(_TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3, _Property_63eb73f720e14219bd8da1a652d00204_Out_0, _SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2);
+            float _Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0 = _NoiseStrenght;
+            float _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1;
+            Unity_Negate_float(_Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0, _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1);
+            float2 _Vector2_c1c6e2bd0b554ec990a205d291a5d045_Out_0 = float2(_Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0, _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1);
+            float _Remap_7571b2862b044c64866e741f33266bdd_Out_3;
+            Unity_Remap_float(_SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2, float2 (0, 1), _Vector2_c1c6e2bd0b554ec990a205d291a5d045_Out_0, _Remap_7571b2862b044c64866e741f33266bdd_Out_3);
+            float _Property_86a52650aa314cbea69928fc08d5ab70_Out_0 = _CutOffHeight;
+            float _Add_86ebb8d26331497e99e74a76297467b1_Out_2;
+            Unity_Add_float(_Remap_7571b2862b044c64866e741f33266bdd_Out_3, _Property_86a52650aa314cbea69928fc08d5ab70_Out_0, _Add_86ebb8d26331497e99e74a76297467b1_Out_2);
+            float _Step_5ee290f992b84028845ab1cd66a0455a_Out_2;
+            Unity_Step_float(_Split_8fd5cd931c1443078da7ded728f1b2fe_G_2, _Add_86ebb8d26331497e99e74a76297467b1_Out_2, _Step_5ee290f992b84028845ab1cd66a0455a_Out_2);
+            surface.Alpha = _Step_5ee290f992b84028845ab1cd66a0455a_Out_2;
+            return surface;
+        }
+
+            // --------------------------------------------------
+            // Build Graph Inputs
+
+            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
+        {
+            VertexDescriptionInputs output;
+            ZERO_INITIALIZE(VertexDescriptionInputs, output);
+
+            output.ObjectSpaceNormal =           input.normalOS;
+            output.ObjectSpaceTangent =          input.tangentOS;
+            output.ObjectSpacePosition =         input.positionOS;
+
+            return output;
+        }
+            SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
+        {
+            SurfaceDescriptionInputs output;
+            ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
+
+
+
+
+
+            output.WorldSpacePosition =          input.positionWS;
+            output.uv0 =                         input.texCoord0;
+        #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
+        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
+        #else
+        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
+        #endif
+        #undef BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
+
+            return output;
+        }
+
+            // --------------------------------------------------
+            // Main
+
+            #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/DepthOnlyPass.hlsl"
+
+            ENDHLSL
+        }
+    }
+    SubShader
+    {
+        Tags
+        {
+            "RenderPipeline"="UniversalPipeline"
+            "RenderType"="Transparent"
+            "UniversalMaterialType" = "Unlit"
+            "Queue"="Transparent"
+        }
+        Pass
+        {
+            Name "Pass"
+            Tags
+            {
+                // LightMode: <None>
             }
 
             // Render State
@@ -511,31 +1156,19 @@ Shader "Disolve"
             // Keywords
             #pragma multi_compile _ LIGHTMAP_ON
         #pragma multi_compile _ DIRLIGHTMAP_COMBINED
-        #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
-        #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
-        #pragma multi_compile _ _SHADOWS_SOFT
-        #pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
-        #pragma multi_compile _ _GBUFFER_NORMALS_OCT
+        #pragma shader_feature _ _SAMPLE_GI
             // GraphKeywords: <None>
 
             // Defines
             #define _SURFACE_TYPE_TRANSPARENT 1
-            #define _AlphaClip 1
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
             #define ATTRIBUTES_NEED_NORMAL
             #define ATTRIBUTES_NEED_TANGENT
             #define ATTRIBUTES_NEED_TEXCOORD0
-            #define ATTRIBUTES_NEED_TEXCOORD1
             #define VARYINGS_NEED_POSITION_WS
-            #define VARYINGS_NEED_NORMAL_WS
-            #define VARYINGS_NEED_TANGENT_WS
             #define VARYINGS_NEED_TEXCOORD0
-            #define VARYINGS_NEED_VIEWDIRECTION_WS
-            #define VARYINGS_NEED_FOG_AND_VERTEX_LIGHT
             #define FEATURES_GRAPH_VERTEX
             /* WARNING: $splice Could not find named fragment 'PassInstancing' */
-            #define SHADERPASS SHADERPASS_GBUFFER
+            #define SHADERPASS SHADERPASS_UNLIT
             /* WARNING: $splice Could not find named fragment 'DotsInstancingVars' */
 
             // Includes
@@ -544,7 +1177,6 @@ Shader "Disolve"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 
             // --------------------------------------------------
@@ -556,7 +1188,6 @@ Shader "Disolve"
             float3 normalOS : NORMAL;
             float4 tangentOS : TANGENT;
             float4 uv0 : TEXCOORD0;
-            float4 uv1 : TEXCOORD1;
             #if UNITY_ANY_INSTANCING_ENABLED
             uint instanceID : INSTANCEID_SEMANTIC;
             #endif
@@ -565,18 +1196,7 @@ Shader "Disolve"
         {
             float4 positionCS : SV_POSITION;
             float3 positionWS;
-            float3 normalWS;
-            float4 tangentWS;
             float4 texCoord0;
-            float3 viewDirectionWS;
-            #if defined(LIGHTMAP_ON)
-            float2 lightmapUV;
-            #endif
-            #if !defined(LIGHTMAP_ON)
-            float3 sh;
-            #endif
-            float4 fogFactorAndVertexLight;
-            float4 shadowCoord;
             #if UNITY_ANY_INSTANCING_ENABLED
             uint instanceID : CUSTOM_INSTANCE_ID;
             #endif
@@ -592,7 +1212,6 @@ Shader "Disolve"
         };
         struct SurfaceDescriptionInputs
         {
-            float3 TangentSpaceNormal;
             float3 WorldSpacePosition;
             float4 uv0;
         };
@@ -606,18 +1225,7 @@ Shader "Disolve"
         {
             float4 positionCS : SV_POSITION;
             float3 interp0 : TEXCOORD0;
-            float3 interp1 : TEXCOORD1;
-            float4 interp2 : TEXCOORD2;
-            float4 interp3 : TEXCOORD3;
-            float3 interp4 : TEXCOORD4;
-            #if defined(LIGHTMAP_ON)
-            float2 interp5 : TEXCOORD5;
-            #endif
-            #if !defined(LIGHTMAP_ON)
-            float3 interp6 : TEXCOORD6;
-            #endif
-            float4 interp7 : TEXCOORD7;
-            float4 interp8 : TEXCOORD8;
+            float4 interp1 : TEXCOORD1;
             #if UNITY_ANY_INSTANCING_ENABLED
             uint instanceID : CUSTOM_INSTANCE_ID;
             #endif
@@ -637,18 +1245,7 @@ Shader "Disolve"
             PackedVaryings output;
             output.positionCS = input.positionCS;
             output.interp0.xyz =  input.positionWS;
-            output.interp1.xyz =  input.normalWS;
-            output.interp2.xyzw =  input.tangentWS;
-            output.interp3.xyzw =  input.texCoord0;
-            output.interp4.xyz =  input.viewDirectionWS;
-            #if defined(LIGHTMAP_ON)
-            output.interp5.xy =  input.lightmapUV;
-            #endif
-            #if !defined(LIGHTMAP_ON)
-            output.interp6.xyz =  input.sh;
-            #endif
-            output.interp7.xyzw =  input.fogFactorAndVertexLight;
-            output.interp8.xyzw =  input.shadowCoord;
+            output.interp1.xyzw =  input.texCoord0;
             #if UNITY_ANY_INSTANCING_ENABLED
             output.instanceID = input.instanceID;
             #endif
@@ -668,18 +1265,7 @@ Shader "Disolve"
             Varyings output;
             output.positionCS = input.positionCS;
             output.positionWS = input.interp0.xyz;
-            output.normalWS = input.interp1.xyz;
-            output.tangentWS = input.interp2.xyzw;
-            output.texCoord0 = input.interp3.xyzw;
-            output.viewDirectionWS = input.interp4.xyz;
-            #if defined(LIGHTMAP_ON)
-            output.lightmapUV = input.interp5.xy;
-            #endif
-            #if !defined(LIGHTMAP_ON)
-            output.sh = input.interp6.xyz;
-            #endif
-            output.fogFactorAndVertexLight = input.interp7.xyzw;
-            output.shadowCoord = input.interp8.xyzw;
+            output.texCoord0 = input.interp1.xyzw;
             #if UNITY_ANY_INSTANCING_ENABLED
             output.instanceID = input.instanceID;
             #endif
@@ -700,19 +1286,24 @@ Shader "Disolve"
 
             // Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 _Color;
         float _NoiseScale;
         float _NoiseStrenght;
         float _CutOffHeight;
         float _EdgeHeight;
-        float4 _ColorShift;
         float _Shift;
+        float4 _Color;
+        float4 _ColorShift;
         CBUFFER_END
 
         // Object and Global properties
 
             // Graph Functions
             
+        void Unity_Add_float(float A, float B, out float Out)
+        {
+            Out = A + B;
+        }
+
         void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
         {
             Out = UV * Tiling + Offset;
@@ -780,11 +1371,6 @@ Shader "Disolve"
             Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
         }
 
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -795,9 +1381,14 @@ Shader "Disolve"
             Out = A * B;
         }
 
-        void Unity_InverseLerp_float(float A, float B, float T, out float Out)
+        void Unity_InvertColors_float(float In, float InvertColors, out float Out)
         {
-            Out = (T - A)/(B - A);
+            Out = abs(InvertColors - In);
+        }
+
+        void Unity_Add_float4(float4 A, float4 B, out float4 Out)
+        {
+            Out = A + B;
         }
 
             // Graph Vertex
@@ -821,60 +1412,56 @@ Shader "Disolve"
             struct SurfaceDescription
         {
             float3 BaseColor;
-            float3 NormalTS;
-            float3 Emission;
-            float Metallic;
-            float Smoothness;
-            float Occlusion;
             float Alpha;
-            float AlphaClipThreshold;
         };
 
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            float _Split_1103c935c6a4468ab421e86871b91930_R_1 = IN.WorldSpacePosition[0];
-            float _Split_1103c935c6a4468ab421e86871b91930_G_2 = IN.WorldSpacePosition[1];
-            float _Split_1103c935c6a4468ab421e86871b91930_B_3 = IN.WorldSpacePosition[2];
-            float _Split_1103c935c6a4468ab421e86871b91930_A_4 = 0;
-            float _Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0 = _Shift;
-            float2 _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0.xx), _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3);
-            float _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0 = _NoiseScale;
-            float _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2;
-            Unity_SimpleNoise_float(_TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3, _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0, _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2);
-            float _Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0 = _NoiseStrenght;
-            float _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1;
-            Unity_Negate_float(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float2 _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0 = float2(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float _Remap_d685bc1aa488497f91dc571549adae5f_Out_3;
-            Unity_Remap_float(_SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2, float2 (0, 1), _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0, _Remap_d685bc1aa488497f91dc571549adae5f_Out_3);
-            float _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0 = _CutOffHeight;
-            float _Add_86130490412e4e3589fd1fc3a763a266_Out_2;
-            Unity_Add_float(_Remap_d685bc1aa488497f91dc571549adae5f_Out_3, _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0, _Add_86130490412e4e3589fd1fc3a763a266_Out_2);
-            float _Step_bc5e1ec54eff474bbc022279af008206_Out_2;
-            Unity_Step_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_bc5e1ec54eff474bbc022279af008206_Out_2);
-            float4 _Property_18efa9b9e0854782a74518ffec19fe62_Out_0 = _Color;
-            float4 _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2;
-            Unity_Multiply_float((_Step_bc5e1ec54eff474bbc022279af008206_Out_2.xxxx), _Property_18efa9b9e0854782a74518ffec19fe62_Out_0, _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2);
-            float _Property_844d526415994a5492317b7bcebd737e_Out_0 = _EdgeHeight;
-            float _Add_17593e632e7643ff944f74055cb21fe9_Out_2;
-            Unity_Add_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Property_844d526415994a5492317b7bcebd737e_Out_0, _Add_17593e632e7643ff944f74055cb21fe9_Out_2);
-            float _Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2;
-            Unity_Step_float(_Add_17593e632e7643ff944f74055cb21fe9_Out_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2);
-            float4 _Property_32ce72f6875941f3808e74c876168054_Out_0 = _ColorShift;
-            float4 _Multiply_cdf67173af2446438fe178304d51218d_Out_2;
-            Unity_Multiply_float((_Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2.xxxx), _Property_32ce72f6875941f3808e74c876168054_Out_0, _Multiply_cdf67173af2446438fe178304d51218d_Out_2);
-            float _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            Unity_InverseLerp_float(0, 1, _Step_bc5e1ec54eff474bbc022279af008206_Out_2, _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3);
-            surface.BaseColor = (_Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2.xyz);
-            surface.NormalTS = IN.TangentSpaceNormal;
-            surface.Emission = (_Multiply_cdf67173af2446438fe178304d51218d_Out_2.xyz);
-            surface.Metallic = 0;
-            surface.Smoothness = 0.5;
-            surface.Occlusion = 1;
-            surface.Alpha = _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            surface.AlphaClipThreshold = 0.5;
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_R_1 = IN.WorldSpacePosition[0];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_G_2 = IN.WorldSpacePosition[1];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_B_3 = IN.WorldSpacePosition[2];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_A_4 = 0;
+            float _Property_c318a4d5df774218ab3f39b8fdb7619c_Out_0 = _EdgeHeight;
+            float _Add_1c8bd51470884762a7f1dd84c7efdf02_Out_2;
+            Unity_Add_float(_Split_8fd5cd931c1443078da7ded728f1b2fe_G_2, _Property_c318a4d5df774218ab3f39b8fdb7619c_Out_0, _Add_1c8bd51470884762a7f1dd84c7efdf02_Out_2);
+            float _Property_1ac9737eb1a14c05b1c5a15e474e94e9_Out_0 = _Shift;
+            float2 _TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3;
+            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_1ac9737eb1a14c05b1c5a15e474e94e9_Out_0.xx), _TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3);
+            float _Property_63eb73f720e14219bd8da1a652d00204_Out_0 = _NoiseScale;
+            float _SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2;
+            Unity_SimpleNoise_float(_TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3, _Property_63eb73f720e14219bd8da1a652d00204_Out_0, _SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2);
+            float _Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0 = _NoiseStrenght;
+            float _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1;
+            Unity_Negate_float(_Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0, _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1);
+            float2 _Vector2_c1c6e2bd0b554ec990a205d291a5d045_Out_0 = float2(_Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0, _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1);
+            float _Remap_7571b2862b044c64866e741f33266bdd_Out_3;
+            Unity_Remap_float(_SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2, float2 (0, 1), _Vector2_c1c6e2bd0b554ec990a205d291a5d045_Out_0, _Remap_7571b2862b044c64866e741f33266bdd_Out_3);
+            float _Property_86a52650aa314cbea69928fc08d5ab70_Out_0 = _CutOffHeight;
+            float _Add_86ebb8d26331497e99e74a76297467b1_Out_2;
+            Unity_Add_float(_Remap_7571b2862b044c64866e741f33266bdd_Out_3, _Property_86a52650aa314cbea69928fc08d5ab70_Out_0, _Add_86ebb8d26331497e99e74a76297467b1_Out_2);
+            float _Step_92a6cefadb234c659618a3bbd69edcd7_Out_2;
+            Unity_Step_float(_Add_1c8bd51470884762a7f1dd84c7efdf02_Out_2, _Add_86ebb8d26331497e99e74a76297467b1_Out_2, _Step_92a6cefadb234c659618a3bbd69edcd7_Out_2);
+            float4 _Property_f0b35fd57a27401eb1b831344a52a17f_Out_0 = _Color;
+            float4 _Multiply_526badf36ff24656b849ab533b07c350_Out_2;
+            Unity_Multiply_float((_Step_92a6cefadb234c659618a3bbd69edcd7_Out_2.xxxx), _Property_f0b35fd57a27401eb1b831344a52a17f_Out_0, _Multiply_526badf36ff24656b849ab533b07c350_Out_2);
+            float _Step_5ee290f992b84028845ab1cd66a0455a_Out_2;
+            Unity_Step_float(_Split_8fd5cd931c1443078da7ded728f1b2fe_G_2, _Add_86ebb8d26331497e99e74a76297467b1_Out_2, _Step_5ee290f992b84028845ab1cd66a0455a_Out_2);
+            float _InvertColors_e15b70cfaf7645c2b67de0fa55318947_Out_1;
+            float _InvertColors_e15b70cfaf7645c2b67de0fa55318947_InvertColors = float (1
+        );    Unity_InvertColors_float(_Step_5ee290f992b84028845ab1cd66a0455a_Out_2, _InvertColors_e15b70cfaf7645c2b67de0fa55318947_InvertColors, _InvertColors_e15b70cfaf7645c2b67de0fa55318947_Out_1);
+            float _Add_920406a61b7d4711a585aab70d747bbf_Out_2;
+            Unity_Add_float(_Step_92a6cefadb234c659618a3bbd69edcd7_Out_2, _InvertColors_e15b70cfaf7645c2b67de0fa55318947_Out_1, _Add_920406a61b7d4711a585aab70d747bbf_Out_2);
+            float _InvertColors_ff9ad7db1bfc4b9db93d99d713ffce79_Out_1;
+            float _InvertColors_ff9ad7db1bfc4b9db93d99d713ffce79_InvertColors = float (1
+        );    Unity_InvertColors_float(_Add_920406a61b7d4711a585aab70d747bbf_Out_2, _InvertColors_ff9ad7db1bfc4b9db93d99d713ffce79_InvertColors, _InvertColors_ff9ad7db1bfc4b9db93d99d713ffce79_Out_1);
+            float4 _Property_86bdb483e8c547a1bbb9a63f40205eb0_Out_0 = _ColorShift;
+            float4 _Multiply_f2f4b76a9e114d74aa02a3bcd46cbdb5_Out_2;
+            Unity_Multiply_float((_InvertColors_ff9ad7db1bfc4b9db93d99d713ffce79_Out_1.xxxx), _Property_86bdb483e8c547a1bbb9a63f40205eb0_Out_0, _Multiply_f2f4b76a9e114d74aa02a3bcd46cbdb5_Out_2);
+            float4 _Add_03b730e210bb4d2a88426d5a1a369bf9_Out_2;
+            Unity_Add_float4(_Multiply_526badf36ff24656b849ab533b07c350_Out_2, _Multiply_f2f4b76a9e114d74aa02a3bcd46cbdb5_Out_2, _Add_03b730e210bb4d2a88426d5a1a369bf9_Out_2);
+            surface.BaseColor = (_Add_03b730e210bb4d2a88426d5a1a369bf9_Out_2.xyz);
+            surface.Alpha = _Step_5ee290f992b84028845ab1cd66a0455a_Out_2;
             return surface;
         }
 
@@ -899,7 +1486,6 @@ Shader "Disolve"
 
 
 
-            output.TangentSpaceNormal =          float3(0.0f, 0.0f, 1.0f);
 
 
             output.WorldSpacePosition =          input.positionWS;
@@ -919,8 +1505,7 @@ Shader "Disolve"
 
             #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/PBRGBufferPass.hlsl"
+        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/UnlitPass.hlsl"
 
             ENDHLSL
         }
@@ -964,9 +1549,6 @@ Shader "Disolve"
 
             // Defines
             #define _SURFACE_TYPE_TRANSPARENT 1
-            #define _AlphaClip 1
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
             #define ATTRIBUTES_NEED_NORMAL
             #define ATTRIBUTES_NEED_TANGENT
             #define ATTRIBUTES_NEED_TEXCOORD0
@@ -1092,13 +1674,13 @@ Shader "Disolve"
 
             // Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 _Color;
         float _NoiseScale;
         float _NoiseStrenght;
         float _CutOffHeight;
         float _EdgeHeight;
-        float4 _ColorShift;
         float _Shift;
+        float4 _Color;
+        float4 _ColorShift;
         CBUFFER_END
 
         // Object and Global properties
@@ -1182,11 +1764,6 @@ Shader "Disolve"
             Out = step(Edge, In);
         }
 
-        void Unity_InverseLerp_float(float A, float B, float T, out float Out)
-        {
-            Out = (T - A)/(B - A);
-        }
-
             // Graph Vertex
             struct VertexDescription
         {
@@ -1208,37 +1785,33 @@ Shader "Disolve"
             struct SurfaceDescription
         {
             float Alpha;
-            float AlphaClipThreshold;
         };
 
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            float _Split_1103c935c6a4468ab421e86871b91930_R_1 = IN.WorldSpacePosition[0];
-            float _Split_1103c935c6a4468ab421e86871b91930_G_2 = IN.WorldSpacePosition[1];
-            float _Split_1103c935c6a4468ab421e86871b91930_B_3 = IN.WorldSpacePosition[2];
-            float _Split_1103c935c6a4468ab421e86871b91930_A_4 = 0;
-            float _Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0 = _Shift;
-            float2 _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0.xx), _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3);
-            float _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0 = _NoiseScale;
-            float _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2;
-            Unity_SimpleNoise_float(_TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3, _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0, _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2);
-            float _Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0 = _NoiseStrenght;
-            float _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1;
-            Unity_Negate_float(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float2 _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0 = float2(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float _Remap_d685bc1aa488497f91dc571549adae5f_Out_3;
-            Unity_Remap_float(_SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2, float2 (0, 1), _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0, _Remap_d685bc1aa488497f91dc571549adae5f_Out_3);
-            float _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0 = _CutOffHeight;
-            float _Add_86130490412e4e3589fd1fc3a763a266_Out_2;
-            Unity_Add_float(_Remap_d685bc1aa488497f91dc571549adae5f_Out_3, _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0, _Add_86130490412e4e3589fd1fc3a763a266_Out_2);
-            float _Step_bc5e1ec54eff474bbc022279af008206_Out_2;
-            Unity_Step_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_bc5e1ec54eff474bbc022279af008206_Out_2);
-            float _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            Unity_InverseLerp_float(0, 1, _Step_bc5e1ec54eff474bbc022279af008206_Out_2, _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3);
-            surface.Alpha = _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            surface.AlphaClipThreshold = 0.5;
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_R_1 = IN.WorldSpacePosition[0];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_G_2 = IN.WorldSpacePosition[1];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_B_3 = IN.WorldSpacePosition[2];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_A_4 = 0;
+            float _Property_1ac9737eb1a14c05b1c5a15e474e94e9_Out_0 = _Shift;
+            float2 _TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3;
+            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_1ac9737eb1a14c05b1c5a15e474e94e9_Out_0.xx), _TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3);
+            float _Property_63eb73f720e14219bd8da1a652d00204_Out_0 = _NoiseScale;
+            float _SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2;
+            Unity_SimpleNoise_float(_TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3, _Property_63eb73f720e14219bd8da1a652d00204_Out_0, _SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2);
+            float _Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0 = _NoiseStrenght;
+            float _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1;
+            Unity_Negate_float(_Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0, _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1);
+            float2 _Vector2_c1c6e2bd0b554ec990a205d291a5d045_Out_0 = float2(_Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0, _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1);
+            float _Remap_7571b2862b044c64866e741f33266bdd_Out_3;
+            Unity_Remap_float(_SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2, float2 (0, 1), _Vector2_c1c6e2bd0b554ec990a205d291a5d045_Out_0, _Remap_7571b2862b044c64866e741f33266bdd_Out_3);
+            float _Property_86a52650aa314cbea69928fc08d5ab70_Out_0 = _CutOffHeight;
+            float _Add_86ebb8d26331497e99e74a76297467b1_Out_2;
+            Unity_Add_float(_Remap_7571b2862b044c64866e741f33266bdd_Out_3, _Property_86a52650aa314cbea69928fc08d5ab70_Out_0, _Add_86ebb8d26331497e99e74a76297467b1_Out_2);
+            float _Step_5ee290f992b84028845ab1cd66a0455a_Out_2;
+            Unity_Step_float(_Split_8fd5cd931c1443078da7ded728f1b2fe_G_2, _Add_86ebb8d26331497e99e74a76297467b1_Out_2, _Step_5ee290f992b84028845ab1cd66a0455a_Out_2);
+            surface.Alpha = _Step_5ee290f992b84028845ab1cd66a0455a_Out_2;
             return surface;
         }
 
@@ -1326,9 +1899,6 @@ Shader "Disolve"
 
             // Defines
             #define _SURFACE_TYPE_TRANSPARENT 1
-            #define _AlphaClip 1
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
             #define ATTRIBUTES_NEED_NORMAL
             #define ATTRIBUTES_NEED_TANGENT
             #define ATTRIBUTES_NEED_TEXCOORD0
@@ -1454,13 +2024,13 @@ Shader "Disolve"
 
             // Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 _Color;
         float _NoiseScale;
         float _NoiseStrenght;
         float _CutOffHeight;
         float _EdgeHeight;
-        float4 _ColorShift;
         float _Shift;
+        float4 _Color;
+        float4 _ColorShift;
         CBUFFER_END
 
         // Object and Global properties
@@ -1544,11 +2114,6 @@ Shader "Disolve"
             Out = step(Edge, In);
         }
 
-        void Unity_InverseLerp_float(float A, float B, float T, out float Out)
-        {
-            Out = (T - A)/(B - A);
-        }
-
             // Graph Vertex
             struct VertexDescription
         {
@@ -1570,37 +2135,33 @@ Shader "Disolve"
             struct SurfaceDescription
         {
             float Alpha;
-            float AlphaClipThreshold;
         };
 
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            float _Split_1103c935c6a4468ab421e86871b91930_R_1 = IN.WorldSpacePosition[0];
-            float _Split_1103c935c6a4468ab421e86871b91930_G_2 = IN.WorldSpacePosition[1];
-            float _Split_1103c935c6a4468ab421e86871b91930_B_3 = IN.WorldSpacePosition[2];
-            float _Split_1103c935c6a4468ab421e86871b91930_A_4 = 0;
-            float _Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0 = _Shift;
-            float2 _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0.xx), _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3);
-            float _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0 = _NoiseScale;
-            float _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2;
-            Unity_SimpleNoise_float(_TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3, _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0, _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2);
-            float _Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0 = _NoiseStrenght;
-            float _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1;
-            Unity_Negate_float(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float2 _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0 = float2(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float _Remap_d685bc1aa488497f91dc571549adae5f_Out_3;
-            Unity_Remap_float(_SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2, float2 (0, 1), _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0, _Remap_d685bc1aa488497f91dc571549adae5f_Out_3);
-            float _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0 = _CutOffHeight;
-            float _Add_86130490412e4e3589fd1fc3a763a266_Out_2;
-            Unity_Add_float(_Remap_d685bc1aa488497f91dc571549adae5f_Out_3, _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0, _Add_86130490412e4e3589fd1fc3a763a266_Out_2);
-            float _Step_bc5e1ec54eff474bbc022279af008206_Out_2;
-            Unity_Step_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_bc5e1ec54eff474bbc022279af008206_Out_2);
-            float _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            Unity_InverseLerp_float(0, 1, _Step_bc5e1ec54eff474bbc022279af008206_Out_2, _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3);
-            surface.Alpha = _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            surface.AlphaClipThreshold = 0.5;
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_R_1 = IN.WorldSpacePosition[0];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_G_2 = IN.WorldSpacePosition[1];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_B_3 = IN.WorldSpacePosition[2];
+            float _Split_8fd5cd931c1443078da7ded728f1b2fe_A_4 = 0;
+            float _Property_1ac9737eb1a14c05b1c5a15e474e94e9_Out_0 = _Shift;
+            float2 _TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3;
+            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_1ac9737eb1a14c05b1c5a15e474e94e9_Out_0.xx), _TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3);
+            float _Property_63eb73f720e14219bd8da1a652d00204_Out_0 = _NoiseScale;
+            float _SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2;
+            Unity_SimpleNoise_float(_TilingAndOffset_81bb1d2e62074fc39ec9fbe5e853d53b_Out_3, _Property_63eb73f720e14219bd8da1a652d00204_Out_0, _SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2);
+            float _Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0 = _NoiseStrenght;
+            float _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1;
+            Unity_Negate_float(_Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0, _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1);
+            float2 _Vector2_c1c6e2bd0b554ec990a205d291a5d045_Out_0 = float2(_Property_663305afdd4745ceb6b33e5a2cd87d31_Out_0, _Negate_1206e7dab294421ebb1b75a42fca01d2_Out_1);
+            float _Remap_7571b2862b044c64866e741f33266bdd_Out_3;
+            Unity_Remap_float(_SimpleNoise_ebc1778d04994c66be5e653f0a6228ec_Out_2, float2 (0, 1), _Vector2_c1c6e2bd0b554ec990a205d291a5d045_Out_0, _Remap_7571b2862b044c64866e741f33266bdd_Out_3);
+            float _Property_86a52650aa314cbea69928fc08d5ab70_Out_0 = _CutOffHeight;
+            float _Add_86ebb8d26331497e99e74a76297467b1_Out_2;
+            Unity_Add_float(_Remap_7571b2862b044c64866e741f33266bdd_Out_3, _Property_86a52650aa314cbea69928fc08d5ab70_Out_0, _Add_86ebb8d26331497e99e74a76297467b1_Out_2);
+            float _Step_5ee290f992b84028845ab1cd66a0455a_Out_2;
+            Unity_Step_float(_Split_8fd5cd931c1443078da7ded728f1b2fe_G_2, _Add_86ebb8d26331497e99e74a76297467b1_Out_2, _Step_5ee290f992b84028845ab1cd66a0455a_Out_2);
+            surface.Alpha = _Step_5ee290f992b84028845ab1cd66a0455a_Out_2;
             return surface;
         }
 
@@ -1648,3444 +2209,6 @@ Shader "Disolve"
 
             ENDHLSL
         }
-        Pass
-        {
-            Name "DepthNormals"
-            Tags
-            {
-                "LightMode" = "DepthNormals"
-            }
-
-            // Render State
-            Cull Back
-        Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
-        ZTest LEqual
-        ZWrite On
-
-            // Debug
-            // <None>
-
-            // --------------------------------------------------
-            // Pass
-
-            HLSLPROGRAM
-
-            // Pragmas
-            #pragma target 4.5
-        #pragma exclude_renderers gles gles3 glcore
-        #pragma multi_compile_instancing
-        #pragma multi_compile _ DOTS_INSTANCING_ON
-        #pragma vertex vert
-        #pragma fragment frag
-
-            // DotsInstancingOptions: <None>
-            // HybridV1InjectedBuiltinProperties: <None>
-
-            // Keywords
-            // PassKeywords: <None>
-            // GraphKeywords: <None>
-
-            // Defines
-            #define _SURFACE_TYPE_TRANSPARENT 1
-            #define _AlphaClip 1
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
-            #define ATTRIBUTES_NEED_NORMAL
-            #define ATTRIBUTES_NEED_TANGENT
-            #define ATTRIBUTES_NEED_TEXCOORD0
-            #define ATTRIBUTES_NEED_TEXCOORD1
-            #define VARYINGS_NEED_POSITION_WS
-            #define VARYINGS_NEED_NORMAL_WS
-            #define VARYINGS_NEED_TANGENT_WS
-            #define VARYINGS_NEED_TEXCOORD0
-            #define FEATURES_GRAPH_VERTEX
-            /* WARNING: $splice Could not find named fragment 'PassInstancing' */
-            #define SHADERPASS SHADERPASS_DEPTHNORMALSONLY
-            /* WARNING: $splice Could not find named fragment 'DotsInstancingVars' */
-
-            // Includes
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
-
-            // --------------------------------------------------
-            // Structs and Packing
-
-            struct Attributes
-        {
-            float3 positionOS : POSITION;
-            float3 normalOS : NORMAL;
-            float4 tangentOS : TANGENT;
-            float4 uv0 : TEXCOORD0;
-            float4 uv1 : TEXCOORD1;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : INSTANCEID_SEMANTIC;
-            #endif
-        };
-        struct Varyings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 positionWS;
-            float3 normalWS;
-            float4 tangentWS;
-            float4 texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-        struct SurfaceDescriptionInputs
-        {
-            float3 TangentSpaceNormal;
-            float3 WorldSpacePosition;
-            float4 uv0;
-        };
-        struct VertexDescriptionInputs
-        {
-            float3 ObjectSpaceNormal;
-            float3 ObjectSpaceTangent;
-            float3 ObjectSpacePosition;
-        };
-        struct PackedVaryings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 interp0 : TEXCOORD0;
-            float3 interp1 : TEXCOORD1;
-            float4 interp2 : TEXCOORD2;
-            float4 interp3 : TEXCOORD3;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-
-            PackedVaryings PackVaryings (Varyings input)
-        {
-            PackedVaryings output;
-            output.positionCS = input.positionCS;
-            output.interp0.xyz =  input.positionWS;
-            output.interp1.xyz =  input.normalWS;
-            output.interp2.xyzw =  input.tangentWS;
-            output.interp3.xyzw =  input.texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-        Varyings UnpackVaryings (PackedVaryings input)
-        {
-            Varyings output;
-            output.positionCS = input.positionCS;
-            output.positionWS = input.interp0.xyz;
-            output.normalWS = input.interp1.xyz;
-            output.tangentWS = input.interp2.xyzw;
-            output.texCoord0 = input.interp3.xyzw;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Graph
-
-            // Graph Properties
-            CBUFFER_START(UnityPerMaterial)
-        float4 _Color;
-        float _NoiseScale;
-        float _NoiseStrenght;
-        float _CutOffHeight;
-        float _EdgeHeight;
-        float4 _ColorShift;
-        float _Shift;
-        CBUFFER_END
-
-        // Object and Global properties
-
-            // Graph Functions
-            
-        void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
-        {
-            Out = UV * Tiling + Offset;
-        }
-
-
-        inline float Unity_SimpleNoise_RandomValue_float (float2 uv)
-        {
-            return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
-        }
-
-        inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
-        {
-            return (1.0-t)*a + (t*b);
-        }
-
-
-        inline float Unity_SimpleNoise_ValueNoise_float (float2 uv)
-        {
-            float2 i = floor(uv);
-            float2 f = frac(uv);
-            f = f * f * (3.0 - 2.0 * f);
-
-            uv = abs(frac(uv) - 0.5);
-            float2 c0 = i + float2(0.0, 0.0);
-            float2 c1 = i + float2(1.0, 0.0);
-            float2 c2 = i + float2(0.0, 1.0);
-            float2 c3 = i + float2(1.0, 1.0);
-            float r0 = Unity_SimpleNoise_RandomValue_float(c0);
-            float r1 = Unity_SimpleNoise_RandomValue_float(c1);
-            float r2 = Unity_SimpleNoise_RandomValue_float(c2);
-            float r3 = Unity_SimpleNoise_RandomValue_float(c3);
-
-            float bottomOfGrid = Unity_SimpleNnoise_Interpolate_float(r0, r1, f.x);
-            float topOfGrid = Unity_SimpleNnoise_Interpolate_float(r2, r3, f.x);
-            float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
-            return t;
-        }
-        void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
-        {
-            float t = 0.0;
-
-            float freq = pow(2.0, float(0));
-            float amp = pow(0.5, float(3-0));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(1));
-            amp = pow(0.5, float(3-1));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(2));
-            amp = pow(0.5, float(3-2));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            Out = t;
-        }
-
-        void Unity_Negate_float(float In, out float Out)
-        {
-            Out = -1 * In;
-        }
-
-        void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
-        {
-            Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-
-        void Unity_Step_float(float Edge, float In, out float Out)
-        {
-            Out = step(Edge, In);
-        }
-
-        void Unity_InverseLerp_float(float A, float B, float T, out float Out)
-        {
-            Out = (T - A)/(B - A);
-        }
-
-            // Graph Vertex
-            struct VertexDescription
-        {
-            float3 Position;
-            float3 Normal;
-            float3 Tangent;
-        };
-
-        VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
-        {
-            VertexDescription description = (VertexDescription)0;
-            description.Position = IN.ObjectSpacePosition;
-            description.Normal = IN.ObjectSpaceNormal;
-            description.Tangent = IN.ObjectSpaceTangent;
-            return description;
-        }
-
-            // Graph Pixel
-            struct SurfaceDescription
-        {
-            float3 NormalTS;
-            float Alpha;
-            float AlphaClipThreshold;
-        };
-
-        SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
-        {
-            SurfaceDescription surface = (SurfaceDescription)0;
-            float _Split_1103c935c6a4468ab421e86871b91930_R_1 = IN.WorldSpacePosition[0];
-            float _Split_1103c935c6a4468ab421e86871b91930_G_2 = IN.WorldSpacePosition[1];
-            float _Split_1103c935c6a4468ab421e86871b91930_B_3 = IN.WorldSpacePosition[2];
-            float _Split_1103c935c6a4468ab421e86871b91930_A_4 = 0;
-            float _Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0 = _Shift;
-            float2 _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0.xx), _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3);
-            float _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0 = _NoiseScale;
-            float _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2;
-            Unity_SimpleNoise_float(_TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3, _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0, _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2);
-            float _Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0 = _NoiseStrenght;
-            float _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1;
-            Unity_Negate_float(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float2 _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0 = float2(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float _Remap_d685bc1aa488497f91dc571549adae5f_Out_3;
-            Unity_Remap_float(_SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2, float2 (0, 1), _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0, _Remap_d685bc1aa488497f91dc571549adae5f_Out_3);
-            float _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0 = _CutOffHeight;
-            float _Add_86130490412e4e3589fd1fc3a763a266_Out_2;
-            Unity_Add_float(_Remap_d685bc1aa488497f91dc571549adae5f_Out_3, _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0, _Add_86130490412e4e3589fd1fc3a763a266_Out_2);
-            float _Step_bc5e1ec54eff474bbc022279af008206_Out_2;
-            Unity_Step_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_bc5e1ec54eff474bbc022279af008206_Out_2);
-            float _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            Unity_InverseLerp_float(0, 1, _Step_bc5e1ec54eff474bbc022279af008206_Out_2, _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3);
-            surface.NormalTS = IN.TangentSpaceNormal;
-            surface.Alpha = _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            surface.AlphaClipThreshold = 0.5;
-            return surface;
-        }
-
-            // --------------------------------------------------
-            // Build Graph Inputs
-
-            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
-        {
-            VertexDescriptionInputs output;
-            ZERO_INITIALIZE(VertexDescriptionInputs, output);
-
-            output.ObjectSpaceNormal =           input.normalOS;
-            output.ObjectSpaceTangent =          input.tangentOS;
-            output.ObjectSpacePosition =         input.positionOS;
-
-            return output;
-        }
-            SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
-        {
-            SurfaceDescriptionInputs output;
-            ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
-
-
-
-            output.TangentSpaceNormal =          float3(0.0f, 0.0f, 1.0f);
-
-
-            output.WorldSpacePosition =          input.positionWS;
-            output.uv0 =                         input.texCoord0;
-        #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
-        #else
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-        #endif
-        #undef BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Main
-
-            #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/DepthNormalsOnlyPass.hlsl"
-
-            ENDHLSL
-        }
-        Pass
-        {
-            Name "Meta"
-            Tags
-            {
-                "LightMode" = "Meta"
-            }
-
-            // Render State
-            Cull Off
-
-            // Debug
-            // <None>
-
-            // --------------------------------------------------
-            // Pass
-
-            HLSLPROGRAM
-
-            // Pragmas
-            #pragma target 4.5
-        #pragma exclude_renderers gles gles3 glcore
-        #pragma vertex vert
-        #pragma fragment frag
-
-            // DotsInstancingOptions: <None>
-            // HybridV1InjectedBuiltinProperties: <None>
-
-            // Keywords
-            #pragma shader_feature _ _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-            // GraphKeywords: <None>
-
-            // Defines
-            #define _SURFACE_TYPE_TRANSPARENT 1
-            #define _AlphaClip 1
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
-            #define ATTRIBUTES_NEED_NORMAL
-            #define ATTRIBUTES_NEED_TANGENT
-            #define ATTRIBUTES_NEED_TEXCOORD0
-            #define ATTRIBUTES_NEED_TEXCOORD1
-            #define ATTRIBUTES_NEED_TEXCOORD2
-            #define VARYINGS_NEED_POSITION_WS
-            #define VARYINGS_NEED_TEXCOORD0
-            #define FEATURES_GRAPH_VERTEX
-            /* WARNING: $splice Could not find named fragment 'PassInstancing' */
-            #define SHADERPASS SHADERPASS_META
-            /* WARNING: $splice Could not find named fragment 'DotsInstancingVars' */
-
-            // Includes
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/MetaInput.hlsl"
-
-            // --------------------------------------------------
-            // Structs and Packing
-
-            struct Attributes
-        {
-            float3 positionOS : POSITION;
-            float3 normalOS : NORMAL;
-            float4 tangentOS : TANGENT;
-            float4 uv0 : TEXCOORD0;
-            float4 uv1 : TEXCOORD1;
-            float4 uv2 : TEXCOORD2;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : INSTANCEID_SEMANTIC;
-            #endif
-        };
-        struct Varyings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 positionWS;
-            float4 texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-        struct SurfaceDescriptionInputs
-        {
-            float3 WorldSpacePosition;
-            float4 uv0;
-        };
-        struct VertexDescriptionInputs
-        {
-            float3 ObjectSpaceNormal;
-            float3 ObjectSpaceTangent;
-            float3 ObjectSpacePosition;
-        };
-        struct PackedVaryings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 interp0 : TEXCOORD0;
-            float4 interp1 : TEXCOORD1;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-
-            PackedVaryings PackVaryings (Varyings input)
-        {
-            PackedVaryings output;
-            output.positionCS = input.positionCS;
-            output.interp0.xyz =  input.positionWS;
-            output.interp1.xyzw =  input.texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-        Varyings UnpackVaryings (PackedVaryings input)
-        {
-            Varyings output;
-            output.positionCS = input.positionCS;
-            output.positionWS = input.interp0.xyz;
-            output.texCoord0 = input.interp1.xyzw;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Graph
-
-            // Graph Properties
-            CBUFFER_START(UnityPerMaterial)
-        float4 _Color;
-        float _NoiseScale;
-        float _NoiseStrenght;
-        float _CutOffHeight;
-        float _EdgeHeight;
-        float4 _ColorShift;
-        float _Shift;
-        CBUFFER_END
-
-        // Object and Global properties
-
-            // Graph Functions
-            
-        void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
-        {
-            Out = UV * Tiling + Offset;
-        }
-
-
-        inline float Unity_SimpleNoise_RandomValue_float (float2 uv)
-        {
-            return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
-        }
-
-        inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
-        {
-            return (1.0-t)*a + (t*b);
-        }
-
-
-        inline float Unity_SimpleNoise_ValueNoise_float (float2 uv)
-        {
-            float2 i = floor(uv);
-            float2 f = frac(uv);
-            f = f * f * (3.0 - 2.0 * f);
-
-            uv = abs(frac(uv) - 0.5);
-            float2 c0 = i + float2(0.0, 0.0);
-            float2 c1 = i + float2(1.0, 0.0);
-            float2 c2 = i + float2(0.0, 1.0);
-            float2 c3 = i + float2(1.0, 1.0);
-            float r0 = Unity_SimpleNoise_RandomValue_float(c0);
-            float r1 = Unity_SimpleNoise_RandomValue_float(c1);
-            float r2 = Unity_SimpleNoise_RandomValue_float(c2);
-            float r3 = Unity_SimpleNoise_RandomValue_float(c3);
-
-            float bottomOfGrid = Unity_SimpleNnoise_Interpolate_float(r0, r1, f.x);
-            float topOfGrid = Unity_SimpleNnoise_Interpolate_float(r2, r3, f.x);
-            float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
-            return t;
-        }
-        void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
-        {
-            float t = 0.0;
-
-            float freq = pow(2.0, float(0));
-            float amp = pow(0.5, float(3-0));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(1));
-            amp = pow(0.5, float(3-1));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(2));
-            amp = pow(0.5, float(3-2));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            Out = t;
-        }
-
-        void Unity_Negate_float(float In, out float Out)
-        {
-            Out = -1 * In;
-        }
-
-        void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
-        {
-            Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-
-        void Unity_Step_float(float Edge, float In, out float Out)
-        {
-            Out = step(Edge, In);
-        }
-
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
-        void Unity_InverseLerp_float(float A, float B, float T, out float Out)
-        {
-            Out = (T - A)/(B - A);
-        }
-
-            // Graph Vertex
-            struct VertexDescription
-        {
-            float3 Position;
-            float3 Normal;
-            float3 Tangent;
-        };
-
-        VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
-        {
-            VertexDescription description = (VertexDescription)0;
-            description.Position = IN.ObjectSpacePosition;
-            description.Normal = IN.ObjectSpaceNormal;
-            description.Tangent = IN.ObjectSpaceTangent;
-            return description;
-        }
-
-            // Graph Pixel
-            struct SurfaceDescription
-        {
-            float3 BaseColor;
-            float3 Emission;
-            float Alpha;
-            float AlphaClipThreshold;
-        };
-
-        SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
-        {
-            SurfaceDescription surface = (SurfaceDescription)0;
-            float _Split_1103c935c6a4468ab421e86871b91930_R_1 = IN.WorldSpacePosition[0];
-            float _Split_1103c935c6a4468ab421e86871b91930_G_2 = IN.WorldSpacePosition[1];
-            float _Split_1103c935c6a4468ab421e86871b91930_B_3 = IN.WorldSpacePosition[2];
-            float _Split_1103c935c6a4468ab421e86871b91930_A_4 = 0;
-            float _Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0 = _Shift;
-            float2 _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0.xx), _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3);
-            float _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0 = _NoiseScale;
-            float _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2;
-            Unity_SimpleNoise_float(_TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3, _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0, _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2);
-            float _Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0 = _NoiseStrenght;
-            float _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1;
-            Unity_Negate_float(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float2 _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0 = float2(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float _Remap_d685bc1aa488497f91dc571549adae5f_Out_3;
-            Unity_Remap_float(_SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2, float2 (0, 1), _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0, _Remap_d685bc1aa488497f91dc571549adae5f_Out_3);
-            float _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0 = _CutOffHeight;
-            float _Add_86130490412e4e3589fd1fc3a763a266_Out_2;
-            Unity_Add_float(_Remap_d685bc1aa488497f91dc571549adae5f_Out_3, _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0, _Add_86130490412e4e3589fd1fc3a763a266_Out_2);
-            float _Step_bc5e1ec54eff474bbc022279af008206_Out_2;
-            Unity_Step_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_bc5e1ec54eff474bbc022279af008206_Out_2);
-            float4 _Property_18efa9b9e0854782a74518ffec19fe62_Out_0 = _Color;
-            float4 _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2;
-            Unity_Multiply_float((_Step_bc5e1ec54eff474bbc022279af008206_Out_2.xxxx), _Property_18efa9b9e0854782a74518ffec19fe62_Out_0, _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2);
-            float _Property_844d526415994a5492317b7bcebd737e_Out_0 = _EdgeHeight;
-            float _Add_17593e632e7643ff944f74055cb21fe9_Out_2;
-            Unity_Add_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Property_844d526415994a5492317b7bcebd737e_Out_0, _Add_17593e632e7643ff944f74055cb21fe9_Out_2);
-            float _Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2;
-            Unity_Step_float(_Add_17593e632e7643ff944f74055cb21fe9_Out_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2);
-            float4 _Property_32ce72f6875941f3808e74c876168054_Out_0 = _ColorShift;
-            float4 _Multiply_cdf67173af2446438fe178304d51218d_Out_2;
-            Unity_Multiply_float((_Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2.xxxx), _Property_32ce72f6875941f3808e74c876168054_Out_0, _Multiply_cdf67173af2446438fe178304d51218d_Out_2);
-            float _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            Unity_InverseLerp_float(0, 1, _Step_bc5e1ec54eff474bbc022279af008206_Out_2, _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3);
-            surface.BaseColor = (_Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2.xyz);
-            surface.Emission = (_Multiply_cdf67173af2446438fe178304d51218d_Out_2.xyz);
-            surface.Alpha = _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            surface.AlphaClipThreshold = 0.5;
-            return surface;
-        }
-
-            // --------------------------------------------------
-            // Build Graph Inputs
-
-            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
-        {
-            VertexDescriptionInputs output;
-            ZERO_INITIALIZE(VertexDescriptionInputs, output);
-
-            output.ObjectSpaceNormal =           input.normalOS;
-            output.ObjectSpaceTangent =          input.tangentOS;
-            output.ObjectSpacePosition =         input.positionOS;
-
-            return output;
-        }
-            SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
-        {
-            SurfaceDescriptionInputs output;
-            ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
-
-
-
-
-
-            output.WorldSpacePosition =          input.positionWS;
-            output.uv0 =                         input.texCoord0;
-        #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
-        #else
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-        #endif
-        #undef BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Main
-
-            #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/LightingMetaPass.hlsl"
-
-            ENDHLSL
-        }
-        Pass
-        {
-            // Name: <None>
-            Tags
-            {
-                "LightMode" = "Universal2D"
-            }
-
-            // Render State
-            Cull Back
-        Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
-        ZTest LEqual
-        ZWrite Off
-
-            // Debug
-            // <None>
-
-            // --------------------------------------------------
-            // Pass
-
-            HLSLPROGRAM
-
-            // Pragmas
-            #pragma target 4.5
-        #pragma exclude_renderers gles gles3 glcore
-        #pragma vertex vert
-        #pragma fragment frag
-
-            // DotsInstancingOptions: <None>
-            // HybridV1InjectedBuiltinProperties: <None>
-
-            // Keywords
-            // PassKeywords: <None>
-            // GraphKeywords: <None>
-
-            // Defines
-            #define _SURFACE_TYPE_TRANSPARENT 1
-            #define _AlphaClip 1
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
-            #define ATTRIBUTES_NEED_NORMAL
-            #define ATTRIBUTES_NEED_TANGENT
-            #define ATTRIBUTES_NEED_TEXCOORD0
-            #define VARYINGS_NEED_POSITION_WS
-            #define VARYINGS_NEED_TEXCOORD0
-            #define FEATURES_GRAPH_VERTEX
-            /* WARNING: $splice Could not find named fragment 'PassInstancing' */
-            #define SHADERPASS SHADERPASS_2D
-            /* WARNING: $splice Could not find named fragment 'DotsInstancingVars' */
-
-            // Includes
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
-
-            // --------------------------------------------------
-            // Structs and Packing
-
-            struct Attributes
-        {
-            float3 positionOS : POSITION;
-            float3 normalOS : NORMAL;
-            float4 tangentOS : TANGENT;
-            float4 uv0 : TEXCOORD0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : INSTANCEID_SEMANTIC;
-            #endif
-        };
-        struct Varyings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 positionWS;
-            float4 texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-        struct SurfaceDescriptionInputs
-        {
-            float3 WorldSpacePosition;
-            float4 uv0;
-        };
-        struct VertexDescriptionInputs
-        {
-            float3 ObjectSpaceNormal;
-            float3 ObjectSpaceTangent;
-            float3 ObjectSpacePosition;
-        };
-        struct PackedVaryings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 interp0 : TEXCOORD0;
-            float4 interp1 : TEXCOORD1;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-
-            PackedVaryings PackVaryings (Varyings input)
-        {
-            PackedVaryings output;
-            output.positionCS = input.positionCS;
-            output.interp0.xyz =  input.positionWS;
-            output.interp1.xyzw =  input.texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-        Varyings UnpackVaryings (PackedVaryings input)
-        {
-            Varyings output;
-            output.positionCS = input.positionCS;
-            output.positionWS = input.interp0.xyz;
-            output.texCoord0 = input.interp1.xyzw;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Graph
-
-            // Graph Properties
-            CBUFFER_START(UnityPerMaterial)
-        float4 _Color;
-        float _NoiseScale;
-        float _NoiseStrenght;
-        float _CutOffHeight;
-        float _EdgeHeight;
-        float4 _ColorShift;
-        float _Shift;
-        CBUFFER_END
-
-        // Object and Global properties
-
-            // Graph Functions
-            
-        void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
-        {
-            Out = UV * Tiling + Offset;
-        }
-
-
-        inline float Unity_SimpleNoise_RandomValue_float (float2 uv)
-        {
-            return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
-        }
-
-        inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
-        {
-            return (1.0-t)*a + (t*b);
-        }
-
-
-        inline float Unity_SimpleNoise_ValueNoise_float (float2 uv)
-        {
-            float2 i = floor(uv);
-            float2 f = frac(uv);
-            f = f * f * (3.0 - 2.0 * f);
-
-            uv = abs(frac(uv) - 0.5);
-            float2 c0 = i + float2(0.0, 0.0);
-            float2 c1 = i + float2(1.0, 0.0);
-            float2 c2 = i + float2(0.0, 1.0);
-            float2 c3 = i + float2(1.0, 1.0);
-            float r0 = Unity_SimpleNoise_RandomValue_float(c0);
-            float r1 = Unity_SimpleNoise_RandomValue_float(c1);
-            float r2 = Unity_SimpleNoise_RandomValue_float(c2);
-            float r3 = Unity_SimpleNoise_RandomValue_float(c3);
-
-            float bottomOfGrid = Unity_SimpleNnoise_Interpolate_float(r0, r1, f.x);
-            float topOfGrid = Unity_SimpleNnoise_Interpolate_float(r2, r3, f.x);
-            float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
-            return t;
-        }
-        void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
-        {
-            float t = 0.0;
-
-            float freq = pow(2.0, float(0));
-            float amp = pow(0.5, float(3-0));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(1));
-            amp = pow(0.5, float(3-1));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(2));
-            amp = pow(0.5, float(3-2));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            Out = t;
-        }
-
-        void Unity_Negate_float(float In, out float Out)
-        {
-            Out = -1 * In;
-        }
-
-        void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
-        {
-            Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-
-        void Unity_Step_float(float Edge, float In, out float Out)
-        {
-            Out = step(Edge, In);
-        }
-
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
-        void Unity_InverseLerp_float(float A, float B, float T, out float Out)
-        {
-            Out = (T - A)/(B - A);
-        }
-
-            // Graph Vertex
-            struct VertexDescription
-        {
-            float3 Position;
-            float3 Normal;
-            float3 Tangent;
-        };
-
-        VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
-        {
-            VertexDescription description = (VertexDescription)0;
-            description.Position = IN.ObjectSpacePosition;
-            description.Normal = IN.ObjectSpaceNormal;
-            description.Tangent = IN.ObjectSpaceTangent;
-            return description;
-        }
-
-            // Graph Pixel
-            struct SurfaceDescription
-        {
-            float3 BaseColor;
-            float Alpha;
-            float AlphaClipThreshold;
-        };
-
-        SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
-        {
-            SurfaceDescription surface = (SurfaceDescription)0;
-            float _Split_1103c935c6a4468ab421e86871b91930_R_1 = IN.WorldSpacePosition[0];
-            float _Split_1103c935c6a4468ab421e86871b91930_G_2 = IN.WorldSpacePosition[1];
-            float _Split_1103c935c6a4468ab421e86871b91930_B_3 = IN.WorldSpacePosition[2];
-            float _Split_1103c935c6a4468ab421e86871b91930_A_4 = 0;
-            float _Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0 = _Shift;
-            float2 _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0.xx), _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3);
-            float _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0 = _NoiseScale;
-            float _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2;
-            Unity_SimpleNoise_float(_TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3, _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0, _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2);
-            float _Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0 = _NoiseStrenght;
-            float _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1;
-            Unity_Negate_float(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float2 _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0 = float2(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float _Remap_d685bc1aa488497f91dc571549adae5f_Out_3;
-            Unity_Remap_float(_SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2, float2 (0, 1), _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0, _Remap_d685bc1aa488497f91dc571549adae5f_Out_3);
-            float _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0 = _CutOffHeight;
-            float _Add_86130490412e4e3589fd1fc3a763a266_Out_2;
-            Unity_Add_float(_Remap_d685bc1aa488497f91dc571549adae5f_Out_3, _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0, _Add_86130490412e4e3589fd1fc3a763a266_Out_2);
-            float _Step_bc5e1ec54eff474bbc022279af008206_Out_2;
-            Unity_Step_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_bc5e1ec54eff474bbc022279af008206_Out_2);
-            float4 _Property_18efa9b9e0854782a74518ffec19fe62_Out_0 = _Color;
-            float4 _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2;
-            Unity_Multiply_float((_Step_bc5e1ec54eff474bbc022279af008206_Out_2.xxxx), _Property_18efa9b9e0854782a74518ffec19fe62_Out_0, _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2);
-            float _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            Unity_InverseLerp_float(0, 1, _Step_bc5e1ec54eff474bbc022279af008206_Out_2, _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3);
-            surface.BaseColor = (_Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2.xyz);
-            surface.Alpha = _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            surface.AlphaClipThreshold = 0.5;
-            return surface;
-        }
-
-            // --------------------------------------------------
-            // Build Graph Inputs
-
-            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
-        {
-            VertexDescriptionInputs output;
-            ZERO_INITIALIZE(VertexDescriptionInputs, output);
-
-            output.ObjectSpaceNormal =           input.normalOS;
-            output.ObjectSpaceTangent =          input.tangentOS;
-            output.ObjectSpacePosition =         input.positionOS;
-
-            return output;
-        }
-            SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
-        {
-            SurfaceDescriptionInputs output;
-            ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
-
-
-
-
-
-            output.WorldSpacePosition =          input.positionWS;
-            output.uv0 =                         input.texCoord0;
-        #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
-        #else
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-        #endif
-        #undef BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Main
-
-            #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/PBR2DPass.hlsl"
-
-            ENDHLSL
-        }
     }
-    SubShader
-    {
-        Tags
-        {
-            "RenderPipeline"="UniversalPipeline"
-            "RenderType"="Transparent"
-            "UniversalMaterialType" = "Lit"
-            "Queue"="Transparent"
-        }
-        Pass
-        {
-            Name "Universal Forward"
-            Tags
-            {
-                "LightMode" = "UniversalForward"
-            }
-
-            // Render State
-            Cull Back
-        Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
-        ZTest LEqual
-        ZWrite Off
-
-            // Debug
-            // <None>
-
-            // --------------------------------------------------
-            // Pass
-
-            HLSLPROGRAM
-
-            // Pragmas
-            #pragma target 2.0
-        #pragma only_renderers gles gles3 glcore
-        #pragma multi_compile_instancing
-        #pragma multi_compile_fog
-        #pragma vertex vert
-        #pragma fragment frag
-
-            // DotsInstancingOptions: <None>
-            // HybridV1InjectedBuiltinProperties: <None>
-
-            // Keywords
-            #pragma multi_compile _ _SCREEN_SPACE_OCCLUSION
-        #pragma multi_compile _ LIGHTMAP_ON
-        #pragma multi_compile _ DIRLIGHTMAP_COMBINED
-        #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
-        #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
-        #pragma multi_compile _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS _ADDITIONAL_OFF
-        #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
-        #pragma multi_compile _ _SHADOWS_SOFT
-        #pragma multi_compile _ LIGHTMAP_SHADOW_MIXING
-        #pragma multi_compile _ SHADOWS_SHADOWMASK
-            // GraphKeywords: <None>
-
-            // Defines
-            #define _SURFACE_TYPE_TRANSPARENT 1
-            #define _AlphaClip 1
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
-            #define ATTRIBUTES_NEED_NORMAL
-            #define ATTRIBUTES_NEED_TANGENT
-            #define ATTRIBUTES_NEED_TEXCOORD0
-            #define ATTRIBUTES_NEED_TEXCOORD1
-            #define VARYINGS_NEED_POSITION_WS
-            #define VARYINGS_NEED_NORMAL_WS
-            #define VARYINGS_NEED_TANGENT_WS
-            #define VARYINGS_NEED_TEXCOORD0
-            #define VARYINGS_NEED_VIEWDIRECTION_WS
-            #define VARYINGS_NEED_FOG_AND_VERTEX_LIGHT
-            #define FEATURES_GRAPH_VERTEX
-            /* WARNING: $splice Could not find named fragment 'PassInstancing' */
-            #define SHADERPASS SHADERPASS_FORWARD
-            /* WARNING: $splice Could not find named fragment 'DotsInstancingVars' */
-
-            // Includes
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
-
-            // --------------------------------------------------
-            // Structs and Packing
-
-            struct Attributes
-        {
-            float3 positionOS : POSITION;
-            float3 normalOS : NORMAL;
-            float4 tangentOS : TANGENT;
-            float4 uv0 : TEXCOORD0;
-            float4 uv1 : TEXCOORD1;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : INSTANCEID_SEMANTIC;
-            #endif
-        };
-        struct Varyings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 positionWS;
-            float3 normalWS;
-            float4 tangentWS;
-            float4 texCoord0;
-            float3 viewDirectionWS;
-            #if defined(LIGHTMAP_ON)
-            float2 lightmapUV;
-            #endif
-            #if !defined(LIGHTMAP_ON)
-            float3 sh;
-            #endif
-            float4 fogFactorAndVertexLight;
-            float4 shadowCoord;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-        struct SurfaceDescriptionInputs
-        {
-            float3 TangentSpaceNormal;
-            float3 WorldSpacePosition;
-            float4 uv0;
-        };
-        struct VertexDescriptionInputs
-        {
-            float3 ObjectSpaceNormal;
-            float3 ObjectSpaceTangent;
-            float3 ObjectSpacePosition;
-        };
-        struct PackedVaryings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 interp0 : TEXCOORD0;
-            float3 interp1 : TEXCOORD1;
-            float4 interp2 : TEXCOORD2;
-            float4 interp3 : TEXCOORD3;
-            float3 interp4 : TEXCOORD4;
-            #if defined(LIGHTMAP_ON)
-            float2 interp5 : TEXCOORD5;
-            #endif
-            #if !defined(LIGHTMAP_ON)
-            float3 interp6 : TEXCOORD6;
-            #endif
-            float4 interp7 : TEXCOORD7;
-            float4 interp8 : TEXCOORD8;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-
-            PackedVaryings PackVaryings (Varyings input)
-        {
-            PackedVaryings output;
-            output.positionCS = input.positionCS;
-            output.interp0.xyz =  input.positionWS;
-            output.interp1.xyz =  input.normalWS;
-            output.interp2.xyzw =  input.tangentWS;
-            output.interp3.xyzw =  input.texCoord0;
-            output.interp4.xyz =  input.viewDirectionWS;
-            #if defined(LIGHTMAP_ON)
-            output.interp5.xy =  input.lightmapUV;
-            #endif
-            #if !defined(LIGHTMAP_ON)
-            output.interp6.xyz =  input.sh;
-            #endif
-            output.interp7.xyzw =  input.fogFactorAndVertexLight;
-            output.interp8.xyzw =  input.shadowCoord;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-        Varyings UnpackVaryings (PackedVaryings input)
-        {
-            Varyings output;
-            output.positionCS = input.positionCS;
-            output.positionWS = input.interp0.xyz;
-            output.normalWS = input.interp1.xyz;
-            output.tangentWS = input.interp2.xyzw;
-            output.texCoord0 = input.interp3.xyzw;
-            output.viewDirectionWS = input.interp4.xyz;
-            #if defined(LIGHTMAP_ON)
-            output.lightmapUV = input.interp5.xy;
-            #endif
-            #if !defined(LIGHTMAP_ON)
-            output.sh = input.interp6.xyz;
-            #endif
-            output.fogFactorAndVertexLight = input.interp7.xyzw;
-            output.shadowCoord = input.interp8.xyzw;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Graph
-
-            // Graph Properties
-            CBUFFER_START(UnityPerMaterial)
-        float4 _Color;
-        float _NoiseScale;
-        float _NoiseStrenght;
-        float _CutOffHeight;
-        float _EdgeHeight;
-        float4 _ColorShift;
-        float _Shift;
-        CBUFFER_END
-
-        // Object and Global properties
-
-            // Graph Functions
-            
-        void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
-        {
-            Out = UV * Tiling + Offset;
-        }
-
-
-        inline float Unity_SimpleNoise_RandomValue_float (float2 uv)
-        {
-            return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
-        }
-
-        inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
-        {
-            return (1.0-t)*a + (t*b);
-        }
-
-
-        inline float Unity_SimpleNoise_ValueNoise_float (float2 uv)
-        {
-            float2 i = floor(uv);
-            float2 f = frac(uv);
-            f = f * f * (3.0 - 2.0 * f);
-
-            uv = abs(frac(uv) - 0.5);
-            float2 c0 = i + float2(0.0, 0.0);
-            float2 c1 = i + float2(1.0, 0.0);
-            float2 c2 = i + float2(0.0, 1.0);
-            float2 c3 = i + float2(1.0, 1.0);
-            float r0 = Unity_SimpleNoise_RandomValue_float(c0);
-            float r1 = Unity_SimpleNoise_RandomValue_float(c1);
-            float r2 = Unity_SimpleNoise_RandomValue_float(c2);
-            float r3 = Unity_SimpleNoise_RandomValue_float(c3);
-
-            float bottomOfGrid = Unity_SimpleNnoise_Interpolate_float(r0, r1, f.x);
-            float topOfGrid = Unity_SimpleNnoise_Interpolate_float(r2, r3, f.x);
-            float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
-            return t;
-        }
-        void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
-        {
-            float t = 0.0;
-
-            float freq = pow(2.0, float(0));
-            float amp = pow(0.5, float(3-0));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(1));
-            amp = pow(0.5, float(3-1));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(2));
-            amp = pow(0.5, float(3-2));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            Out = t;
-        }
-
-        void Unity_Negate_float(float In, out float Out)
-        {
-            Out = -1 * In;
-        }
-
-        void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
-        {
-            Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-
-        void Unity_Step_float(float Edge, float In, out float Out)
-        {
-            Out = step(Edge, In);
-        }
-
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
-        void Unity_InverseLerp_float(float A, float B, float T, out float Out)
-        {
-            Out = (T - A)/(B - A);
-        }
-
-            // Graph Vertex
-            struct VertexDescription
-        {
-            float3 Position;
-            float3 Normal;
-            float3 Tangent;
-        };
-
-        VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
-        {
-            VertexDescription description = (VertexDescription)0;
-            description.Position = IN.ObjectSpacePosition;
-            description.Normal = IN.ObjectSpaceNormal;
-            description.Tangent = IN.ObjectSpaceTangent;
-            return description;
-        }
-
-            // Graph Pixel
-            struct SurfaceDescription
-        {
-            float3 BaseColor;
-            float3 NormalTS;
-            float3 Emission;
-            float Metallic;
-            float Smoothness;
-            float Occlusion;
-            float Alpha;
-            float AlphaClipThreshold;
-        };
-
-        SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
-        {
-            SurfaceDescription surface = (SurfaceDescription)0;
-            float _Split_1103c935c6a4468ab421e86871b91930_R_1 = IN.WorldSpacePosition[0];
-            float _Split_1103c935c6a4468ab421e86871b91930_G_2 = IN.WorldSpacePosition[1];
-            float _Split_1103c935c6a4468ab421e86871b91930_B_3 = IN.WorldSpacePosition[2];
-            float _Split_1103c935c6a4468ab421e86871b91930_A_4 = 0;
-            float _Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0 = _Shift;
-            float2 _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0.xx), _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3);
-            float _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0 = _NoiseScale;
-            float _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2;
-            Unity_SimpleNoise_float(_TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3, _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0, _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2);
-            float _Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0 = _NoiseStrenght;
-            float _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1;
-            Unity_Negate_float(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float2 _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0 = float2(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float _Remap_d685bc1aa488497f91dc571549adae5f_Out_3;
-            Unity_Remap_float(_SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2, float2 (0, 1), _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0, _Remap_d685bc1aa488497f91dc571549adae5f_Out_3);
-            float _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0 = _CutOffHeight;
-            float _Add_86130490412e4e3589fd1fc3a763a266_Out_2;
-            Unity_Add_float(_Remap_d685bc1aa488497f91dc571549adae5f_Out_3, _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0, _Add_86130490412e4e3589fd1fc3a763a266_Out_2);
-            float _Step_bc5e1ec54eff474bbc022279af008206_Out_2;
-            Unity_Step_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_bc5e1ec54eff474bbc022279af008206_Out_2);
-            float4 _Property_18efa9b9e0854782a74518ffec19fe62_Out_0 = _Color;
-            float4 _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2;
-            Unity_Multiply_float((_Step_bc5e1ec54eff474bbc022279af008206_Out_2.xxxx), _Property_18efa9b9e0854782a74518ffec19fe62_Out_0, _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2);
-            float _Property_844d526415994a5492317b7bcebd737e_Out_0 = _EdgeHeight;
-            float _Add_17593e632e7643ff944f74055cb21fe9_Out_2;
-            Unity_Add_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Property_844d526415994a5492317b7bcebd737e_Out_0, _Add_17593e632e7643ff944f74055cb21fe9_Out_2);
-            float _Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2;
-            Unity_Step_float(_Add_17593e632e7643ff944f74055cb21fe9_Out_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2);
-            float4 _Property_32ce72f6875941f3808e74c876168054_Out_0 = _ColorShift;
-            float4 _Multiply_cdf67173af2446438fe178304d51218d_Out_2;
-            Unity_Multiply_float((_Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2.xxxx), _Property_32ce72f6875941f3808e74c876168054_Out_0, _Multiply_cdf67173af2446438fe178304d51218d_Out_2);
-            float _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            Unity_InverseLerp_float(0, 1, _Step_bc5e1ec54eff474bbc022279af008206_Out_2, _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3);
-            surface.BaseColor = (_Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2.xyz);
-            surface.NormalTS = IN.TangentSpaceNormal;
-            surface.Emission = (_Multiply_cdf67173af2446438fe178304d51218d_Out_2.xyz);
-            surface.Metallic = 0;
-            surface.Smoothness = 0.5;
-            surface.Occlusion = 1;
-            surface.Alpha = _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            surface.AlphaClipThreshold = 0.5;
-            return surface;
-        }
-
-            // --------------------------------------------------
-            // Build Graph Inputs
-
-            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
-        {
-            VertexDescriptionInputs output;
-            ZERO_INITIALIZE(VertexDescriptionInputs, output);
-
-            output.ObjectSpaceNormal =           input.normalOS;
-            output.ObjectSpaceTangent =          input.tangentOS;
-            output.ObjectSpacePosition =         input.positionOS;
-
-            return output;
-        }
-            SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
-        {
-            SurfaceDescriptionInputs output;
-            ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
-
-
-
-            output.TangentSpaceNormal =          float3(0.0f, 0.0f, 1.0f);
-
-
-            output.WorldSpacePosition =          input.positionWS;
-            output.uv0 =                         input.texCoord0;
-        #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
-        #else
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-        #endif
-        #undef BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Main
-
-            #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/PBRForwardPass.hlsl"
-
-            ENDHLSL
-        }
-        Pass
-        {
-            Name "ShadowCaster"
-            Tags
-            {
-                "LightMode" = "ShadowCaster"
-            }
-
-            // Render State
-            Cull Back
-        Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
-        ZTest LEqual
-        ZWrite On
-        ColorMask 0
-
-            // Debug
-            // <None>
-
-            // --------------------------------------------------
-            // Pass
-
-            HLSLPROGRAM
-
-            // Pragmas
-            #pragma target 2.0
-        #pragma only_renderers gles gles3 glcore
-        #pragma multi_compile_instancing
-        #pragma vertex vert
-        #pragma fragment frag
-
-            // DotsInstancingOptions: <None>
-            // HybridV1InjectedBuiltinProperties: <None>
-
-            // Keywords
-            // PassKeywords: <None>
-            // GraphKeywords: <None>
-
-            // Defines
-            #define _SURFACE_TYPE_TRANSPARENT 1
-            #define _AlphaClip 1
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
-            #define ATTRIBUTES_NEED_NORMAL
-            #define ATTRIBUTES_NEED_TANGENT
-            #define ATTRIBUTES_NEED_TEXCOORD0
-            #define VARYINGS_NEED_POSITION_WS
-            #define VARYINGS_NEED_TEXCOORD0
-            #define FEATURES_GRAPH_VERTEX
-            /* WARNING: $splice Could not find named fragment 'PassInstancing' */
-            #define SHADERPASS SHADERPASS_SHADOWCASTER
-            /* WARNING: $splice Could not find named fragment 'DotsInstancingVars' */
-
-            // Includes
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
-
-            // --------------------------------------------------
-            // Structs and Packing
-
-            struct Attributes
-        {
-            float3 positionOS : POSITION;
-            float3 normalOS : NORMAL;
-            float4 tangentOS : TANGENT;
-            float4 uv0 : TEXCOORD0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : INSTANCEID_SEMANTIC;
-            #endif
-        };
-        struct Varyings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 positionWS;
-            float4 texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-        struct SurfaceDescriptionInputs
-        {
-            float3 WorldSpacePosition;
-            float4 uv0;
-        };
-        struct VertexDescriptionInputs
-        {
-            float3 ObjectSpaceNormal;
-            float3 ObjectSpaceTangent;
-            float3 ObjectSpacePosition;
-        };
-        struct PackedVaryings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 interp0 : TEXCOORD0;
-            float4 interp1 : TEXCOORD1;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-
-            PackedVaryings PackVaryings (Varyings input)
-        {
-            PackedVaryings output;
-            output.positionCS = input.positionCS;
-            output.interp0.xyz =  input.positionWS;
-            output.interp1.xyzw =  input.texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-        Varyings UnpackVaryings (PackedVaryings input)
-        {
-            Varyings output;
-            output.positionCS = input.positionCS;
-            output.positionWS = input.interp0.xyz;
-            output.texCoord0 = input.interp1.xyzw;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Graph
-
-            // Graph Properties
-            CBUFFER_START(UnityPerMaterial)
-        float4 _Color;
-        float _NoiseScale;
-        float _NoiseStrenght;
-        float _CutOffHeight;
-        float _EdgeHeight;
-        float4 _ColorShift;
-        float _Shift;
-        CBUFFER_END
-
-        // Object and Global properties
-
-            // Graph Functions
-            
-        void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
-        {
-            Out = UV * Tiling + Offset;
-        }
-
-
-        inline float Unity_SimpleNoise_RandomValue_float (float2 uv)
-        {
-            return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
-        }
-
-        inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
-        {
-            return (1.0-t)*a + (t*b);
-        }
-
-
-        inline float Unity_SimpleNoise_ValueNoise_float (float2 uv)
-        {
-            float2 i = floor(uv);
-            float2 f = frac(uv);
-            f = f * f * (3.0 - 2.0 * f);
-
-            uv = abs(frac(uv) - 0.5);
-            float2 c0 = i + float2(0.0, 0.0);
-            float2 c1 = i + float2(1.0, 0.0);
-            float2 c2 = i + float2(0.0, 1.0);
-            float2 c3 = i + float2(1.0, 1.0);
-            float r0 = Unity_SimpleNoise_RandomValue_float(c0);
-            float r1 = Unity_SimpleNoise_RandomValue_float(c1);
-            float r2 = Unity_SimpleNoise_RandomValue_float(c2);
-            float r3 = Unity_SimpleNoise_RandomValue_float(c3);
-
-            float bottomOfGrid = Unity_SimpleNnoise_Interpolate_float(r0, r1, f.x);
-            float topOfGrid = Unity_SimpleNnoise_Interpolate_float(r2, r3, f.x);
-            float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
-            return t;
-        }
-        void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
-        {
-            float t = 0.0;
-
-            float freq = pow(2.0, float(0));
-            float amp = pow(0.5, float(3-0));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(1));
-            amp = pow(0.5, float(3-1));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(2));
-            amp = pow(0.5, float(3-2));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            Out = t;
-        }
-
-        void Unity_Negate_float(float In, out float Out)
-        {
-            Out = -1 * In;
-        }
-
-        void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
-        {
-            Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-
-        void Unity_Step_float(float Edge, float In, out float Out)
-        {
-            Out = step(Edge, In);
-        }
-
-        void Unity_InverseLerp_float(float A, float B, float T, out float Out)
-        {
-            Out = (T - A)/(B - A);
-        }
-
-            // Graph Vertex
-            struct VertexDescription
-        {
-            float3 Position;
-            float3 Normal;
-            float3 Tangent;
-        };
-
-        VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
-        {
-            VertexDescription description = (VertexDescription)0;
-            description.Position = IN.ObjectSpacePosition;
-            description.Normal = IN.ObjectSpaceNormal;
-            description.Tangent = IN.ObjectSpaceTangent;
-            return description;
-        }
-
-            // Graph Pixel
-            struct SurfaceDescription
-        {
-            float Alpha;
-            float AlphaClipThreshold;
-        };
-
-        SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
-        {
-            SurfaceDescription surface = (SurfaceDescription)0;
-            float _Split_1103c935c6a4468ab421e86871b91930_R_1 = IN.WorldSpacePosition[0];
-            float _Split_1103c935c6a4468ab421e86871b91930_G_2 = IN.WorldSpacePosition[1];
-            float _Split_1103c935c6a4468ab421e86871b91930_B_3 = IN.WorldSpacePosition[2];
-            float _Split_1103c935c6a4468ab421e86871b91930_A_4 = 0;
-            float _Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0 = _Shift;
-            float2 _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0.xx), _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3);
-            float _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0 = _NoiseScale;
-            float _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2;
-            Unity_SimpleNoise_float(_TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3, _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0, _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2);
-            float _Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0 = _NoiseStrenght;
-            float _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1;
-            Unity_Negate_float(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float2 _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0 = float2(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float _Remap_d685bc1aa488497f91dc571549adae5f_Out_3;
-            Unity_Remap_float(_SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2, float2 (0, 1), _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0, _Remap_d685bc1aa488497f91dc571549adae5f_Out_3);
-            float _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0 = _CutOffHeight;
-            float _Add_86130490412e4e3589fd1fc3a763a266_Out_2;
-            Unity_Add_float(_Remap_d685bc1aa488497f91dc571549adae5f_Out_3, _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0, _Add_86130490412e4e3589fd1fc3a763a266_Out_2);
-            float _Step_bc5e1ec54eff474bbc022279af008206_Out_2;
-            Unity_Step_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_bc5e1ec54eff474bbc022279af008206_Out_2);
-            float _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            Unity_InverseLerp_float(0, 1, _Step_bc5e1ec54eff474bbc022279af008206_Out_2, _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3);
-            surface.Alpha = _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            surface.AlphaClipThreshold = 0.5;
-            return surface;
-        }
-
-            // --------------------------------------------------
-            // Build Graph Inputs
-
-            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
-        {
-            VertexDescriptionInputs output;
-            ZERO_INITIALIZE(VertexDescriptionInputs, output);
-
-            output.ObjectSpaceNormal =           input.normalOS;
-            output.ObjectSpaceTangent =          input.tangentOS;
-            output.ObjectSpacePosition =         input.positionOS;
-
-            return output;
-        }
-            SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
-        {
-            SurfaceDescriptionInputs output;
-            ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
-
-
-
-
-
-            output.WorldSpacePosition =          input.positionWS;
-            output.uv0 =                         input.texCoord0;
-        #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
-        #else
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-        #endif
-        #undef BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Main
-
-            #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShadowCasterPass.hlsl"
-
-            ENDHLSL
-        }
-        Pass
-        {
-            Name "DepthOnly"
-            Tags
-            {
-                "LightMode" = "DepthOnly"
-            }
-
-            // Render State
-            Cull Back
-        Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
-        ZTest LEqual
-        ZWrite On
-        ColorMask 0
-
-            // Debug
-            // <None>
-
-            // --------------------------------------------------
-            // Pass
-
-            HLSLPROGRAM
-
-            // Pragmas
-            #pragma target 2.0
-        #pragma only_renderers gles gles3 glcore
-        #pragma multi_compile_instancing
-        #pragma vertex vert
-        #pragma fragment frag
-
-            // DotsInstancingOptions: <None>
-            // HybridV1InjectedBuiltinProperties: <None>
-
-            // Keywords
-            // PassKeywords: <None>
-            // GraphKeywords: <None>
-
-            // Defines
-            #define _SURFACE_TYPE_TRANSPARENT 1
-            #define _AlphaClip 1
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
-            #define ATTRIBUTES_NEED_NORMAL
-            #define ATTRIBUTES_NEED_TANGENT
-            #define ATTRIBUTES_NEED_TEXCOORD0
-            #define VARYINGS_NEED_POSITION_WS
-            #define VARYINGS_NEED_TEXCOORD0
-            #define FEATURES_GRAPH_VERTEX
-            /* WARNING: $splice Could not find named fragment 'PassInstancing' */
-            #define SHADERPASS SHADERPASS_DEPTHONLY
-            /* WARNING: $splice Could not find named fragment 'DotsInstancingVars' */
-
-            // Includes
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
-
-            // --------------------------------------------------
-            // Structs and Packing
-
-            struct Attributes
-        {
-            float3 positionOS : POSITION;
-            float3 normalOS : NORMAL;
-            float4 tangentOS : TANGENT;
-            float4 uv0 : TEXCOORD0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : INSTANCEID_SEMANTIC;
-            #endif
-        };
-        struct Varyings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 positionWS;
-            float4 texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-        struct SurfaceDescriptionInputs
-        {
-            float3 WorldSpacePosition;
-            float4 uv0;
-        };
-        struct VertexDescriptionInputs
-        {
-            float3 ObjectSpaceNormal;
-            float3 ObjectSpaceTangent;
-            float3 ObjectSpacePosition;
-        };
-        struct PackedVaryings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 interp0 : TEXCOORD0;
-            float4 interp1 : TEXCOORD1;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-
-            PackedVaryings PackVaryings (Varyings input)
-        {
-            PackedVaryings output;
-            output.positionCS = input.positionCS;
-            output.interp0.xyz =  input.positionWS;
-            output.interp1.xyzw =  input.texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-        Varyings UnpackVaryings (PackedVaryings input)
-        {
-            Varyings output;
-            output.positionCS = input.positionCS;
-            output.positionWS = input.interp0.xyz;
-            output.texCoord0 = input.interp1.xyzw;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Graph
-
-            // Graph Properties
-            CBUFFER_START(UnityPerMaterial)
-        float4 _Color;
-        float _NoiseScale;
-        float _NoiseStrenght;
-        float _CutOffHeight;
-        float _EdgeHeight;
-        float4 _ColorShift;
-        float _Shift;
-        CBUFFER_END
-
-        // Object and Global properties
-
-            // Graph Functions
-            
-        void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
-        {
-            Out = UV * Tiling + Offset;
-        }
-
-
-        inline float Unity_SimpleNoise_RandomValue_float (float2 uv)
-        {
-            return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
-        }
-
-        inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
-        {
-            return (1.0-t)*a + (t*b);
-        }
-
-
-        inline float Unity_SimpleNoise_ValueNoise_float (float2 uv)
-        {
-            float2 i = floor(uv);
-            float2 f = frac(uv);
-            f = f * f * (3.0 - 2.0 * f);
-
-            uv = abs(frac(uv) - 0.5);
-            float2 c0 = i + float2(0.0, 0.0);
-            float2 c1 = i + float2(1.0, 0.0);
-            float2 c2 = i + float2(0.0, 1.0);
-            float2 c3 = i + float2(1.0, 1.0);
-            float r0 = Unity_SimpleNoise_RandomValue_float(c0);
-            float r1 = Unity_SimpleNoise_RandomValue_float(c1);
-            float r2 = Unity_SimpleNoise_RandomValue_float(c2);
-            float r3 = Unity_SimpleNoise_RandomValue_float(c3);
-
-            float bottomOfGrid = Unity_SimpleNnoise_Interpolate_float(r0, r1, f.x);
-            float topOfGrid = Unity_SimpleNnoise_Interpolate_float(r2, r3, f.x);
-            float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
-            return t;
-        }
-        void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
-        {
-            float t = 0.0;
-
-            float freq = pow(2.0, float(0));
-            float amp = pow(0.5, float(3-0));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(1));
-            amp = pow(0.5, float(3-1));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(2));
-            amp = pow(0.5, float(3-2));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            Out = t;
-        }
-
-        void Unity_Negate_float(float In, out float Out)
-        {
-            Out = -1 * In;
-        }
-
-        void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
-        {
-            Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-
-        void Unity_Step_float(float Edge, float In, out float Out)
-        {
-            Out = step(Edge, In);
-        }
-
-        void Unity_InverseLerp_float(float A, float B, float T, out float Out)
-        {
-            Out = (T - A)/(B - A);
-        }
-
-            // Graph Vertex
-            struct VertexDescription
-        {
-            float3 Position;
-            float3 Normal;
-            float3 Tangent;
-        };
-
-        VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
-        {
-            VertexDescription description = (VertexDescription)0;
-            description.Position = IN.ObjectSpacePosition;
-            description.Normal = IN.ObjectSpaceNormal;
-            description.Tangent = IN.ObjectSpaceTangent;
-            return description;
-        }
-
-            // Graph Pixel
-            struct SurfaceDescription
-        {
-            float Alpha;
-            float AlphaClipThreshold;
-        };
-
-        SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
-        {
-            SurfaceDescription surface = (SurfaceDescription)0;
-            float _Split_1103c935c6a4468ab421e86871b91930_R_1 = IN.WorldSpacePosition[0];
-            float _Split_1103c935c6a4468ab421e86871b91930_G_2 = IN.WorldSpacePosition[1];
-            float _Split_1103c935c6a4468ab421e86871b91930_B_3 = IN.WorldSpacePosition[2];
-            float _Split_1103c935c6a4468ab421e86871b91930_A_4 = 0;
-            float _Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0 = _Shift;
-            float2 _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0.xx), _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3);
-            float _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0 = _NoiseScale;
-            float _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2;
-            Unity_SimpleNoise_float(_TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3, _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0, _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2);
-            float _Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0 = _NoiseStrenght;
-            float _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1;
-            Unity_Negate_float(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float2 _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0 = float2(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float _Remap_d685bc1aa488497f91dc571549adae5f_Out_3;
-            Unity_Remap_float(_SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2, float2 (0, 1), _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0, _Remap_d685bc1aa488497f91dc571549adae5f_Out_3);
-            float _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0 = _CutOffHeight;
-            float _Add_86130490412e4e3589fd1fc3a763a266_Out_2;
-            Unity_Add_float(_Remap_d685bc1aa488497f91dc571549adae5f_Out_3, _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0, _Add_86130490412e4e3589fd1fc3a763a266_Out_2);
-            float _Step_bc5e1ec54eff474bbc022279af008206_Out_2;
-            Unity_Step_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_bc5e1ec54eff474bbc022279af008206_Out_2);
-            float _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            Unity_InverseLerp_float(0, 1, _Step_bc5e1ec54eff474bbc022279af008206_Out_2, _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3);
-            surface.Alpha = _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            surface.AlphaClipThreshold = 0.5;
-            return surface;
-        }
-
-            // --------------------------------------------------
-            // Build Graph Inputs
-
-            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
-        {
-            VertexDescriptionInputs output;
-            ZERO_INITIALIZE(VertexDescriptionInputs, output);
-
-            output.ObjectSpaceNormal =           input.normalOS;
-            output.ObjectSpaceTangent =          input.tangentOS;
-            output.ObjectSpacePosition =         input.positionOS;
-
-            return output;
-        }
-            SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
-        {
-            SurfaceDescriptionInputs output;
-            ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
-
-
-
-
-
-            output.WorldSpacePosition =          input.positionWS;
-            output.uv0 =                         input.texCoord0;
-        #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
-        #else
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-        #endif
-        #undef BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Main
-
-            #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/DepthOnlyPass.hlsl"
-
-            ENDHLSL
-        }
-        Pass
-        {
-            Name "DepthNormals"
-            Tags
-            {
-                "LightMode" = "DepthNormals"
-            }
-
-            // Render State
-            Cull Back
-        Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
-        ZTest LEqual
-        ZWrite On
-
-            // Debug
-            // <None>
-
-            // --------------------------------------------------
-            // Pass
-
-            HLSLPROGRAM
-
-            // Pragmas
-            #pragma target 2.0
-        #pragma only_renderers gles gles3 glcore
-        #pragma multi_compile_instancing
-        #pragma vertex vert
-        #pragma fragment frag
-
-            // DotsInstancingOptions: <None>
-            // HybridV1InjectedBuiltinProperties: <None>
-
-            // Keywords
-            // PassKeywords: <None>
-            // GraphKeywords: <None>
-
-            // Defines
-            #define _SURFACE_TYPE_TRANSPARENT 1
-            #define _AlphaClip 1
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
-            #define ATTRIBUTES_NEED_NORMAL
-            #define ATTRIBUTES_NEED_TANGENT
-            #define ATTRIBUTES_NEED_TEXCOORD0
-            #define ATTRIBUTES_NEED_TEXCOORD1
-            #define VARYINGS_NEED_POSITION_WS
-            #define VARYINGS_NEED_NORMAL_WS
-            #define VARYINGS_NEED_TANGENT_WS
-            #define VARYINGS_NEED_TEXCOORD0
-            #define FEATURES_GRAPH_VERTEX
-            /* WARNING: $splice Could not find named fragment 'PassInstancing' */
-            #define SHADERPASS SHADERPASS_DEPTHNORMALSONLY
-            /* WARNING: $splice Could not find named fragment 'DotsInstancingVars' */
-
-            // Includes
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
-
-            // --------------------------------------------------
-            // Structs and Packing
-
-            struct Attributes
-        {
-            float3 positionOS : POSITION;
-            float3 normalOS : NORMAL;
-            float4 tangentOS : TANGENT;
-            float4 uv0 : TEXCOORD0;
-            float4 uv1 : TEXCOORD1;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : INSTANCEID_SEMANTIC;
-            #endif
-        };
-        struct Varyings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 positionWS;
-            float3 normalWS;
-            float4 tangentWS;
-            float4 texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-        struct SurfaceDescriptionInputs
-        {
-            float3 TangentSpaceNormal;
-            float3 WorldSpacePosition;
-            float4 uv0;
-        };
-        struct VertexDescriptionInputs
-        {
-            float3 ObjectSpaceNormal;
-            float3 ObjectSpaceTangent;
-            float3 ObjectSpacePosition;
-        };
-        struct PackedVaryings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 interp0 : TEXCOORD0;
-            float3 interp1 : TEXCOORD1;
-            float4 interp2 : TEXCOORD2;
-            float4 interp3 : TEXCOORD3;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-
-            PackedVaryings PackVaryings (Varyings input)
-        {
-            PackedVaryings output;
-            output.positionCS = input.positionCS;
-            output.interp0.xyz =  input.positionWS;
-            output.interp1.xyz =  input.normalWS;
-            output.interp2.xyzw =  input.tangentWS;
-            output.interp3.xyzw =  input.texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-        Varyings UnpackVaryings (PackedVaryings input)
-        {
-            Varyings output;
-            output.positionCS = input.positionCS;
-            output.positionWS = input.interp0.xyz;
-            output.normalWS = input.interp1.xyz;
-            output.tangentWS = input.interp2.xyzw;
-            output.texCoord0 = input.interp3.xyzw;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Graph
-
-            // Graph Properties
-            CBUFFER_START(UnityPerMaterial)
-        float4 _Color;
-        float _NoiseScale;
-        float _NoiseStrenght;
-        float _CutOffHeight;
-        float _EdgeHeight;
-        float4 _ColorShift;
-        float _Shift;
-        CBUFFER_END
-
-        // Object and Global properties
-
-            // Graph Functions
-            
-        void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
-        {
-            Out = UV * Tiling + Offset;
-        }
-
-
-        inline float Unity_SimpleNoise_RandomValue_float (float2 uv)
-        {
-            return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
-        }
-
-        inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
-        {
-            return (1.0-t)*a + (t*b);
-        }
-
-
-        inline float Unity_SimpleNoise_ValueNoise_float (float2 uv)
-        {
-            float2 i = floor(uv);
-            float2 f = frac(uv);
-            f = f * f * (3.0 - 2.0 * f);
-
-            uv = abs(frac(uv) - 0.5);
-            float2 c0 = i + float2(0.0, 0.0);
-            float2 c1 = i + float2(1.0, 0.0);
-            float2 c2 = i + float2(0.0, 1.0);
-            float2 c3 = i + float2(1.0, 1.0);
-            float r0 = Unity_SimpleNoise_RandomValue_float(c0);
-            float r1 = Unity_SimpleNoise_RandomValue_float(c1);
-            float r2 = Unity_SimpleNoise_RandomValue_float(c2);
-            float r3 = Unity_SimpleNoise_RandomValue_float(c3);
-
-            float bottomOfGrid = Unity_SimpleNnoise_Interpolate_float(r0, r1, f.x);
-            float topOfGrid = Unity_SimpleNnoise_Interpolate_float(r2, r3, f.x);
-            float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
-            return t;
-        }
-        void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
-        {
-            float t = 0.0;
-
-            float freq = pow(2.0, float(0));
-            float amp = pow(0.5, float(3-0));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(1));
-            amp = pow(0.5, float(3-1));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(2));
-            amp = pow(0.5, float(3-2));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            Out = t;
-        }
-
-        void Unity_Negate_float(float In, out float Out)
-        {
-            Out = -1 * In;
-        }
-
-        void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
-        {
-            Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-
-        void Unity_Step_float(float Edge, float In, out float Out)
-        {
-            Out = step(Edge, In);
-        }
-
-        void Unity_InverseLerp_float(float A, float B, float T, out float Out)
-        {
-            Out = (T - A)/(B - A);
-        }
-
-            // Graph Vertex
-            struct VertexDescription
-        {
-            float3 Position;
-            float3 Normal;
-            float3 Tangent;
-        };
-
-        VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
-        {
-            VertexDescription description = (VertexDescription)0;
-            description.Position = IN.ObjectSpacePosition;
-            description.Normal = IN.ObjectSpaceNormal;
-            description.Tangent = IN.ObjectSpaceTangent;
-            return description;
-        }
-
-            // Graph Pixel
-            struct SurfaceDescription
-        {
-            float3 NormalTS;
-            float Alpha;
-            float AlphaClipThreshold;
-        };
-
-        SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
-        {
-            SurfaceDescription surface = (SurfaceDescription)0;
-            float _Split_1103c935c6a4468ab421e86871b91930_R_1 = IN.WorldSpacePosition[0];
-            float _Split_1103c935c6a4468ab421e86871b91930_G_2 = IN.WorldSpacePosition[1];
-            float _Split_1103c935c6a4468ab421e86871b91930_B_3 = IN.WorldSpacePosition[2];
-            float _Split_1103c935c6a4468ab421e86871b91930_A_4 = 0;
-            float _Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0 = _Shift;
-            float2 _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0.xx), _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3);
-            float _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0 = _NoiseScale;
-            float _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2;
-            Unity_SimpleNoise_float(_TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3, _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0, _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2);
-            float _Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0 = _NoiseStrenght;
-            float _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1;
-            Unity_Negate_float(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float2 _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0 = float2(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float _Remap_d685bc1aa488497f91dc571549adae5f_Out_3;
-            Unity_Remap_float(_SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2, float2 (0, 1), _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0, _Remap_d685bc1aa488497f91dc571549adae5f_Out_3);
-            float _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0 = _CutOffHeight;
-            float _Add_86130490412e4e3589fd1fc3a763a266_Out_2;
-            Unity_Add_float(_Remap_d685bc1aa488497f91dc571549adae5f_Out_3, _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0, _Add_86130490412e4e3589fd1fc3a763a266_Out_2);
-            float _Step_bc5e1ec54eff474bbc022279af008206_Out_2;
-            Unity_Step_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_bc5e1ec54eff474bbc022279af008206_Out_2);
-            float _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            Unity_InverseLerp_float(0, 1, _Step_bc5e1ec54eff474bbc022279af008206_Out_2, _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3);
-            surface.NormalTS = IN.TangentSpaceNormal;
-            surface.Alpha = _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            surface.AlphaClipThreshold = 0.5;
-            return surface;
-        }
-
-            // --------------------------------------------------
-            // Build Graph Inputs
-
-            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
-        {
-            VertexDescriptionInputs output;
-            ZERO_INITIALIZE(VertexDescriptionInputs, output);
-
-            output.ObjectSpaceNormal =           input.normalOS;
-            output.ObjectSpaceTangent =          input.tangentOS;
-            output.ObjectSpacePosition =         input.positionOS;
-
-            return output;
-        }
-            SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
-        {
-            SurfaceDescriptionInputs output;
-            ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
-
-
-
-            output.TangentSpaceNormal =          float3(0.0f, 0.0f, 1.0f);
-
-
-            output.WorldSpacePosition =          input.positionWS;
-            output.uv0 =                         input.texCoord0;
-        #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
-        #else
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-        #endif
-        #undef BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Main
-
-            #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/DepthNormalsOnlyPass.hlsl"
-
-            ENDHLSL
-        }
-        Pass
-        {
-            Name "Meta"
-            Tags
-            {
-                "LightMode" = "Meta"
-            }
-
-            // Render State
-            Cull Off
-
-            // Debug
-            // <None>
-
-            // --------------------------------------------------
-            // Pass
-
-            HLSLPROGRAM
-
-            // Pragmas
-            #pragma target 2.0
-        #pragma only_renderers gles gles3 glcore
-        #pragma vertex vert
-        #pragma fragment frag
-
-            // DotsInstancingOptions: <None>
-            // HybridV1InjectedBuiltinProperties: <None>
-
-            // Keywords
-            #pragma shader_feature _ _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-            // GraphKeywords: <None>
-
-            // Defines
-            #define _SURFACE_TYPE_TRANSPARENT 1
-            #define _AlphaClip 1
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
-            #define ATTRIBUTES_NEED_NORMAL
-            #define ATTRIBUTES_NEED_TANGENT
-            #define ATTRIBUTES_NEED_TEXCOORD0
-            #define ATTRIBUTES_NEED_TEXCOORD1
-            #define ATTRIBUTES_NEED_TEXCOORD2
-            #define VARYINGS_NEED_POSITION_WS
-            #define VARYINGS_NEED_TEXCOORD0
-            #define FEATURES_GRAPH_VERTEX
-            /* WARNING: $splice Could not find named fragment 'PassInstancing' */
-            #define SHADERPASS SHADERPASS_META
-            /* WARNING: $splice Could not find named fragment 'DotsInstancingVars' */
-
-            // Includes
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/MetaInput.hlsl"
-
-            // --------------------------------------------------
-            // Structs and Packing
-
-            struct Attributes
-        {
-            float3 positionOS : POSITION;
-            float3 normalOS : NORMAL;
-            float4 tangentOS : TANGENT;
-            float4 uv0 : TEXCOORD0;
-            float4 uv1 : TEXCOORD1;
-            float4 uv2 : TEXCOORD2;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : INSTANCEID_SEMANTIC;
-            #endif
-        };
-        struct Varyings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 positionWS;
-            float4 texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-        struct SurfaceDescriptionInputs
-        {
-            float3 WorldSpacePosition;
-            float4 uv0;
-        };
-        struct VertexDescriptionInputs
-        {
-            float3 ObjectSpaceNormal;
-            float3 ObjectSpaceTangent;
-            float3 ObjectSpacePosition;
-        };
-        struct PackedVaryings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 interp0 : TEXCOORD0;
-            float4 interp1 : TEXCOORD1;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-
-            PackedVaryings PackVaryings (Varyings input)
-        {
-            PackedVaryings output;
-            output.positionCS = input.positionCS;
-            output.interp0.xyz =  input.positionWS;
-            output.interp1.xyzw =  input.texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-        Varyings UnpackVaryings (PackedVaryings input)
-        {
-            Varyings output;
-            output.positionCS = input.positionCS;
-            output.positionWS = input.interp0.xyz;
-            output.texCoord0 = input.interp1.xyzw;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Graph
-
-            // Graph Properties
-            CBUFFER_START(UnityPerMaterial)
-        float4 _Color;
-        float _NoiseScale;
-        float _NoiseStrenght;
-        float _CutOffHeight;
-        float _EdgeHeight;
-        float4 _ColorShift;
-        float _Shift;
-        CBUFFER_END
-
-        // Object and Global properties
-
-            // Graph Functions
-            
-        void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
-        {
-            Out = UV * Tiling + Offset;
-        }
-
-
-        inline float Unity_SimpleNoise_RandomValue_float (float2 uv)
-        {
-            return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
-        }
-
-        inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
-        {
-            return (1.0-t)*a + (t*b);
-        }
-
-
-        inline float Unity_SimpleNoise_ValueNoise_float (float2 uv)
-        {
-            float2 i = floor(uv);
-            float2 f = frac(uv);
-            f = f * f * (3.0 - 2.0 * f);
-
-            uv = abs(frac(uv) - 0.5);
-            float2 c0 = i + float2(0.0, 0.0);
-            float2 c1 = i + float2(1.0, 0.0);
-            float2 c2 = i + float2(0.0, 1.0);
-            float2 c3 = i + float2(1.0, 1.0);
-            float r0 = Unity_SimpleNoise_RandomValue_float(c0);
-            float r1 = Unity_SimpleNoise_RandomValue_float(c1);
-            float r2 = Unity_SimpleNoise_RandomValue_float(c2);
-            float r3 = Unity_SimpleNoise_RandomValue_float(c3);
-
-            float bottomOfGrid = Unity_SimpleNnoise_Interpolate_float(r0, r1, f.x);
-            float topOfGrid = Unity_SimpleNnoise_Interpolate_float(r2, r3, f.x);
-            float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
-            return t;
-        }
-        void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
-        {
-            float t = 0.0;
-
-            float freq = pow(2.0, float(0));
-            float amp = pow(0.5, float(3-0));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(1));
-            amp = pow(0.5, float(3-1));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(2));
-            amp = pow(0.5, float(3-2));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            Out = t;
-        }
-
-        void Unity_Negate_float(float In, out float Out)
-        {
-            Out = -1 * In;
-        }
-
-        void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
-        {
-            Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-
-        void Unity_Step_float(float Edge, float In, out float Out)
-        {
-            Out = step(Edge, In);
-        }
-
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
-        void Unity_InverseLerp_float(float A, float B, float T, out float Out)
-        {
-            Out = (T - A)/(B - A);
-        }
-
-            // Graph Vertex
-            struct VertexDescription
-        {
-            float3 Position;
-            float3 Normal;
-            float3 Tangent;
-        };
-
-        VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
-        {
-            VertexDescription description = (VertexDescription)0;
-            description.Position = IN.ObjectSpacePosition;
-            description.Normal = IN.ObjectSpaceNormal;
-            description.Tangent = IN.ObjectSpaceTangent;
-            return description;
-        }
-
-            // Graph Pixel
-            struct SurfaceDescription
-        {
-            float3 BaseColor;
-            float3 Emission;
-            float Alpha;
-            float AlphaClipThreshold;
-        };
-
-        SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
-        {
-            SurfaceDescription surface = (SurfaceDescription)0;
-            float _Split_1103c935c6a4468ab421e86871b91930_R_1 = IN.WorldSpacePosition[0];
-            float _Split_1103c935c6a4468ab421e86871b91930_G_2 = IN.WorldSpacePosition[1];
-            float _Split_1103c935c6a4468ab421e86871b91930_B_3 = IN.WorldSpacePosition[2];
-            float _Split_1103c935c6a4468ab421e86871b91930_A_4 = 0;
-            float _Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0 = _Shift;
-            float2 _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0.xx), _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3);
-            float _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0 = _NoiseScale;
-            float _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2;
-            Unity_SimpleNoise_float(_TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3, _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0, _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2);
-            float _Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0 = _NoiseStrenght;
-            float _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1;
-            Unity_Negate_float(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float2 _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0 = float2(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float _Remap_d685bc1aa488497f91dc571549adae5f_Out_3;
-            Unity_Remap_float(_SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2, float2 (0, 1), _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0, _Remap_d685bc1aa488497f91dc571549adae5f_Out_3);
-            float _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0 = _CutOffHeight;
-            float _Add_86130490412e4e3589fd1fc3a763a266_Out_2;
-            Unity_Add_float(_Remap_d685bc1aa488497f91dc571549adae5f_Out_3, _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0, _Add_86130490412e4e3589fd1fc3a763a266_Out_2);
-            float _Step_bc5e1ec54eff474bbc022279af008206_Out_2;
-            Unity_Step_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_bc5e1ec54eff474bbc022279af008206_Out_2);
-            float4 _Property_18efa9b9e0854782a74518ffec19fe62_Out_0 = _Color;
-            float4 _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2;
-            Unity_Multiply_float((_Step_bc5e1ec54eff474bbc022279af008206_Out_2.xxxx), _Property_18efa9b9e0854782a74518ffec19fe62_Out_0, _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2);
-            float _Property_844d526415994a5492317b7bcebd737e_Out_0 = _EdgeHeight;
-            float _Add_17593e632e7643ff944f74055cb21fe9_Out_2;
-            Unity_Add_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Property_844d526415994a5492317b7bcebd737e_Out_0, _Add_17593e632e7643ff944f74055cb21fe9_Out_2);
-            float _Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2;
-            Unity_Step_float(_Add_17593e632e7643ff944f74055cb21fe9_Out_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2);
-            float4 _Property_32ce72f6875941f3808e74c876168054_Out_0 = _ColorShift;
-            float4 _Multiply_cdf67173af2446438fe178304d51218d_Out_2;
-            Unity_Multiply_float((_Step_e0dbbe40c1cc488c84556596e3e874b7_Out_2.xxxx), _Property_32ce72f6875941f3808e74c876168054_Out_0, _Multiply_cdf67173af2446438fe178304d51218d_Out_2);
-            float _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            Unity_InverseLerp_float(0, 1, _Step_bc5e1ec54eff474bbc022279af008206_Out_2, _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3);
-            surface.BaseColor = (_Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2.xyz);
-            surface.Emission = (_Multiply_cdf67173af2446438fe178304d51218d_Out_2.xyz);
-            surface.Alpha = _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            surface.AlphaClipThreshold = 0.5;
-            return surface;
-        }
-
-            // --------------------------------------------------
-            // Build Graph Inputs
-
-            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
-        {
-            VertexDescriptionInputs output;
-            ZERO_INITIALIZE(VertexDescriptionInputs, output);
-
-            output.ObjectSpaceNormal =           input.normalOS;
-            output.ObjectSpaceTangent =          input.tangentOS;
-            output.ObjectSpacePosition =         input.positionOS;
-
-            return output;
-        }
-            SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
-        {
-            SurfaceDescriptionInputs output;
-            ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
-
-
-
-
-
-            output.WorldSpacePosition =          input.positionWS;
-            output.uv0 =                         input.texCoord0;
-        #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
-        #else
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-        #endif
-        #undef BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Main
-
-            #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/LightingMetaPass.hlsl"
-
-            ENDHLSL
-        }
-        Pass
-        {
-            // Name: <None>
-            Tags
-            {
-                "LightMode" = "Universal2D"
-            }
-
-            // Render State
-            Cull Back
-        Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
-        ZTest LEqual
-        ZWrite Off
-
-            // Debug
-            // <None>
-
-            // --------------------------------------------------
-            // Pass
-
-            HLSLPROGRAM
-
-            // Pragmas
-            #pragma target 2.0
-        #pragma only_renderers gles gles3 glcore
-        #pragma multi_compile_instancing
-        #pragma vertex vert
-        #pragma fragment frag
-
-            // DotsInstancingOptions: <None>
-            // HybridV1InjectedBuiltinProperties: <None>
-
-            // Keywords
-            // PassKeywords: <None>
-            // GraphKeywords: <None>
-
-            // Defines
-            #define _SURFACE_TYPE_TRANSPARENT 1
-            #define _AlphaClip 1
-            #define _NORMALMAP 1
-            #define _NORMAL_DROPOFF_TS 1
-            #define ATTRIBUTES_NEED_NORMAL
-            #define ATTRIBUTES_NEED_TANGENT
-            #define ATTRIBUTES_NEED_TEXCOORD0
-            #define VARYINGS_NEED_POSITION_WS
-            #define VARYINGS_NEED_TEXCOORD0
-            #define FEATURES_GRAPH_VERTEX
-            /* WARNING: $splice Could not find named fragment 'PassInstancing' */
-            #define SHADERPASS SHADERPASS_2D
-            /* WARNING: $splice Could not find named fragment 'DotsInstancingVars' */
-
-            // Includes
-            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/TextureStack.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
-
-            // --------------------------------------------------
-            // Structs and Packing
-
-            struct Attributes
-        {
-            float3 positionOS : POSITION;
-            float3 normalOS : NORMAL;
-            float4 tangentOS : TANGENT;
-            float4 uv0 : TEXCOORD0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : INSTANCEID_SEMANTIC;
-            #endif
-        };
-        struct Varyings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 positionWS;
-            float4 texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-        struct SurfaceDescriptionInputs
-        {
-            float3 WorldSpacePosition;
-            float4 uv0;
-        };
-        struct VertexDescriptionInputs
-        {
-            float3 ObjectSpaceNormal;
-            float3 ObjectSpaceTangent;
-            float3 ObjectSpacePosition;
-        };
-        struct PackedVaryings
-        {
-            float4 positionCS : SV_POSITION;
-            float3 interp0 : TEXCOORD0;
-            float4 interp1 : TEXCOORD1;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            uint instanceID : CUSTOM_INSTANCE_ID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            uint stereoTargetEyeIndexAsBlendIdx0 : BLENDINDICES0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            uint stereoTargetEyeIndexAsRTArrayIdx : SV_RenderTargetArrayIndex;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            FRONT_FACE_TYPE cullFace : FRONT_FACE_SEMANTIC;
-            #endif
-        };
-
-            PackedVaryings PackVaryings (Varyings input)
-        {
-            PackedVaryings output;
-            output.positionCS = input.positionCS;
-            output.interp0.xyz =  input.positionWS;
-            output.interp1.xyzw =  input.texCoord0;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-        Varyings UnpackVaryings (PackedVaryings input)
-        {
-            Varyings output;
-            output.positionCS = input.positionCS;
-            output.positionWS = input.interp0.xyz;
-            output.texCoord0 = input.interp1.xyzw;
-            #if UNITY_ANY_INSTANCING_ENABLED
-            output.instanceID = input.instanceID;
-            #endif
-            #if (defined(UNITY_STEREO_MULTIVIEW_ENABLED)) || (defined(UNITY_STEREO_INSTANCING_ENABLED) && (defined(SHADER_API_GLES3) || defined(SHADER_API_GLCORE)))
-            output.stereoTargetEyeIndexAsBlendIdx0 = input.stereoTargetEyeIndexAsBlendIdx0;
-            #endif
-            #if (defined(UNITY_STEREO_INSTANCING_ENABLED))
-            output.stereoTargetEyeIndexAsRTArrayIdx = input.stereoTargetEyeIndexAsRTArrayIdx;
-            #endif
-            #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-            output.cullFace = input.cullFace;
-            #endif
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Graph
-
-            // Graph Properties
-            CBUFFER_START(UnityPerMaterial)
-        float4 _Color;
-        float _NoiseScale;
-        float _NoiseStrenght;
-        float _CutOffHeight;
-        float _EdgeHeight;
-        float4 _ColorShift;
-        float _Shift;
-        CBUFFER_END
-
-        // Object and Global properties
-
-            // Graph Functions
-            
-        void Unity_TilingAndOffset_float(float2 UV, float2 Tiling, float2 Offset, out float2 Out)
-        {
-            Out = UV * Tiling + Offset;
-        }
-
-
-        inline float Unity_SimpleNoise_RandomValue_float (float2 uv)
-        {
-            return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
-        }
-
-        inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
-        {
-            return (1.0-t)*a + (t*b);
-        }
-
-
-        inline float Unity_SimpleNoise_ValueNoise_float (float2 uv)
-        {
-            float2 i = floor(uv);
-            float2 f = frac(uv);
-            f = f * f * (3.0 - 2.0 * f);
-
-            uv = abs(frac(uv) - 0.5);
-            float2 c0 = i + float2(0.0, 0.0);
-            float2 c1 = i + float2(1.0, 0.0);
-            float2 c2 = i + float2(0.0, 1.0);
-            float2 c3 = i + float2(1.0, 1.0);
-            float r0 = Unity_SimpleNoise_RandomValue_float(c0);
-            float r1 = Unity_SimpleNoise_RandomValue_float(c1);
-            float r2 = Unity_SimpleNoise_RandomValue_float(c2);
-            float r3 = Unity_SimpleNoise_RandomValue_float(c3);
-
-            float bottomOfGrid = Unity_SimpleNnoise_Interpolate_float(r0, r1, f.x);
-            float topOfGrid = Unity_SimpleNnoise_Interpolate_float(r2, r3, f.x);
-            float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
-            return t;
-        }
-        void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
-        {
-            float t = 0.0;
-
-            float freq = pow(2.0, float(0));
-            float amp = pow(0.5, float(3-0));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(1));
-            amp = pow(0.5, float(3-1));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            freq = pow(2.0, float(2));
-            amp = pow(0.5, float(3-2));
-            t += Unity_SimpleNoise_ValueNoise_float(float2(UV.x*Scale/freq, UV.y*Scale/freq))*amp;
-
-            Out = t;
-        }
-
-        void Unity_Negate_float(float In, out float Out)
-        {
-            Out = -1 * In;
-        }
-
-        void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
-        {
-            Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-
-        void Unity_Step_float(float Edge, float In, out float Out)
-        {
-            Out = step(Edge, In);
-        }
-
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
-        void Unity_InverseLerp_float(float A, float B, float T, out float Out)
-        {
-            Out = (T - A)/(B - A);
-        }
-
-            // Graph Vertex
-            struct VertexDescription
-        {
-            float3 Position;
-            float3 Normal;
-            float3 Tangent;
-        };
-
-        VertexDescription VertexDescriptionFunction(VertexDescriptionInputs IN)
-        {
-            VertexDescription description = (VertexDescription)0;
-            description.Position = IN.ObjectSpacePosition;
-            description.Normal = IN.ObjectSpaceNormal;
-            description.Tangent = IN.ObjectSpaceTangent;
-            return description;
-        }
-
-            // Graph Pixel
-            struct SurfaceDescription
-        {
-            float3 BaseColor;
-            float Alpha;
-            float AlphaClipThreshold;
-        };
-
-        SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
-        {
-            SurfaceDescription surface = (SurfaceDescription)0;
-            float _Split_1103c935c6a4468ab421e86871b91930_R_1 = IN.WorldSpacePosition[0];
-            float _Split_1103c935c6a4468ab421e86871b91930_G_2 = IN.WorldSpacePosition[1];
-            float _Split_1103c935c6a4468ab421e86871b91930_B_3 = IN.WorldSpacePosition[2];
-            float _Split_1103c935c6a4468ab421e86871b91930_A_4 = 0;
-            float _Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0 = _Shift;
-            float2 _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3;
-            Unity_TilingAndOffset_float(IN.uv0.xy, float2 (1, 1), (_Property_29ff3ffa3bf142f09ec82fc5609f606a_Out_0.xx), _TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3);
-            float _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0 = _NoiseScale;
-            float _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2;
-            Unity_SimpleNoise_float(_TilingAndOffset_c236de2c797447cdafc5bf77d811cf90_Out_3, _Property_d3b6ee41852e46c18fdec4239f7b9f62_Out_0, _SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2);
-            float _Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0 = _NoiseStrenght;
-            float _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1;
-            Unity_Negate_float(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float2 _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0 = float2(_Property_30d02e8c10fb48ad925d3938cf7561a2_Out_0, _Negate_aad196a2c2a448edaae3856aa4a878da_Out_1);
-            float _Remap_d685bc1aa488497f91dc571549adae5f_Out_3;
-            Unity_Remap_float(_SimpleNoise_16df7a26a33640bfb8370219f9ba2774_Out_2, float2 (0, 1), _Vector2_0c4f251e4364403099028a1fb1ae1594_Out_0, _Remap_d685bc1aa488497f91dc571549adae5f_Out_3);
-            float _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0 = _CutOffHeight;
-            float _Add_86130490412e4e3589fd1fc3a763a266_Out_2;
-            Unity_Add_float(_Remap_d685bc1aa488497f91dc571549adae5f_Out_3, _Property_1c4e5a5689a24124a6e4a5c6052c76a2_Out_0, _Add_86130490412e4e3589fd1fc3a763a266_Out_2);
-            float _Step_bc5e1ec54eff474bbc022279af008206_Out_2;
-            Unity_Step_float(_Split_1103c935c6a4468ab421e86871b91930_G_2, _Add_86130490412e4e3589fd1fc3a763a266_Out_2, _Step_bc5e1ec54eff474bbc022279af008206_Out_2);
-            float4 _Property_18efa9b9e0854782a74518ffec19fe62_Out_0 = _Color;
-            float4 _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2;
-            Unity_Multiply_float((_Step_bc5e1ec54eff474bbc022279af008206_Out_2.xxxx), _Property_18efa9b9e0854782a74518ffec19fe62_Out_0, _Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2);
-            float _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            Unity_InverseLerp_float(0, 1, _Step_bc5e1ec54eff474bbc022279af008206_Out_2, _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3);
-            surface.BaseColor = (_Multiply_bb5ba8856f5e4c669bac7a1a7e7cb592_Out_2.xyz);
-            surface.Alpha = _InverseLerp_0827dcd5bc814f109a9378c9986955a4_Out_3;
-            surface.AlphaClipThreshold = 0.5;
-            return surface;
-        }
-
-            // --------------------------------------------------
-            // Build Graph Inputs
-
-            VertexDescriptionInputs BuildVertexDescriptionInputs(Attributes input)
-        {
-            VertexDescriptionInputs output;
-            ZERO_INITIALIZE(VertexDescriptionInputs, output);
-
-            output.ObjectSpaceNormal =           input.normalOS;
-            output.ObjectSpaceTangent =          input.tangentOS;
-            output.ObjectSpacePosition =         input.positionOS;
-
-            return output;
-        }
-            SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
-        {
-            SurfaceDescriptionInputs output;
-            ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
-
-
-
-
-
-            output.WorldSpacePosition =          input.positionWS;
-            output.uv0 =                         input.texCoord0;
-        #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
-        #else
-        #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-        #endif
-        #undef BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN
-
-            return output;
-        }
-
-            // --------------------------------------------------
-            // Main
-
-            #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/Varyings.hlsl"
-        #include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/PBR2DPass.hlsl"
-
-            ENDHLSL
-        }
-    }
-    CustomEditor "ShaderGraph.PBRMasterGUI"
     FallBack "Hidden/Shader Graph/FallbackError"
 }

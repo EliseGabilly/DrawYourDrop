@@ -66,16 +66,20 @@ public class BackgroundSpawnManager : MonoBehaviour {
     private void Restyle(GameObject go) {
         SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
 
-        sr.material.shader = Shader.Find("Disolve");
         sr.material.SetFloat("_CutOffHeight", position.y);
         sr.material.SetFloat("_Shift", Random.Range(-100, 100));
-        sr.material.SetColor("_ColorShift", RandomColorFromOption());
+        Color[] colors = RandomColorFromOption();
+        sr.material.SetColor("_Color", colors[0]);
+        sr.material.SetColor("_ColorShift", colors[1]); 
+
         sr.sortingOrder = layerOrder;
         layerOrder++;
     }
 
-    private Color RandomColorFromOption() {
-        return Random.ColorHSV(H - 0.05f, H + 0.05f, S - 0.05f, S + 0.05f, V - 0.05f, V + 0.05f);
+    private Color[] RandomColorFromOption() {
+        Color color = Random.ColorHSV(H - 0.05f, H + 0.05f, S - 0.05f, S + 0.05f, V - 0.05f, V + 0.05f);
+        Color darkerColor = new Color(color.r * 0.90f, color.g * 0.90f, color.b * 0.90f);
+        return new Color[] { color, darkerColor };
     }
 
     private void Update() {
