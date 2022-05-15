@@ -58,6 +58,7 @@ public class Player : Singleton<Player> {
     }
 
     public void ChangeHighScores(int highScore, int highDistanceScore, int highBonusScore, int leapOfFaith) {
+        this.lastScore = highScore;
         this.highScore = Mathf.Max(this.highScore, highScore);
         this.highDistanceScore = Mathf.Max(this.highDistanceScore, highDistanceScore);
         this.highBonusScore = Mathf.Max(this.highBonusScore, highBonusScore);

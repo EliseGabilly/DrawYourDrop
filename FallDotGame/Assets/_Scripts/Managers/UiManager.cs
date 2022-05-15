@@ -13,6 +13,8 @@ public class UiManager : Singleton<UiManager> {
 
     [Header("Canvas")]
     [SerializeField]
+    private Canvas gameCanvas;
+    [SerializeField]
     private Canvas menuCanvas;
     [SerializeField]
     private Canvas succesCanvas;
@@ -67,6 +69,15 @@ public class UiManager : Singleton<UiManager> {
         succesCanvas.enabled = false;
         optionCanvas.enabled = false;
         creditsCanvas.enabled = false;
+    }
+
+    public void StartGame() {
+        menuCanvas.enabled = false;
+        succesCanvas.enabled = false;
+        optionCanvas.enabled = false;
+        creditsCanvas.enabled = false;
+        gameCanvas.enabled = true;
+        Time.timeScale = 1;
     }
 
     public void Quit() {
