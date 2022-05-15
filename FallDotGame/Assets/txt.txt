@@ -14,3 +14,4 @@ Succes :
 
 TODO
  - stop drawing went in pause
+ - fix background spawn so you doesn't see it appearing

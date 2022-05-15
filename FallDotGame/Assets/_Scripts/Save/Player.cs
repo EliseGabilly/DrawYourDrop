@@ -8,6 +8,7 @@ public class Player : Singleton<Player> {
 
     #region Variables
     public int highScore = 0;
+    public int lastScore = 0;
     public int highDistanceScore = 0;
     public int highBonusScore = 0;
 
@@ -22,18 +23,19 @@ public class Player : Singleton<Player> {
     public float volumeMusic = 0.5f;
     public float volumeSound = 0.5f;
 
-    public Color colorBall = Color.white;
-    public Color colorMagic = Color.blue;
-    public Color colorBackground = Color.cyan;
+    public Color colorBall = Const.ColorWhite;
+    public Color colorMagic = Const.ColorBlue;
+    public Color colorBackground = Const.ColorGreenLight;
     #endregion
 
     protected override void Awake() {
         base.Awake();
         SaveSystem.LoadData();
-    }
+}
 
     public Player ChangeData(PlayerData data) {
         this.highScore = data.highScore;
+        this.lastScore = data.lastScore;
         this.highDistanceScore = data.highDistanceScore;
         this.highBonusScore = data.highBonusScore;
 
@@ -76,6 +78,7 @@ public class Player : Singleton<Player> {
     public void ChangeOptions(float volumeMusic, float volumeSound, Color colorBall, Color colorMagic, Color colorBackground) {
         this.volumeMusic = volumeMusic;
         this.volumeSound = volumeSound;
+
         this.colorBall = colorBall;
         this.colorMagic = colorMagic;
         this.colorBackground = colorBackground;

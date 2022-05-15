@@ -29,7 +29,7 @@ public class BackgroundSpawnManager : MonoBehaviour {
         Vector3 positionBottom = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth/2, 0, -mainCamera.transform.position.z));
         worldHeight = positionTop.y - positionBottom.y;
 
-        position = new Vector3(position.x, position.y+1.5f*worldHeight, 5);
+        position = new Vector3(position.x, position.y+1.5f*worldHeight, 4);
         GameObject go;
         for(int i = 0; i<10; i++) {
             position.y -= worldHeight*Random.Range(0.1f, 0.6f);
@@ -54,7 +54,7 @@ public class BackgroundSpawnManager : MonoBehaviour {
     private void FullRestyle(GameObject go) {
         SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
         float scale = go.transform.localScale.x;
-
+        
         sr.material.shader = Shader.Find("Disolve");
         sr.material.SetFloat("_NoiseScale", scale);
         sr.material.SetFloat("_NoiseStrenght", scale/8);
@@ -77,7 +77,7 @@ public class BackgroundSpawnManager : MonoBehaviour {
     }
 
     private Color[] RandomColorFromOption() {
-        Color color = Random.ColorHSV(H - 0.05f, H + 0.05f, S - 0.05f, S + 0.05f, V - 0.05f, V + 0.05f);
+        Color color = Random.ColorHSV(H - 0.02f, H + 0.02f, S - 0.02f, S + 0.02f, V - 0.02f, V + 0.02f);
         Color darkerColor = new Color(color.r * 0.90f, color.g * 0.90f, color.b * 0.90f);
         return new Color[] { color, darkerColor };
     }

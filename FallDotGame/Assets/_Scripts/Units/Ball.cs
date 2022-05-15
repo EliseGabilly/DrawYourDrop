@@ -40,7 +40,7 @@ public class Ball : Singleton<Ball> {
     }
 
     public void TakeDamage() {
-        if (!isImune) UiManager.Instance.FadeIn();
+        if (!isImune) GameManager.Instance.GameOver();
         else EndShield();
     }
 
@@ -99,7 +99,7 @@ public class Ball : Singleton<Ball> {
 
     public void WentOutOfFrame() {
         if (!IsBounce) {
-            UiManager.Instance.FadeIn();
+            GameManager.Instance.GameOver();
         } else {
             Rigidbody2D rb = GetComponent<Rigidbody2D>();
             rb.velocity = new Vector2(-transform.position.normalized.x*40, rb.velocity.y);

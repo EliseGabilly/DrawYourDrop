@@ -37,11 +37,12 @@ public class ItemSpawnManager : Singleton<ItemSpawnManager> {
             itemGroup.HighestItem = itemGroup.ItemList.Dequeue();
         }
 
-        //spawn two of each power ups out of frame
+        //spawn multiple of each power ups out of frame
+        Vector3 positionTopLeftPlus = new Vector3(positionTopLeft.x+10, positionTopLeft.y+10, positionTopLeft.z+10);
         ItemPowerUp powerUp = itemParent.GetComponentInChildren<ItemPowerUp>();
         foreach(GameObject itm in powerUp.Prefabs) {
             for (int i = 0; i < 10; i++) {
-                go = Instantiate(itm, positionTopLeft, Quaternion.identity) as GameObject;
+                go = Instantiate(itm, positionTopLeftPlus, Quaternion.identity) as GameObject;
                 go.transform.parent = powerUp.gameObject.transform;
                 ColorItem(go);
                 powerUp.FreeItems.Add(go.GetComponent<Item>());

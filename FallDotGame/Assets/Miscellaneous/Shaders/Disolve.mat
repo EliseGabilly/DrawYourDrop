@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Disolve
-  m_Shader: {fileID: -6465566751694194690, guid: 9195bcc67382c1d46a4dfdb405c3943c, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 72c1d63c6cb1d244cabb075982c38d6c, type: 3}
   m_ShaderKeywords: ETC1_EXTERNAL_ALPHA
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -85,6 +85,7 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _NoiseScale: 50
+    - _NoiseStrengh: 10
     - _NoiseStrenght: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02

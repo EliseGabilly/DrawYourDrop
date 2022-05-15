@@ -21,6 +21,7 @@ public class GameManager : Singleton<GameManager> {
         base.Awake();
         player = GameObject.FindWithTag("Player");
         mainCamera = Camera.main;
+        Time.timeScale = 0;
     }
 
     private void Update() {
@@ -41,7 +42,7 @@ public class GameManager : Singleton<GameManager> {
         }
         if(yRatio > 1.05f || yRatio < -.05f) {
             isInFrame = false;
-            UiManager.Instance.FadeIn();
+            GameManager.Instance.GameOver();
         }
         return isInFrame;
     }

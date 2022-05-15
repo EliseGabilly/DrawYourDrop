@@ -6,6 +6,7 @@ public class PlayerData {
 
     #region Variables
     public int highScore;
+    public int lastScore;
     public int highDistanceScore;
     public int highBonusScore;
 
@@ -33,6 +34,7 @@ public class PlayerData {
 
     public PlayerData(Player player) {
         this.highScore = player.highScore;
+        this.lastScore = player.lastScore;
         this.highDistanceScore = player.highDistanceScore;
         this.highBonusScore = player.highBonusScore;
 

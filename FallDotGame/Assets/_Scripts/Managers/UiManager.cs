@@ -5,11 +5,11 @@ public class UiManager : Singleton<UiManager> {
 
     #region Variables
     [SerializeField]
-    private Text highScore;
-    [SerializeField]
     private Text score;
     [SerializeField]
-    private Animator fadeAnim;
+    private Text hightScore;
+    [SerializeField]
+    private Text lastScore;
 
     [Header("Canvas")]
     [SerializeField]
@@ -23,7 +23,8 @@ public class UiManager : Singleton<UiManager> {
     #endregion
 
     private void Start() {
-        highScore.text = Player.Instance.highScore.ToString();
+        hightScore.text = Player.Instance.highScore.ToString();
+        lastScore.text = string.Format("Last game : {0}", Player.Instance.lastScore.ToString());
         score.text = "0";
     }
 
@@ -37,13 +38,8 @@ public class UiManager : Singleton<UiManager> {
         score.text = scoreVal.ToString();
     }
 
-    public void FadeIn() {
-        fadeAnim.SetTrigger("fade_in");
-    }
-
     public void OpenMenu() {
         OpenCanvas(menuCanvas);
-        SuccessManager.Instance.LoadSuccess();
         Time.timeScale = 0;
     }
 
@@ -55,11 +51,14 @@ public class UiManager : Singleton<UiManager> {
     public void CloseMenuReplay() {
         CloseCanvases();
         Time.timeScale = 1;
-        FadeIn();
+        GameManager.Instance.GameOver();
     }
 
     public void OpenCanvas(Canvas canvas) {
         CloseCanvases();
+        if (canvas.Equals(succesCanvas)) {
+            SuccessManager.Instance.LoadSuccess();
+        }
         canvas.enabled = true;
     }
 
