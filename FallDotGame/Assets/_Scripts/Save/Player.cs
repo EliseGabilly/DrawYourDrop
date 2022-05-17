@@ -25,13 +25,13 @@ public class Player : Singleton<Player> {
 
     public Color colorBall = Const.ColorWhite;
     public Color colorMagic = Const.ColorBlue;
-    public Color colorBackground = Const.ColorGreenLight;
+    public Color colorBackground = Const.ColorBlueLight;
     #endregion
 
     protected override void Awake() {
         base.Awake();
         SaveSystem.LoadData();
-}
+    }
 
     public Player ChangeData(PlayerData data) {
         this.highScore = data.highScore;
@@ -50,9 +50,9 @@ public class Player : Singleton<Player> {
         this.volumeMusic = data.volumeMusic;
         this.volumeSound = data.volumeSound;
 
-        this.colorBall = new Color(data.colorBallR, data.colorBallG, data.colorBallB);
-        this.colorMagic = new Color(data.colorMagicR, data.colorMagicG, data.colorMagicB);
-        this.colorBackground = new Color(data.colorBackgroundR, data.colorBackgroundG, data.colorBackgroundB);
+        this.colorBall = new Color32((byte)(data.colorBallR * 255), (byte)(data.colorBallG * 255), (byte)(data.colorBallB * 255), 255);
+        this.colorMagic = new Color32((byte)(data.colorMagicR * 255), (byte)(data.colorMagicG * 255), (byte)(data.colorMagicB * 255), 255);
+        this.colorBackground = new Color32((byte)(data.colorBackgroundR * 255), (byte)(data.colorBackgroundG * 255), (byte)(data.colorBackgroundB * 255), 255);
 
         return this;
     }

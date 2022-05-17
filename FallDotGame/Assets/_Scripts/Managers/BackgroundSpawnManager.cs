@@ -19,7 +19,7 @@ public class BackgroundSpawnManager : MonoBehaviour {
     private float H, S, V;
     #endregion
 
-    private void Awake() {
+    private void Start() {
         mainCamera = Camera.main;
 
         Color baseColor = Player.Instance.colorBackground;

@@ -26,17 +26,17 @@ public static class Const {
         SuccesColorInProgress = Color.white;
         SuccesColorInProgress.a = 0.5f;
 
-        ColorBlue = new Color(72, 107, 250);
-        ColorPink = new Color(250, 72, 222);
-        ColorRed = new Color(250, 101, 72);
-        ColorYellow = new Color(250, 214, 72);
-        ColorGreen = new Color(72, 250, 96);
+        ColorBlue = new Color32(72, 107, 250, 255);
+        ColorPink = new Color32(250, 72, 222, 255);
+        ColorRed = new Color32(250, 101, 72, 255);
+        ColorYellow = new Color32(250, 214, 72, 255);
+        ColorGreen = new Color32(72, 250, 96, 255);
         ColorWhite = Color.white;
         ColorBlack = Color.black;
-        ColorBlueLight = new Color(189, 212, 245);
-        ColorPinkLight = new Color(244, 189, 245);
-        ColorRedLight = new Color(245, 191, 189);
-        ColorYellowLight = new Color(245, 228, 189);
-        ColorGreenLight = new Color(189, 245, 193);
+        ColorBlueLight = new Color32(189, 212, 245, 255);
+        ColorPinkLight = new Color32(244, 189, 245, 255);
+        ColorRedLight = new Color32(245, 191, 189, 255);
+        ColorYellowLight = new Color32(245, 228, 189, 255);
+        ColorGreenLight = new Color32(189, 245, 193, 255);
     }
 }

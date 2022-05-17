@@ -1468,7 +1468,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: cc24f46551511be43a415200239febb1, type: 2}
-  m_Color: {r: 0.6497864, g: 0.8047337, b: 0.9245283, a: 0.9607843}
+  m_Color: {r: 0.60784316, g: 0.85882354, b: 0.9137255, a: 0.9607843}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2914,7 +2914,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: cc24f46551511be43a415200239febb1, type: 2}
-  m_Color: {r: 0.56256676, g: 0.85733277, b: 0.9245283, a: 0.9607843}
+  m_Color: {r: 0.60862404, g: 0.85907286, b: 0.9150943, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -5930,7 +5930,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: cc24f46551511be43a415200239febb1, type: 2}
-  m_Color: {r: 0.6497864, g: 0.8047337, b: 0.9245283, a: 0.9607843}
+  m_Color: {r: 0.60784316, g: 0.85882354, b: 0.9137255, a: 0.9607843}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -8357,6 +8357,9 @@ MonoBehaviour:
   succesCanvas: {fileID: 926606291}
   optionCanvas: {fileID: 324632427}
   creditsCanvas: {fileID: 1907808413}
+  succesBg: {fileID: 155366685}
+  optionBg: {fileID: 784024026}
+  creditsBg: {fileID: 406490005}
 --- !u!114 &1189463402
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8384,6 +8387,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   musicSlider: {fileID: 1989692211}
   soundSlider: {fileID: 75338718}
+  colorMagic: {fileID: 1276665182}
+  colorBall: {fileID: 2113246250}
+  colorBg: {fileID: 1285121410}
 --- !u!1 &1194640078
 GameObject:
   m_ObjectHideFlags: 0
@@ -9652,8 +9658,8 @@ MonoBehaviour:
   volumeMusic: 0.5
   volumeSound: 0.5
   colorBall: {r: 1, g: 1, b: 1, a: 1}
-  colorMagic: {r: 0, g: 0, b: 1, a: 1}
-  colorBackground: {r: 0, g: 1, b: 1, a: 1}
+  colorMagic: {r: 0.28235295, g: 0.41960785, b: 0.98039216, a: 1}
+  colorBackground: {r: 0.7411765, g: 0.83137256, b: 0.9607843, a: 1}
 --- !u!1 &1394007259
 GameObject:
   m_ObjectHideFlags: 0

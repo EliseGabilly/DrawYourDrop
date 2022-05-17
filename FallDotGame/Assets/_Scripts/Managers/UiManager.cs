@@ -22,12 +22,23 @@ public class UiManager : Singleton<UiManager> {
     private Canvas optionCanvas;
     [SerializeField]
     private Canvas creditsCanvas;
+
+    [Header("Background")]
+    [SerializeField]
+    private Image succesBg;
+    [SerializeField]
+    private Image optionBg;
+    [SerializeField]
+    private Image creditsBg;
     #endregion
 
     private void Start() {
         hightScore.text = Player.Instance.highScore.ToString();
         lastScore.text = string.Format("Last game : {0}", Player.Instance.lastScore.ToString());
         score.text = "0";
+        succesBg.color = Player.Instance.colorBackground;
+        optionBg.color = Player.Instance.colorBackground;
+        creditsBg.color = Player.Instance.colorBackground;
     }
 
     private void Update() {

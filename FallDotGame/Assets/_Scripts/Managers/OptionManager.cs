@@ -12,28 +12,30 @@ public class OptionManager : MonoBehaviour {
     [SerializeField]
     private Slider soundSlider;
 
-    //[Header("Colors")]
-    //[SerializeField]
-    //private Image colorMagic;
-    //private Color[] colorsMagic = new Color[]{ Const.ColorBlue, Const.ColorPink, Const.ColorRed, Const.ColorYellow, Const.ColorGreen};
-    //private int countMagic = 0;
-    //[SerializeField]
-    //private Image colorBall;
-    //private Color[] colorsBall = new Color[] { Const.ColorWhite, Const.ColorBlack, Const.ColorBlue, Const.ColorRed, Const.ColorGreen };
-    //private int countBall = 0;
-    //[SerializeField]
-    //private Image colorBg;
-    //private Color[] colorsBg = new Color[] { Const.ColorBlueLight, Const.ColorPinkLight, Const.ColorRedLight, Const.ColorYellowLight, Const.ColorGreenLight };
-    //private int countBg = 0;
+    [Header("Colors")]
+    [SerializeField]
+    private Image colorMagic;
+    private Color[] colorsMagic = new Color[]{ Const.ColorBlue, Const.ColorPink, Const.ColorRed, Const.ColorYellow, Const.ColorGreen};
+    private int countMagic = 0;
+    [SerializeField]
+    private Image colorBall;
+    private Color[] colorsBall = new Color[] { Const.ColorWhite, Const.ColorBlack, Const.ColorBlue, Const.ColorRed, Const.ColorGreen };
+    private int countBall = 0;
+    [SerializeField]
+    private Image colorBg;
+    private Color[] colorsBg = new Color[] { Const.ColorBlueLight, Const.ColorPinkLight, Const.ColorRedLight, Const.ColorYellowLight, Const.ColorGreenLight };
+    private int countBg = 0;
     #endregion
 
-    private void Awake() {
-        //colorMagic.color = Color.white;
-        //countMagic = findColorIndex(Player.Instance.colorMagic, colorsMagic);
-        //colorBall.color = Player.Instance.colorBall;
-        //countBall = findColorIndex(Player.Instance.colorBall, colorsBall);
-        //colorBg.color = Player.Instance.colorBackground;
-        //countBg = findColorIndex(Player.Instance.colorBackground, colorsBg);
+    private void Start() {
+        countMagic = findColorIndex(Player.Instance.colorMagic, colorsMagic);
+        countBall = findColorIndex(Player.Instance.colorBall, colorsBall);
+        countBg = findColorIndex(Player.Instance.colorBackground, colorsBg);
+
+        Player.Instance.ChangeOptions(musicSlider.value, soundSlider.value, colorsBall[countBall], colorsMagic[countMagic], colorsBg[countBg]);
+        colorMagic.color = Color.white;
+        colorBall.color = Player.Instance.colorBall;
+        colorBg.color = Player.Instance.colorBackground;
     }
 
     private int findColorIndex(Color color, Color[] colors) {

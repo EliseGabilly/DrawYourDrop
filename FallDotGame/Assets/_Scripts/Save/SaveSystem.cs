@@ -26,6 +26,7 @@ public static class SaveSystem {
         } else {
             try {
                 //try to write a new player if first conection
+                Debug.Log("Save a new file for player data (" + PATH + ") ");
                 SavePlayer(Player.Instance);
                 return LoadDataFromPath();
             } catch (Exception e) {
