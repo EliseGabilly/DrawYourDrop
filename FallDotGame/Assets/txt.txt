@@ -15,4 +15,3 @@ Succes :
 TODO
  - music
  - score graph
- - fix background spawn so you doesn't see it appearing

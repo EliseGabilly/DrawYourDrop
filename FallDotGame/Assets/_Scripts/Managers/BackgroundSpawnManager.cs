@@ -31,7 +31,7 @@ public class BackgroundSpawnManager : MonoBehaviour {
 
         position = new Vector3(position.x, position.y+1.5f*worldHeight, 4);
         GameObject go;
-        for(int i = 0; i<10; i++) {
+        for(int i = 0; i<12; i++) {
             position.y -= worldHeight*Random.Range(0.1f, 0.6f);
             go = Instantiate(backgroundImg, position, Quaternion.identity) as GameObject;
             go.transform.SetParent(backgroundParent);
