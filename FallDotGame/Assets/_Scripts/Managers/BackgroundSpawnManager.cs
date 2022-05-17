@@ -9,7 +9,7 @@ public class BackgroundSpawnManager : MonoBehaviour {
     [SerializeField]
     private Transform backgroundParent;
 
-    private Queue<GameObject> backgroundImgs = new Queue<GameObject>();
+    private readonly Queue<GameObject> backgroundImgs = new Queue<GameObject>();
     private GameObject backgroundOnTop;
     private Camera mainCamera;
     private float worldHeight;

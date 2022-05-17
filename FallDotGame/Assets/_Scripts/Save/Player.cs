@@ -73,16 +73,22 @@ public class Player : Singleton<Player> {
         succesShieldCount += addedShieldCount;
         succesEraseCount += addedEraseCount;
         succesBounceCount += addedBounceCount;
+
         SaveSystem.SavePlayer(this);
     }
 
-    public void ChangeOptions(float volumeMusic, float volumeSound, Color colorBall, Color colorMagic, Color colorBackground) {
+    public void ChangeOptionsMusic(float volumeMusic, float volumeSound) {
         this.volumeMusic = volumeMusic;
         this.volumeSound = volumeSound;
 
+        SaveSystem.SavePlayer(this);
+    }
+
+    public void ChangeOptionsColors(Color colorBall, Color colorMagic, Color colorBackground) {
         this.colorBall = colorBall;
         this.colorMagic = colorMagic;
         this.colorBackground = colorBackground;
+
         SaveSystem.SavePlayer(this);
     }
 }
