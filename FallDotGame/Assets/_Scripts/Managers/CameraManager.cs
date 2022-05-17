@@ -15,9 +15,6 @@ public class CameraManager : MonoBehaviour {
     }
 
     private void Update() {
-        Vector3 screenPos = mainCamera.WorldToScreenPoint(playerTransform.position);
-        float yRatio = screenPos.y / mainCamera.pixelHeight; //vertical check
-        
         Vector3 v3 = mainCamera.transform.position;
         v3.y = playerTransform.position.y+2.4f; //TODO find magic value
         Vector3 playerPos = v3;

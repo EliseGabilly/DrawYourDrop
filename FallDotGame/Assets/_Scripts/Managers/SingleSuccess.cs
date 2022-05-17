@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -46,7 +45,6 @@ public class SingleSuccess : MonoBehaviour {
         completion3.color = Const.SuccesColorInProgress;
         completion4.color = Const.SuccesColorInProgress;
         if (successScore <= 0) {
-            nextStep = success.CompletionStep1;
             return;
         }
         if (successScore >= success.CompletionStep1) {
