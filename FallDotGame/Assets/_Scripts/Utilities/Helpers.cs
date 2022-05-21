@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -14,5 +16,9 @@ public static class Helpers
     /// </summary>
     public static void DestroyChildren(this Transform t) {
         foreach (Transform child in t) Object.Destroy(child.gameObject);
+    }
+
+    public static void DebugList<T>(List<T> list) {
+        Debug.Log(string.Join(", ", from x in list select x.ToString()));
     }
 }

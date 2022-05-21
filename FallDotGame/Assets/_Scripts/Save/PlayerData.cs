@@ -11,25 +11,14 @@ public class PlayerData {
     public int highBonusScore;
 
     public int gamePlayed;
-    public int leapOfFaith;
-
-    public int succesMagnetCount;
-    public int succesShieldCount;
-    public int succesEraseCount;
-    public int succesBounceCount;
+    public int[] scoreHistory;
 
     public float volumeMusic;
     public float volumeSound;
 
-    public float colorBallR;
-    public float colorBallG;
-    public float colorBallB;
-    public float colorMagicR;
-    public float colorMagicG;
-    public float colorMagicB;
-    public float colorBackgroundR;
-    public float colorBackgroundG;
-    public float colorBackgroundB;
+    public float[] colorBall;
+    public float[] colorMagic;
+    public float[] colorBackground;
     #endregion
 
     public PlayerData(Player player) {
@@ -39,25 +28,14 @@ public class PlayerData {
         this.highBonusScore = player.highBonusScore;
 
         this.gamePlayed = player.gamePlayed;
-        this.leapOfFaith = player.leapOfFaith;
-
-        this.succesMagnetCount = player.succesMagnetCount;
-        this.succesShieldCount = player.succesShieldCount;
-        this.succesEraseCount = player.succesEraseCount;
-        this.succesBounceCount = player.succesBounceCount;
+        this.scoreHistory = player.scoreHistory.ToArray();
 
         this.volumeMusic = player.volumeMusic;
         this.volumeSound = player.volumeSound;
 
-        this.colorBallR = player.colorBall.r;
-        this.colorBallG = player.colorBall.g;
-        this.colorBallB = player.colorBall.b;
-        this.colorMagicR = player.colorMagic.r;
-        this.colorMagicG = player.colorMagic.g;
-        this.colorMagicB = player.colorMagic.b;
-        this.colorBackgroundR = player.colorBackground.r;
-        this.colorBackgroundG = player.colorBackground.g;
-        this.colorBackgroundB = player.colorBackground.b;
+        this.colorBall = new float[] { player.colorBall.r, player.colorBall.g, player.colorBall.b };
+        this.colorMagic = new float[] { player.colorMagic.r, player.colorMagic.g, player.colorMagic.b };
+        this.colorBackground = new float[] { player.colorBackground.r, player.colorBackground.g, player.colorBackground.b };
 
     }
 

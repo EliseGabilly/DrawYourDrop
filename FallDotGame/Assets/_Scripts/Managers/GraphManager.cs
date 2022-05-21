@@ -6,6 +6,7 @@ using System.Linq;
 
 public class GraphManager : Singleton<GraphManager> {
 
+    #region Variables
     [SerializeField] 
     private GameObject bar;
     [SerializeField] 
@@ -17,13 +18,28 @@ public class GraphManager : Singleton<GraphManager> {
     [SerializeField]
     private Text labelEnd;
 
-    public void LoadGraph() {
-        List<int> scoreList = new List<int>() { 5, 98, 56, 45, 30, 22, 150, 120, 100, 160};
-        labelMid.text = Mathf.Ceil(scoreList.Max() / 2).ToString();
-        labelEnd.text = scoreList.Max().ToString();
+    [SerializeField]
+    private GameObject graph;
+    [SerializeField]
+    private GameObject text;
+    #endregion
 
-        Dictionary<int, int> scoreFreq = CalculateScoreFrequence(scoreList, 8);
-        ShowGraph(new List<int>(scoreFreq.Values), 160, scoreList.Average(), scoreList.Max());
+    public void LoadGraph() {
+        List<int> scoreList = Player.Instance.scoreHistory;
+
+        if (scoreList.Count >= 5) {
+            labelMid.text = Mathf.Ceil(scoreList.Max() / 2).ToString();
+            labelEnd.text = scoreList.Max().ToString();
+
+            Dictionary<int, int> scoreFreq = CalculateScoreFrequence(scoreList, 8);
+            ShowGraph(new List<int>(scoreFreq.Values), Player.Instance.lastScore, scoreList.Average(), scoreList.Max());
+
+            graph.SetActive(true);
+            text.SetActive(false);
+        } else {
+            graph.SetActive(false);
+            text.SetActive(true);
+        }
     }
 
     private Dictionary<int, int> CalculateScoreFrequence(List<int> scoreList, int nbPlage = 5) {

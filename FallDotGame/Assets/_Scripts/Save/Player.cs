@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// Player class containing the information that are "translated" in playerdata then saved
@@ -13,12 +15,7 @@ public class Player : Singleton<Player> {
     public int highBonusScore = 0;
 
     public int gamePlayed = 0;
-    public int leapOfFaith = 0;
-
-    public int succesMagnetCount = 0;
-    public int succesShieldCount = 0;
-    public int succesEraseCount = 0;
-    public int succesBounceCount = 0;
+    public List<int> scoreHistory = new List<int>();
 
     public float volumeMusic = 0.5f;
     public float volumeSound = 0.5f;
@@ -40,39 +37,31 @@ public class Player : Singleton<Player> {
         this.highBonusScore = data.highBonusScore;
 
         this.gamePlayed = data.gamePlayed;
-        this.leapOfFaith = data.leapOfFaith;
-
-        this.succesMagnetCount = data.succesMagnetCount;
-        this.succesShieldCount = data.succesShieldCount;
-        this.succesEraseCount = data.succesEraseCount;
-        this.succesBounceCount = data.succesBounceCount;
+        this.scoreHistory = new List<int>(data.scoreHistory);
 
         this.volumeMusic = data.volumeMusic;
         this.volumeSound = data.volumeSound;
 
-        this.colorBall = new Color32((byte)(data.colorBallR * 255), (byte)(data.colorBallG * 255), (byte)(data.colorBallB * 255), 255);
-        this.colorMagic = new Color32((byte)(data.colorMagicR * 255), (byte)(data.colorMagicG * 255), (byte)(data.colorMagicB * 255), 255);
-        this.colorBackground = new Color32((byte)(data.colorBackgroundR * 255), (byte)(data.colorBackgroundG * 255), (byte)(data.colorBackgroundB * 255), 255);
+        this.colorBall = new Color32((byte)(data.colorBall[0] * 255), (byte)(data.colorBall[1] * 255), (byte)(data.colorBall[2] * 255), 255);
+        this.colorMagic = new Color32((byte)(data.colorMagic[0] * 255), (byte)(data.colorMagic[1] * 255), (byte)(data.colorMagic[2] * 255), 255);
+        this.colorBackground = new Color32((byte)(data.colorBackground[0] * 255), (byte)(data.colorBackground[1] * 255), (byte)(data.colorBackground[2] * 255), 255);
 
         return this;
     }
 
-    public void ChangeHighScores(int highScore, int highDistanceScore, int highBonusScore, int leapOfFaith) {
-        this.lastScore = highScore;
-        this.highScore = Mathf.Max(this.highScore, highScore);
-        this.highDistanceScore = Mathf.Max(this.highDistanceScore, highDistanceScore);
-        this.highBonusScore = Mathf.Max(this.highBonusScore, highBonusScore);
+    public void ChangeHighScores(int score, int distanceScore, int bonusScore) {
+        this.lastScore = score;
+        this.highScore = Mathf.Max(this.highScore, score);
+        this.highDistanceScore = Mathf.Max(this.highDistanceScore, distanceScore);
+        this.highBonusScore = Mathf.Max(this.highBonusScore, bonusScore);
         gamePlayed++;
-        this.leapOfFaith = Mathf.Max(this.leapOfFaith, leapOfFaith);
+        if (score > 5) {
+            scoreHistory.Add(score);
+            if (scoreHistory.Count > 100) {
+                scoreHistory.RemoveAt(0);
+            }
 
-        SaveSystem.SavePlayer(this);
-    }
-
-    public void ChangSuccesCount(int addedMagnetCount, int addedShieldCount, int addedEraseCount, int addedBounceCount) {
-        succesMagnetCount += addedMagnetCount;
-        succesShieldCount += addedShieldCount;
-        succesEraseCount += addedEraseCount;
-        succesBounceCount += addedBounceCount;
+        }
 
         SaveSystem.SavePlayer(this);
     }

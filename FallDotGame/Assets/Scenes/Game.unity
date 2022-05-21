@@ -5146,6 +5146,8 @@ MonoBehaviour:
   bar: {fileID: 4648149289778455943, guid: 4c1bfc1416440b44da8f2d64399b3a7e, type: 3}
   value: {fileID: 5314649067337025846, guid: 7cbdc06e1c2c3244e990dbc84b6d3984, type: 3}
   graphContainer: {fileID: 1549206545}
+  labelMid: {fileID: 2088057185}
+  labelEnd: {fileID: 121483772}
 --- !u!1 &1194640078
 GameObject:
   m_ObjectHideFlags: 0
@@ -6276,11 +6278,7 @@ MonoBehaviour:
   highDistanceScore: 0
   highBonusScore: 0
   gamePlayed: 0
-  leapOfFaith: 0
-  succesMagnetCount: 0
-  succesShieldCount: 0
-  succesEraseCount: 0
-  succesBounceCount: 0
+  scoreHistory: 
   volumeMusic: 0.5
   volumeSound: 0.5
   colorBall: {r: 1, g: 1, b: 1, a: 1}

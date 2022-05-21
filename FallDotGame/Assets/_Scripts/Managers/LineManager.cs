@@ -28,14 +28,11 @@ public class LineManager : Singleton<LineManager> {
     private Camera mainCamera;
 
     public bool IsLeapOfFaith { get; private set; }
-    public int LeapOfFaith { get; private set; }
     #endregion
 
     protected override void Awake() {
         base.Awake();
         mainCamera = Camera.main;
-        IsLeapOfFaith = true;
-        LeapOfFaith = 0;
     }
 
     private void Update() {
@@ -47,7 +44,6 @@ public class LineManager : Singleton<LineManager> {
     }
 
     private IEnumerator Drawing() {
-        LeapOfFaith = IsLeapOfFaith ? GameManager.Instance.RewardScore + GameManager.Instance.DistanceScore : LeapOfFaith;
         IsLeapOfFaith = false;
         isDrawing = true;
         StartLine();

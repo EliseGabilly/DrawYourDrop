@@ -9,11 +9,6 @@ public class GameManager : Singleton<GameManager> {
 
     public int RewardScore { get; set; }
     public int DistanceScore { get; set; }
-
-    private int inGameBounceCount = 0;
-    private int inGameShieldCount = 0;
-    private int inGameEraseCount = 0;
-    private int inGameMagnetCount = 0;
     #endregion
 
 
@@ -48,30 +43,12 @@ public class GameManager : Singleton<GameManager> {
     }
 
     public void GameOver() {
-        int leapOfFaithScore = LineManager.Instance.IsLeapOfFaith ? GameManager.Instance.DistanceScore + GameManager.Instance.RewardScore : LineManager.Instance.LeapOfFaith;
-        Player.Instance.ChangeHighScores(RewardScore + DistanceScore, DistanceScore, RewardScore, leapOfFaithScore);
-        Player.Instance.ChangSuccesCount(inGameMagnetCount, inGameShieldCount, inGameEraseCount, inGameBounceCount);
+        Player.Instance.ChangeHighScores(RewardScore + DistanceScore, DistanceScore, RewardScore);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void IncreaseScore(int addedScore) {
         RewardScore += addedScore;
         UiManager.Instance.UpdateScore(RewardScore+ DistanceScore);
-    }
-
-    public void AddToInGameBounceCount() {
-        inGameBounceCount++;
-    }
-
-    public void AddToInGameEraseCount() {
-        inGameEraseCount++;
-    }
-
-    public void AddToInGameMagnetCount() {
-        inGameMagnetCount++;
-    }
-
-    public void AddToInGameShieldCount() {
-        inGameShieldCount++;
     }
 }
