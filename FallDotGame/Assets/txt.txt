@@ -16,3 +16,7 @@ TODO
  - music
  - score graph
  - avoid multiple pickup close
+
+ BUG
+ - plus de bonus passé un certains point
+ - annim de bounce qui ne marche pas bien

@@ -12,9 +12,15 @@ public class GraphManager : Singleton<GraphManager> {
     private GameObject value;
     [SerializeField]
     private RectTransform graphContainer;
+    [SerializeField]
+    private Text labelMid;
+    [SerializeField]
+    private Text labelEnd;
 
     public void LoadGraph() {
         List<int> scoreList = new List<int>() { 5, 98, 56, 45, 30, 22, 150, 120, 100, 160};
+        labelMid.text = Mathf.Ceil(scoreList.Max() / 2).ToString();
+        labelEnd.text = scoreList.Max().ToString();
 
         Dictionary<int, int> scoreFreq = CalculateScoreFrequence(scoreList, 8);
         ShowGraph(new List<int>(scoreFreq.Values), 160, scoreList.Average(), scoreList.Max());
