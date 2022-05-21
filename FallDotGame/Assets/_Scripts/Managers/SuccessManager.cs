@@ -10,8 +10,7 @@ public class SuccessManager : Singleton<SuccessManager> {
     #endregion
 
     public void LoadSuccess() {
-
-        scores.text = string.Format("Hight score : {0}\nBy distance : {1}\nFrom bonus : {2}", 
+        scores.text = string.Format("High score : {0}\nBy distance : {1}\nFrom bonus : {2}", 
             Player.Instance.highScore, Player.Instance.highBonusScore, Player.Instance.highDistanceScore);
     }
 

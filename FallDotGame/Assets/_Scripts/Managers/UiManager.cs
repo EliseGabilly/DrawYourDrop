@@ -69,17 +69,18 @@ public class UiManager : Singleton<UiManager> {
 
     public void OpenCanvas(Canvas canvas) {
         CloseCanvases();
+        canvas.enabled = true;
         if (canvas.Equals(succesCanvas)) {
             SuccessManager.Instance.LoadSuccess();
+            GraphManager.Instance.LoadGraph();
         }
-        canvas.enabled = true;
     }
 
     public void CloseCanvases() {
         menuCanvas.enabled = false;
         succesCanvas.enabled = false;
         optionCanvas.enabled = false;
-        creditsCanvas.enabled = false;
+        creditsCanvas.enabled = false; 
     }
 
     public void StartGame() {

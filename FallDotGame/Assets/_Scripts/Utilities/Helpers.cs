@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// A static class for general helpful methods
 /// </summary>
-public static class Helpers 
+public static class Helpers
 {
     /// <summary>
     /// Destroy all child objects of this transform (Unintentionally evil sounding).
