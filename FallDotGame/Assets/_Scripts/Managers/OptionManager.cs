@@ -53,6 +53,7 @@ public class OptionManager : MonoBehaviour {
     }
 
     public void ChangeMagicColor(int change) {
+        AudioSystem.Instance.PlayClic();
         countMagic += change;
         countMagic = countMagic >= colorsMagic.Length ? 0 : countMagic;
         countMagic = countMagic < 0 ? colorsMagic.Length-1 : countMagic;
@@ -61,6 +62,7 @@ public class OptionManager : MonoBehaviour {
     }
 
     public void ChangeBgColor(int change) {
+        AudioSystem.Instance.PlayClic();
         countBg += change;
         countBg = countBg >= colorsBg.Length ? 0 : countBg;
         countBg = countBg < 0 ? colorsBg.Length-1 : countBg;
@@ -69,6 +71,7 @@ public class OptionManager : MonoBehaviour {
     }
 
     public void ChangeBallColor(int change) {
+        AudioSystem.Instance.PlayClic();
         countBall += change;
         countBall = countBall >= colorsBall.Length ? 0 : countBall;
         countBall = countBall < 0 ? colorsBall.Length-1 : countBall;
@@ -78,6 +81,7 @@ public class OptionManager : MonoBehaviour {
 
     public void ReloadApperance() {
         SaveAndDisplay();
+        AudioSystem.Instance.PlayClic();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

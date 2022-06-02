@@ -74,6 +74,7 @@ public class UiManager : Singleton<UiManager> {
             SuccessManager.Instance.LoadSuccess();
             GraphManager.Instance.LoadGraph();
         }
+        AudioSystem.Instance.PlayClic();
     }
 
     public void CloseCanvases() {
@@ -93,6 +94,7 @@ public class UiManager : Singleton<UiManager> {
     }
 
     public void Quit() {
+        AudioSystem.Instance.PlayClic();
         Application.Quit();
     }
 }

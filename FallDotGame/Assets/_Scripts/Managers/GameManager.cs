@@ -43,6 +43,7 @@ public class GameManager : Singleton<GameManager> {
     }
 
     public void GameOver() {
+        AudioSystem.Instance.PlayLose();
         Player.Instance.ChangeHighScores(RewardScore + DistanceScore, DistanceScore, RewardScore);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }

@@ -6,7 +6,8 @@ public class Bounce : Item {
         if (collision.CompareTag("Player")) {
             collision.gameObject.GetComponent<Ball>().TakeBounce();
             SR.enabled = false;
-            Collider.enabled = false;            
+            Collider.enabled = false;
+            AudioSystem.Instance.PlayItem();
         }
     }
 }

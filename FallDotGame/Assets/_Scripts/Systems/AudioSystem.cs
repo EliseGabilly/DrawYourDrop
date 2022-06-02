@@ -23,7 +23,7 @@ public class AudioSystem : StaticInstance<AudioSystem> {
     [SerializeField]
     private AudioClip item;
     [SerializeField]
-    private AudioClip penalty;
+    private AudioClip lose;
     #endregion
 
     protected override void Awake() {
@@ -31,8 +31,8 @@ public class AudioSystem : StaticInstance<AudioSystem> {
     }
 
     private void Start() {
-        _musicSource = GetComponentsInChildren<AudioSource>()[0];
-        _soundsSource = GetComponentsInChildren<AudioSource>()[1];
+        _soundsSource = GetComponentsInChildren<AudioSource>()[0];
+        _musicSource = GetComponentsInChildren<AudioSource>()[1];
 
         musicIndex = Random.Range(0, music.Count);
         _musicSource.clip = music[musicIndex];
@@ -89,7 +89,7 @@ public class AudioSystem : StaticInstance<AudioSystem> {
         PlaySound(item);
     }
 
-    public void PlayPenalty() {
-        PlaySound(penalty);
+    public void PlayLose() {
+        PlaySound(lose);
     }
 }

@@ -14,6 +14,7 @@ public class Erase : Item {
             SR.enabled = false;
             Collider.enabled = false;
             obstacleGroup.EraseAction();
+            AudioSystem.Instance.PlayItem();
         }
     }
 }

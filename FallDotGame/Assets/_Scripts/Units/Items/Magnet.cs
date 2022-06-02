@@ -7,6 +7,7 @@ public class Magnet : Item {
             collision.gameObject.GetComponent<Ball>().TakeMagnet();
             SR.enabled = false;
             Collider.enabled = false;
+            AudioSystem.Instance.PlayItem();
         } 
     }
 }

@@ -27,6 +27,7 @@ public class Reward : Item {
             SR.enabled = false;
             Collider.enabled = false;
             GameManager.Instance.IncreaseScore(10);
+            AudioSystem.Instance.PlayBonus();
             isMagnet = false;
         } else if (collision.CompareTag("Magnet")) {
             isMagnet = Ball.Instance.IsMagnet;

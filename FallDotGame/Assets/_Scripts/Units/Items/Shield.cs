@@ -7,6 +7,7 @@ public class Shield : Item {
             collision.gameObject.GetComponent<Ball>().TakeShield();
             SR.enabled = false;
             Collider.enabled = false;
+            AudioSystem.Instance.PlayItem();
         }
     }
 }

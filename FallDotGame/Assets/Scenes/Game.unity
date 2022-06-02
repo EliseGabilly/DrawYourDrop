@@ -722,22 +722,30 @@ PrefabInstance:
       propertyPath: col.Array.data[2]
       value: 
       objectReference: {fileID: 11400000, guid: a5ec6e6f43518234bbd07d406453bba3, type: 2}
+    - target: {fileID: 1461370446, guid: 1a32bb5aaf21df040a86121d1db770fb, type: 3}
+      propertyPath: m_Volume
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1163341469097971916, guid: 1a32bb5aaf21df040a86121d1db770fb, type: 3}
       propertyPath: hit
       value: 
-      objectReference: {fileID: 8300000, guid: 3d56d1c6806f0394d9a02531db13837e, type: 3}
+      objectReference: {fileID: 8300000, guid: 955856fcbc96b8e4c9e32fd3bbf22401, type: 3}
     - target: {fileID: 1163341469097971916, guid: 1a32bb5aaf21df040a86121d1db770fb, type: 3}
       propertyPath: clic
       value: 
-      objectReference: {fileID: 8300000, guid: 955856fcbc96b8e4c9e32fd3bbf22401, type: 3}
+      objectReference: {fileID: 8300000, guid: 866f2a4930d9f0e4abdb8cc4764cf06a, type: 3}
     - target: {fileID: 1163341469097971916, guid: 1a32bb5aaf21df040a86121d1db770fb, type: 3}
       propertyPath: item
       value: 
       objectReference: {fileID: 8300000, guid: 866f2a4930d9f0e4abdb8cc4764cf06a, type: 3}
     - target: {fileID: 1163341469097971916, guid: 1a32bb5aaf21df040a86121d1db770fb, type: 3}
+      propertyPath: lose
+      value: 
+      objectReference: {fileID: 8300000, guid: 5f90f0430c7ff6b48ae87388ccb46b6e, type: 3}
+    - target: {fileID: 1163341469097971916, guid: 1a32bb5aaf21df040a86121d1db770fb, type: 3}
       propertyPath: bonus
       value: 
-      objectReference: {fileID: 8300000, guid: 866f2a4930d9f0e4abdb8cc4764cf06a, type: 3}
+      objectReference: {fileID: 8300000, guid: 3d56d1c6806f0394d9a02531db13837e, type: 3}
     - target: {fileID: 1163341469097971916, guid: 1a32bb5aaf21df040a86121d1db770fb, type: 3}
       propertyPath: penalty
       value: 
@@ -3207,12 +3215,12 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1189463401}
         m_TargetAssemblyTypeName: UiManager, Assembly-CSharp
-        m_MethodName: OpenCanvas
-        m_Mode: 2
+        m_MethodName: OpenMenu
+        m_Mode: 1
         m_Arguments:
-          m_ObjectArgument: {fileID: 789639306}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Canvas, UnityEngine
-          m_IntArgument: 0
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: -1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -3790,7 +3798,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: -1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -4535,7 +4543,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 926606291}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Canvas, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: -1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -6189,7 +6197,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: -1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -7134,7 +7142,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 324632427}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Canvas, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: -1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -7722,6 +7730,7 @@ Transform:
   m_Children:
   - {fileID: 1980843606}
   - {fileID: 804985732}
+  - {fileID: 1775618070}
   m_Father: {fileID: 308057232}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -8158,6 +8167,66 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1682544879}
   m_CullTransparentMesh: 1
+--- !u!1 &1775618069
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1775618070}
+  - component: {fileID: 1775618072}
+  - component: {fileID: 1775618071}
+  m_Layer: 0
+  m_Name: CloseTrigger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1775618070
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1775618069}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1643376862}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1775618071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1775618069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a326633dc406f3438eddbda29dac6fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!58 &1775618072
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1775618069}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 0.6
 --- !u!1 &1795345214
 GameObject:
   m_ObjectHideFlags: 0
@@ -8359,12 +8428,12 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1189463401}
         m_TargetAssemblyTypeName: UiManager, Assembly-CSharp
-        m_MethodName: OpenCanvas
-        m_Mode: 2
+        m_MethodName: OpenMenu
+        m_Mode: 1
         m_Arguments:
-          m_ObjectArgument: {fileID: 789639306}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Canvas, UnityEngine
-          m_IntArgument: 0
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: -1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -8497,7 +8566,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 1907808413}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Canvas, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: -1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -9208,12 +9277,12 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1189463401}
         m_TargetAssemblyTypeName: UiManager, Assembly-CSharp
-        m_MethodName: OpenCanvas
-        m_Mode: 2
+        m_MethodName: OpenMenu
+        m_Mode: 1
         m_Arguments:
-          m_ObjectArgument: {fileID: 789639306}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Canvas, UnityEngine
-          m_IntArgument: 0
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: -1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0

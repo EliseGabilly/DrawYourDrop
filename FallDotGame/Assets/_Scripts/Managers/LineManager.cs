@@ -16,10 +16,8 @@ public class LineManager : Singleton<LineManager> {
     [SerializeField]
     private Transform linesContainer;
 
-    readonly List<GameObject> lines;
     List<Vector2> currentLine;
     LineRenderer currentLinerRenderer;
-    private EdgeCollider2D currentLineEdgeCollider;
     [SerializeField]
     private Material material;
 
@@ -57,7 +55,7 @@ public class LineManager : Singleton<LineManager> {
     private void StartLine() {
         //Init line
         currentLine = new List<Vector2>();
-        GameObject goLine = new GameObject { name = "Line" };
+        GameObject goLine = new GameObject { name = "Line" , tag = "Obstacle"};
         goLine.transform.parent = linesContainer;
         currentLinerRenderer = goLine.AddComponent<LineRenderer>();
 
@@ -92,12 +90,14 @@ public class LineManager : Singleton<LineManager> {
     }
 
     private void EndLine() {
-        if(currentLine.Count == 1) {
-            Destroy(currentLineEdgeCollider);
-        } else {
-            currentLineEdgeCollider = gameObject.AddComponent<EdgeCollider2D>();
-            currentLineEdgeCollider.edgeRadius = lineWidth / 2;
-            currentLineEdgeCollider.SetPoints(currentLine);
+        if(currentLine.Count > 1) {
+            EdgeCollider2D lineEdgeTrigger = currentLinerRenderer.gameObject.AddComponent<EdgeCollider2D>();
+            lineEdgeTrigger.edgeRadius = lineWidth / 2 ;
+            lineEdgeTrigger.isTrigger = true;
+            lineEdgeTrigger.SetPoints(currentLine);
+            EdgeCollider2D lineEdgeCollider = currentLinerRenderer.gameObject.AddComponent<EdgeCollider2D>();
+            lineEdgeCollider.edgeRadius = lineWidth / 2;
+            lineEdgeCollider.SetPoints(currentLine);
         }
     }
 }
