@@ -45,12 +45,9 @@ public class AudioSystem : StaticInstance<AudioSystem> {
         }
     }
 
-    public void SetMusicVolume(float volume) {
-        _musicSource.volume = volume;
-    }
-
-    public void SetSoundVolume(float volume) {
-        _soundsSource.volume = volume;
+    public void SetSourcesVolume(float musicVolume, float soundVolume) {
+        _musicSource.volume = musicVolume;
+        _soundsSource.volume = soundVolume;
     }
 
     private void PlayNextSong() {

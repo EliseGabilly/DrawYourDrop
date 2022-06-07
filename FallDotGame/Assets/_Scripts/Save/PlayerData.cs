@@ -36,7 +36,5 @@ public class PlayerData {
         this.colorBall = new float[] { player.colorBall.r, player.colorBall.g, player.colorBall.b };
         this.colorMagic = new float[] { player.colorMagic.r, player.colorMagic.g, player.colorMagic.b };
         this.colorBackground = new float[] { player.colorBackground.r, player.colorBackground.g, player.colorBackground.b };
-
     }
-
 }

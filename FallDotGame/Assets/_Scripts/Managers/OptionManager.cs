@@ -31,7 +31,12 @@ public class OptionManager : MonoBehaviour {
         countBall = FindColorIndex(Player.Instance.colorBall, colorsBall);
         countBg = FindColorIndex(Player.Instance.colorBackground, colorsBg);
 
-        Player.Instance.ChangeOptionsMusic(musicSlider.value, soundSlider.value);
+        float volumeMusic = Player.Instance.volumeMusic;
+        float volumeSound = Player.Instance.volumeSound;
+        musicSlider.value = volumeMusic;
+        soundSlider.value = volumeSound;
+        AudioSystem.Instance.SetSourcesVolume(musicSlider.value, soundSlider.value);
+
         SaveAndDisplay();
     }
 
@@ -83,5 +88,10 @@ public class OptionManager : MonoBehaviour {
         SaveAndDisplay();
         AudioSystem.Instance.PlayClic();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void ChangVolume() {
+        Player.Instance.ChangeOptionsMusic(musicSlider.value, soundSlider.value);
+        AudioSystem.Instance.SetSourcesVolume(musicSlider.value, soundSlider.value);
     }
 }

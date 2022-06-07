@@ -8,7 +8,7 @@ public class BallCloseTrigger : MonoBehaviour {
             AudioSystem.Instance.PlayHit();
             try {
                 collision.gameObject.GetComponent<EdgeCollider2D>().isTrigger = false;
-            } catch (Exception e) { }
+            } catch (Exception) { }
         }
     }
 
