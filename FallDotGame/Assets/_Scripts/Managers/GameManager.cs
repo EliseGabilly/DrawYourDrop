@@ -9,6 +9,7 @@ public class GameManager : Singleton<GameManager> {
 
     public int RewardScore { get; set; }
     public int DistanceScore { get; set; }
+    public int Hundred = 100;
     #endregion
 
 
@@ -21,8 +22,13 @@ public class GameManager : Singleton<GameManager> {
 
     private void Update() {
         if (IsPlayerInFrame()) {
-            DistanceScore = Mathf.Max(DistanceScore, -Mathf.FloorToInt(player.transform.position.y/5));
-            UiManager.Instance.UpdateScore(RewardScore + DistanceScore);
+            DistanceScore = Mathf.Max(DistanceScore, -Mathf.FloorToInt(player.transform.position.y / 5));
+            int score = RewardScore + DistanceScore;
+            UiManager.Instance.UpdateScore(score);
+            if (score >= Hundred) {
+                Hundred += 100;
+                TweenManager.Instance.ScoreRotateEffect();
+            }
         }
     }
 
@@ -31,11 +37,11 @@ public class GameManager : Singleton<GameManager> {
         Vector3 screenPos = mainCamera.WorldToScreenPoint(player.transform.position);
         float xRatio = screenPos.x / mainCamera.pixelWidth; //horizontal check
         float yRatio = screenPos.y / mainCamera.pixelHeight; //vertical chack
-        if(xRatio > 1.05f || xRatio < -.05f) {
+        if (xRatio > 1.05f || xRatio < -.05f) {
             isInFrame = false;
             Ball.Instance.WentOutOfFrame();
         }
-        if(yRatio > 1.05f || yRatio < -.05f) {
+        if (yRatio > 1.05f || yRatio < -.05f) {
             isInFrame = false;
             GameManager.Instance.GameOver();
         }
@@ -50,6 +56,6 @@ public class GameManager : Singleton<GameManager> {
 
     public void IncreaseScore(int addedScore) {
         RewardScore += addedScore;
-        UiManager.Instance.UpdateScore(RewardScore+ DistanceScore);
+        UiManager.Instance.UpdateScore(RewardScore + DistanceScore);
     }
 }

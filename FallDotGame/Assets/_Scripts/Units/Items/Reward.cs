@@ -27,7 +27,7 @@ public class Reward : Item {
             SR.enabled = false;
             Collider.enabled = false;
             GameManager.Instance.IncreaseScore(10);
-            TweenManager.Instance.Pulse();
+            TweenManager.Instance.ScorePulseEffect();
             AudioSystem.Instance.PlayBonus();
             isMagnet = false;
         } else if (collision.CompareTag("Magnet")) {

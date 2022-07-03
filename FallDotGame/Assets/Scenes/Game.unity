@@ -6641,7 +6641,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d06231031fbe0947803da004ef65032, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  go: {fileID: 1594548719}
+  score: {fileID: 1594548719}
+  magnet: {fileID: 1980843605}
+  shield: {fileID: 804985731}
+  bounce: {fileID: 885097242}
 --- !u!4 &1454973789
 Transform:
   m_ObjectHideFlags: 0
