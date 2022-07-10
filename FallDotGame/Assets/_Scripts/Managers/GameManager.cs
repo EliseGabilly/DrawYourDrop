@@ -10,6 +10,7 @@ public class GameManager : Singleton<GameManager> {
     public int RewardScore { get; set; }
     public int DistanceScore { get; set; }
     public int Hundred = 100;
+    public bool UseGravity { get; private set; }
     #endregion
 
 
@@ -17,7 +18,7 @@ public class GameManager : Singleton<GameManager> {
         base.Awake();
         player = GameObject.FindWithTag("Player");
         mainCamera = Camera.main;
-        Time.timeScale = 0;
+        SetGravity(false);
     }
 
     private void Update() {
@@ -57,5 +58,10 @@ public class GameManager : Singleton<GameManager> {
     public void IncreaseScore(int addedScore) {
         RewardScore += addedScore;
         UiManager.Instance.UpdateScore(RewardScore + DistanceScore);
+    }
+
+    public void SetGravity(bool use) {
+        UseGravity = use;
+        Physics2D.gravity = use ? new Vector2(0, -9.81f) : Vector2.zero;
     }
 }

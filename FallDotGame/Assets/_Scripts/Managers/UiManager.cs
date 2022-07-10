@@ -53,18 +53,7 @@ public class UiManager : Singleton<UiManager> {
 
     public void OpenMenu() {
         OpenCanvas(menuCanvas);
-        Time.timeScale = 0;
-    }
-
-    public void CloseMenuPlay() {
-        CloseCanvases();
-        Time.timeScale = 1; 
-    }
-
-    public void CloseMenuReplay() {
-        CloseCanvases();
-        Time.timeScale = 1;
-        GameManager.Instance.GameOver();
+        GameManager.Instance.SetGravity(false);
     }
 
     public void OpenCanvas(Canvas canvas) {
@@ -89,7 +78,7 @@ public class UiManager : Singleton<UiManager> {
         optionCanvas.enabled = false;
         creditsCanvas.enabled = false;
         gameCanvas.enabled = true;
-        Time.timeScale = 1;
+        GameManager.Instance.SetGravity(true);
     }
 
     public void Quit() {

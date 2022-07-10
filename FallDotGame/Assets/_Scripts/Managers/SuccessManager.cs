@@ -75,10 +75,11 @@ public class SuccessManager : Singleton<SuccessManager> {
         int minSize = 1000;
 
         for (int i = 0; i < txtBoxes.Length; i++) {
-            if (minSize > txtBoxes[i].cachedTextGenerator.fontSizeUsedForBestFit)
+            if (minSize > txtBoxes[i].cachedTextGenerator.fontSizeUsedForBestFit) {
                 minSize = txtBoxes[i].cachedTextGenerator.fontSizeUsedForBestFit;
+            }
         }
-
+        
         for (int i = 0; i < txtBoxes.Length; i++) {
             txtBoxes[i].resizeTextMaxSize = minSize;
         }
