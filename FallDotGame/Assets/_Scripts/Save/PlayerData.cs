@@ -6,9 +6,11 @@ public class PlayerData {
 
     #region Variables
     public int highScore;
-    public int lastScore;
     public int highDistanceScore;
     public int highBonusScore;
+    public int lastScore;
+    public int lastDistanceScore;
+    public int lastBonusScore;
 
     public int gamePlayed;
     public int[] scoreHistory;
@@ -23,9 +25,11 @@ public class PlayerData {
 
     public PlayerData(Player player) {
         this.highScore = player.highScore;
-        this.lastScore = player.lastScore;
         this.highDistanceScore = player.highDistanceScore;
         this.highBonusScore = player.highBonusScore;
+        this.lastScore = player.lastScore;
+        this.lastDistanceScore = player.lastDistanceScore;
+        this.lastBonusScore = player.lastBonusScore;
 
         this.gamePlayed = player.gamePlayed;
         this.scoreHistory = player.scoreHistory.ToArray();

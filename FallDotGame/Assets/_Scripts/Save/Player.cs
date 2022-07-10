@@ -10,9 +10,11 @@ public class Player : Singleton<Player> {
 
     #region Variables
     public int highScore = 0;
-    public int lastScore = 0;
     public int highDistanceScore = 0;
     public int highBonusScore = 0;
+    public int lastScore = 0;
+    public int lastDistanceScore = 0;
+    public int lastBonusScore = 0;
 
     public int gamePlayed = 0;
     public List<int> scoreHistory = new List<int>();
@@ -32,9 +34,11 @@ public class Player : Singleton<Player> {
 
     public Player ChangeData(PlayerData data) {
         this.highScore = data.highScore;
-        this.lastScore = data.lastScore;
         this.highDistanceScore = data.highDistanceScore;
         this.highBonusScore = data.highBonusScore;
+        this.lastScore = data.lastScore;
+        this.lastDistanceScore = data.lastDistanceScore;
+        this.lastBonusScore = data.lastBonusScore;
 
         this.gamePlayed = data.gamePlayed;
         this.scoreHistory = new List<int>(data.scoreHistory);
