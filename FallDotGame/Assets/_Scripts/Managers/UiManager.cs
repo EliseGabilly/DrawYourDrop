@@ -79,6 +79,9 @@ public class UiManager : Singleton<UiManager> {
         creditsCanvas.enabled = false;
         gameCanvas.enabled = true;
         GameManager.Instance.SetGravity(true);
+        GameManager.Instance.PickUpCount = 0;
+        GameManager.Instance.StartTime = Time.time;
+        LineManager.Instance.LineCount = 0;
     }
 
     public void Quit() {

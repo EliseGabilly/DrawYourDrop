@@ -22,6 +22,7 @@ public class LineManager : Singleton<LineManager> {
     private Material material;
 
     private bool isDrawing = false;
+    public int LineCount { get; set; } = 0;
 
     private Camera mainCamera;
 
@@ -44,6 +45,7 @@ public class LineManager : Singleton<LineManager> {
     private IEnumerator Drawing() {
         IsLeapOfFaith = false;
         isDrawing = true;
+        LineCount++;
         StartLine();
         while (isDrawing) {
             AddPoint(GetCurrentWorldPoitn());

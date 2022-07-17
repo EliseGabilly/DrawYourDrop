@@ -15,6 +15,7 @@ public class Erase : Item {
             Collider.enabled = false;
             obstacleGroup.EraseAction();
             AudioSystem.Instance.PlayItem();
+            GameManager.Instance.PickUpCount++;
         }
     }
 }

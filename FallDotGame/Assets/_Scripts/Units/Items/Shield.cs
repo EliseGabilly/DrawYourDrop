@@ -8,6 +8,7 @@ public class Shield : Item {
             SR.enabled = false;
             Collider.enabled = false;
             AudioSystem.Instance.PlayItem();
+            GameManager.Instance.PickUpCount++;
         }
     }
 }

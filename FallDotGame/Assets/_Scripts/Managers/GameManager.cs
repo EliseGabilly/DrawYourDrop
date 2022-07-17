@@ -11,6 +11,8 @@ public class GameManager : Singleton<GameManager> {
     public int DistanceScore { get; set; }
     public int Hundred = 100;
     public bool UseGravity { get; private set; }
+    public int PickUpCount { get; set; } = 0;
+    public float StartTime { get; set; } = 0;
     #endregion
 
 
@@ -44,14 +46,22 @@ public class GameManager : Singleton<GameManager> {
         }
         if (yRatio > 1.05f || yRatio < -.05f) {
             isInFrame = false;
-            GameManager.Instance.GameOver();
+            GameManager.Instance.GameOver("Too slow");
         }
         return isInFrame;
     }
 
-    public void GameOver() {
+    public void GameOver(string death) {
         AudioSystem.Instance.PlayLose();
-        Player.Instance.ChangeHighScores(RewardScore + DistanceScore, DistanceScore, RewardScore);
+        Player.Instance.ChangGameStats(
+            RewardScore + DistanceScore,
+            DistanceScore,
+            RewardScore,
+            Time.time - StartTime,
+            death,
+            PickUpCount,
+            LineManager.Instance.LineCount
+        );
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 

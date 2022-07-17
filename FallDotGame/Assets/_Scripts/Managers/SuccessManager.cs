@@ -1,7 +1,7 @@
 using System.Collections;
-using System;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 public class SuccessManager : Singleton<SuccessManager> {
 
@@ -47,10 +47,10 @@ public class SuccessManager : Singleton<SuccessManager> {
         bonus.text = string.Format("{0}\nBonus", Player.Instance.lastBonusScore.ToString());
         distance.text = string.Format("{0}\nDistance", Player.Instance.lastDistanceScore.ToString());
 
-        death.text = string.Format("Death reason : {0}", Player.Instance.highDistanceScore.ToString());
-        clock.text = string.Format("Time played : {0}", Player.Instance.highDistanceScore.ToString());
-        power_up.text = string.Format("Pick up : {0}", Player.Instance.highDistanceScore.ToString());
-        lines.text = string.Format("Line drawns : {0}", Player.Instance.highDistanceScore.ToString());
+        death.text = string.Format("Death reason : {0}", Player.Instance.deathReason);
+        clock.text = string.Format("Time played : {0}", Player.Instance.timePlayed.ToString());
+        power_up.text = string.Format("Pick up : {0}", Player.Instance.pickUp.ToString());
+        lines.text = string.Format("Line drawns : {0}", Player.Instance.linesDrawn.ToString());
 
         Text[] txtLastGame = new Text[] {bonus, distance, death, clock, power_up, lines};
         StartCoroutine(SetTextSize(txtLastGame));
@@ -60,12 +60,12 @@ public class SuccessManager : Singleton<SuccessManager> {
         best_bonus.text = string.Format("{0}\nBonus", Player.Instance.highBonusScore.ToString());
         best_distance.text = string.Format("{0}\nDistance", Player.Instance.highDistanceScore.ToString());
 
-        game_count.text = string.Format("Game played : {0}", Player.Instance.highDistanceScore.ToString());
-        average.text = string.Format("Average : {0}", Player.Instance.highDistanceScore.ToString());
-        total_power_up.text = string.Format("Pick up : {0}", Player.Instance.highDistanceScore.ToString());
-        total_lines.text = string.Format("Line drawns : {0}", Player.Instance.highDistanceScore.ToString());
+        game_count.text = string.Format("Game played : {0}", Player.Instance.gamePlayed.ToString());
+        average.text = string.Format("Average : {0}", Player.Instance.scoreHistory.Average().ToString());
+        total_power_up.text = string.Format("Pick up : {0}", Player.Instance.ttPickUp.ToString());
+        total_lines.text = string.Format("Line drawns : {0}", Player.Instance.ttLinesDrawn.ToString());
 
-        Text[] txtGeneral = new Text[] {game_count, best_bonus, best_distance, game_count, average, total_power_up, total_lines};
+        Text[] txtGeneral = new Text[] {best_bonus, best_distance, game_count, average, total_power_up, total_lines};
         StartCoroutine(SetTextSize(txtGeneral));
     }
 
@@ -79,9 +79,9 @@ public class SuccessManager : Singleton<SuccessManager> {
                 minSize = txtBoxes[i].cachedTextGenerator.fontSizeUsedForBestFit;
             }
         }
-        
+
         for (int i = 0; i < txtBoxes.Length; i++) {
-            txtBoxes[i].resizeTextMaxSize = minSize;
+            txtBoxes[i].resizeTextMaxSize = minSize/2;
         }
     }
 

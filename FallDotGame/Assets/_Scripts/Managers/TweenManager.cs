@@ -27,10 +27,10 @@ public class TweenManager : Singleton<TweenManager> {
 
     public void SlideSuccess() {
         success_last.transform
-            .DOMoveX(isSwitch ? -2*width : 0, 0.5f)
+            .DOMoveX(isSwitch ? -2*width : 0, 0.4f)
             .SetEase(Ease.InOutQuad);
         success_general.transform
-            .DOMoveX(isSwitch ? 0 : 2*width, 0.5f)
+            .DOMoveX(isSwitch ? 0 : 2*width, 0.4f)
             .SetEase(Ease.InOutQuad);
         isSwitch = !isSwitch;
     }

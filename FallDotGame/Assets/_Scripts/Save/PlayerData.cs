@@ -12,6 +12,13 @@ public class PlayerData {
     public int lastDistanceScore;
     public int lastBonusScore;
 
+    public string timePlayed;
+    public string deathReason;
+    public int pickUp;
+    public int ttPickUp;
+    public int linesDrawn;
+    public int ttLinesDrawn;
+
     public int gamePlayed;
     public int[] scoreHistory;
 
@@ -30,6 +37,13 @@ public class PlayerData {
         this.lastScore = player.lastScore;
         this.lastDistanceScore = player.lastDistanceScore;
         this.lastBonusScore = player.lastBonusScore;
+
+        this.timePlayed = player.timePlayed;
+        this.deathReason = player.deathReason;
+        this.pickUp = player.pickUp;
+        this.ttPickUp = player.ttPickUp;
+        this.linesDrawn = player.linesDrawn;
+        this.ttLinesDrawn = player.ttLinesDrawn;
 
         this.gamePlayed = player.gamePlayed;
         this.scoreHistory = player.scoreHistory.ToArray();
