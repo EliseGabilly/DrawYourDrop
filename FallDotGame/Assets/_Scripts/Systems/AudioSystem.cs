@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 /// <summary>
 /// Insanely basic audio system which supports 3D sound.
@@ -46,6 +47,11 @@ public class AudioSystem : StaticInstance<AudioSystem> {
     }
 
     public void SetSourcesVolume(float musicVolume, float soundVolume) {
+        StartCoroutine(DelaySetSourcesVolume(musicVolume, soundVolume));
+    }
+
+    private IEnumerator DelaySetSourcesVolume(float musicVolume, float soundVolume) {
+        yield return null;
         _musicSource.volume = musicVolume;
         _soundsSource.volume = soundVolume;
     }

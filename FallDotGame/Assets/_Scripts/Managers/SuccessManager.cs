@@ -61,7 +61,8 @@ public class SuccessManager : Singleton<SuccessManager> {
         best_distance.text = string.Format("{0}\nDistance", Player.Instance.highDistanceScore.ToString());
 
         game_count.text = string.Format("Game played : {0}", Player.Instance.gamePlayed.ToString());
-        average.text = string.Format("Average : {0}", Player.Instance.scoreHistory.Average().ToString());
+        string avg = Player.Instance.scoreHistory.Count == 0 ? "" : Player.Instance.scoreHistory.Average().ToString();
+        average.text = string.Format("Average : {0}", avg);
         total_power_up.text = string.Format("Pick up : {0}", Player.Instance.ttPickUp.ToString());
         total_lines.text = string.Format("Line drawns : {0}", Player.Instance.ttLinesDrawn.ToString());
 
