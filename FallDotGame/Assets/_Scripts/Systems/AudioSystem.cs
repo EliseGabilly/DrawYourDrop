@@ -27,10 +27,6 @@ public class AudioSystem : StaticInstance<AudioSystem> {
     private AudioClip lose;
     #endregion
 
-    protected override void Awake() {
-        base.Awake();
-    }
-
     private void Start() {
         _soundsSource = GetComponentsInChildren<AudioSource>()[0];
         _musicSource = GetComponentsInChildren<AudioSource>()[1];
@@ -47,11 +43,6 @@ public class AudioSystem : StaticInstance<AudioSystem> {
     }
 
     public void SetSourcesVolume(float musicVolume, float soundVolume) {
-        StartCoroutine(DelaySetSourcesVolume(musicVolume, soundVolume));
-    }
-
-    private IEnumerator DelaySetSourcesVolume(float musicVolume, float soundVolume) {
-        yield return null;
         _musicSource.volume = musicVolume;
         _soundsSource.volume = soundVolume;
     }
