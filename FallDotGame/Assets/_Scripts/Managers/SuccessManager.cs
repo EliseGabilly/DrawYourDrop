@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using System;
 
 public class SuccessManager : Singleton<SuccessManager> {
 
@@ -42,36 +43,35 @@ public class SuccessManager : Singleton<SuccessManager> {
     #endregion
 
     public void LoadSuccess() {
-        // Last game
-        score.text = string.Format("Last score\n{0}", Player.Instance.lastScore.ToString());
-        bonus.text = string.Format("{0}\nBonus", Player.Instance.lastBonusScore.ToString());
-        distance.text = string.Format("{0}\nDistance", Player.Instance.lastDistanceScore.ToString());
+        Player playerInstance = Player.Instance;
 
-        death.text = string.Format("Death reason : {0}", Player.Instance.deathReason);
-        clock.text = string.Format("Time played : {0}", Player.Instance.timePlayed.ToString());
-        power_up.text = string.Format("Pick up : {0}", Player.Instance.pickUp.ToString());
-        lines.text = string.Format("Line drawns : {0}", Player.Instance.linesDrawn.ToString());
+        //Last game
+        score.text = string.Format("Last score\n{0}", playerInstance.lastScore.ToString());
+        bonus.text = string.Format("{0}\nBonus", playerInstance.lastBonusScore.ToString());
+        distance.text = string.Format("{0}\nDistance", playerInstance.lastDistanceScore.ToString());
 
-        Text[] txtLastGame = new Text[] {bonus, distance, death, clock, power_up, lines};
-        StartCoroutine(SetTextSize(txtLastGame));
+        death.text = string.Format("Death reason : {0}", playerInstance.deathReason);
+        clock.text = string.Format("Time played : {0}", playerInstance.timePlayed.ToString());
+        power_up.text = string.Format("Pick up : {0}", playerInstance.pickUp.ToString());
+        lines.text = string.Format("Line drawns : {0}", playerInstance.linesDrawn.ToString());
 
         // Genaral
-        best_score.text = string.Format("Personal best\n{0}", Player.Instance.highScore.ToString());
-        best_bonus.text = string.Format("{0}\nBonus", Player.Instance.highBonusScore.ToString());
-        best_distance.text = string.Format("{0}\nDistance", Player.Instance.highDistanceScore.ToString());
+        best_score.text = string.Format("Personal best\n{0}", playerInstance.highScore.ToString());
+        best_bonus.text = string.Format("{0}\nBonus", playerInstance.highBonusScore.ToString());
+        best_distance.text = string.Format("{0}\nDistance", playerInstance.highDistanceScore.ToString());
 
-        game_count.text = string.Format("Game played : {0}", Player.Instance.gamePlayed.ToString());
-        string avg = Player.Instance.scoreHistory.Count == 0 ? "" : Player.Instance.scoreHistory.Average().ToString();
+        game_count.text = string.Format("Game played : {0}", playerInstance.gamePlayed.ToString());
+        string avg = playerInstance.scoreHistory.Count == 0 ? "" : playerInstance.scoreHistory.Average().ToString();
         average.text = string.Format("Average : {0}", avg);
-        total_power_up.text = string.Format("Pick up : {0}", Player.Instance.ttPickUp.ToString());
-        total_lines.text = string.Format("Line drawns : {0}", Player.Instance.ttLinesDrawn.ToString());
+        total_power_up.text = string.Format("Pick up : {0}", playerInstance.ttPickUp.ToString());
+        total_lines.text = string.Format("Line drawns : {0}", playerInstance.ttLinesDrawn.ToString());
 
-        Text[] txtGeneral = new Text[] {best_bonus, best_distance, game_count, average, total_power_up, total_lines};
-        StartCoroutine(SetTextSize(txtGeneral));
+        StartCoroutine(SetTextSize());
     }
 
-    private IEnumerator SetTextSize(Text[] txtBoxes) {
-        yield return null;
+    private IEnumerator SetTextSize() {
+        yield return null; 
+        Text[] txtBoxes = new Text[] { bonus, distance, death, clock, power_up, lines, best_bonus, best_distance, game_count, average, total_power_up, total_lines };
 
         int minSize = 1000;
 
