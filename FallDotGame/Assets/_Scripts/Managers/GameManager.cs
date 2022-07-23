@@ -46,7 +46,11 @@ public class GameManager : Singleton<GameManager> {
         }
         if (yRatio > 1.05f || yRatio < -.05f) {
             isInFrame = false;
-            GameManager.Instance.GameOver("Too slow");
+            if (Vector2.Equals(Vector2.zero, player.GetComponent<Rigidbody2D>().velocity)) {
+                GameManager.Instance.GameOver("Got stuck");
+            } else {
+                GameManager.Instance.GameOver("Too slow");
+            }
         }
         return isInFrame;
     }

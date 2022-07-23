@@ -4,8 +4,7 @@ TODO
  + success page
 	+ don't take <5 into acount
  - avoid multiple pickup close
- - rework background (no shader cause too laggy)
- - add "got stuck" death reason
+ + add "got stuck" death reason
  - redo power up animations
 
  BUG

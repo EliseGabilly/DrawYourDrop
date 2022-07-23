@@ -43,6 +43,10 @@ public class AudioSystem : StaticInstance<AudioSystem> {
     }
 
     public void SetSourcesVolume(float musicVolume, float soundVolume) {
+        if(_soundsSource==null || _musicSource == null) {
+            _soundsSource = GetComponentsInChildren<AudioSource>()[0];
+            _musicSource = GetComponentsInChildren<AudioSource>()[1];
+        }
         _musicSource.volume = musicVolume;
         _soundsSource.volume = soundVolume;
     }
