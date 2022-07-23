@@ -27,6 +27,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1163341471010937462}
   m_RootOrder: 1
@@ -70,6 +71,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1163341469097971919}
   m_RootOrder: 0
@@ -197,6 +199,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1163341469097971919}
   m_RootOrder: 1
@@ -324,6 +327,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 802013816}
   - {fileID: 1461370445}
@@ -342,8 +346,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3148edc559c581f4c990ce36bbdfb99b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _musicSource: {fileID: 1461370446}
-  _soundsSource: {fileID: 802013817}
+  music:
+  - {fileID: 8300000, guid: ddbc375c152a93646a144cdf398cae32, type: 3}
+  - {fileID: 8300000, guid: 682a4f4b5a5bff0448d243d9c4dcd1e4, type: 3}
+  - {fileID: 8300000, guid: 71a0775d1c3d8704bb28c9c68e41895a, type: 3}
+  - {fileID: 8300000, guid: b0f3893a2b6451e469d36b33c812f82e, type: 3}
+  - {fileID: 8300000, guid: 5ca7b3e7f223fd2478dd4a086589af90, type: 3}
+  clic: {fileID: 8300000, guid: 866f2a4930d9f0e4abdb8cc4764cf06a, type: 3}
+  hit: {fileID: 8300000, guid: 955856fcbc96b8e4c9e32fd3bbf22401, type: 3}
+  bonus: {fileID: 8300000, guid: 3d56d1c6806f0394d9a02531db13837e, type: 3}
+  item: {fileID: 8300000, guid: 866f2a4930d9f0e4abdb8cc4764cf06a, type: 3}
+  lose: {fileID: 8300000, guid: 5f90f0430c7ff6b48ae87388ccb46b6e, type: 3}
 --- !u!1 &1163341471010937456
 GameObject:
   m_ObjectHideFlags: 0
@@ -371,11 +384,12 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1163341469097971919}
   - {fileID: 715220602}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1163341471010937457
 MonoBehaviour:

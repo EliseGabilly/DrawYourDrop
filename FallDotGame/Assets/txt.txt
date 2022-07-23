@@ -1,24 +1,16 @@
-Succes :
-- Score 100 + 
-- Distance score 100 +
-- Bonus score
-
-- Leep of faith
-- Use bounce
-- Use shield
-- Use magnet
-- Use erase
-- Play over x game
-
-
 
 TODO
- - music
- - score graph
-	- limite to 100
-	- don't take <5 into acount
+ + music
+ + success page
+	+ don't take <5 into acount
  - avoid multiple pickup close
+ - rework background (no shader cause too laggy)
+ - add "got stuck" death reason
+ - redo power up animations
 
  BUG
  - plus de bonus passé un certains point
  - annim de bounce qui ne marche pas bien
+ - reward qui comtinu tout droit un fois le magnet fini (plus de reward au bout d'un moment)
+ - music qui start lors du premier load
+ - 

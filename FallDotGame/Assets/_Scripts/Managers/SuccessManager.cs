@@ -51,7 +51,7 @@ public class SuccessManager : Singleton<SuccessManager> {
         distance.text = string.Format("{0}\nDistance", playerInstance.lastDistanceScore.ToString());
 
         death.text = string.Format("Death reason : {0}", playerInstance.deathReason);
-        clock.text = string.Format("Time played : {0}", playerInstance.timePlayed.ToString());
+        clock.text = string.Format("Time played : {0}", playerInstance.timePlayed);
         power_up.text = string.Format("Pick up : {0}", playerInstance.pickUp.ToString());
         lines.text = string.Format("Line drawns : {0}", playerInstance.linesDrawn.ToString());
 
@@ -61,7 +61,7 @@ public class SuccessManager : Singleton<SuccessManager> {
         best_distance.text = string.Format("{0}\nDistance", playerInstance.highDistanceScore.ToString());
 
         game_count.text = string.Format("Game played : {0}", playerInstance.gamePlayed.ToString());
-        string avg = playerInstance.scoreHistory.Count == 0 ? "" : playerInstance.scoreHistory.Average().ToString();
+        string avg = playerInstance.scoreHistory.Count == 0 ? "" : playerInstance.scoreHistory.Average().ToString("F2");
         average.text = string.Format("Average : {0}", avg);
         total_power_up.text = string.Format("Pick up : {0}", playerInstance.ttPickUp.ToString());
         total_lines.text = string.Format("Line drawns : {0}", playerInstance.ttLinesDrawn.ToString());
@@ -73,16 +73,21 @@ public class SuccessManager : Singleton<SuccessManager> {
         yield return null; 
         Text[] txtBoxes = new Text[] { bonus, distance, death, clock, power_up, lines, best_bonus, best_distance, game_count, average, total_power_up, total_lines };
 
-        int minSize = 1000;
+        int sameSizeCounter = 0;
+        int minSize = bonus.cachedTextGenerator.fontSizeUsedForBestFit;
 
         for (int i = 0; i < txtBoxes.Length; i++) {
             if (minSize > txtBoxes[i].cachedTextGenerator.fontSizeUsedForBestFit) {
                 minSize = txtBoxes[i].cachedTextGenerator.fontSizeUsedForBestFit;
-            }
+            } else if (minSize == txtBoxes[i].cachedTextGenerator.fontSizeUsedForBestFit) {
+                sameSizeCounter++;
+            } 
         }
 
-        for (int i = 0; i < txtBoxes.Length; i++) {
-            txtBoxes[i].resizeTextMaxSize = minSize/2;
+        if (sameSizeCounter != txtBoxes.Length) {
+            for (int i = 0; i < txtBoxes.Length; i++) {
+                txtBoxes[i].resizeTextMaxSize = minSize/2;
+            }
         }
     }
 
