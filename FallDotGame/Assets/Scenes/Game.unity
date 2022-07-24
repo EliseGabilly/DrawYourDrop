@@ -1281,7 +1281,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 4dced060453ff0f43977c902c6558776, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8268bf4e017473946aacee9afbf42470, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -2682,7 +2682,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Magic
+  m_Text: Pick up
 --- !u!222 &424115888
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5301,7 +5301,7 @@ GameObject:
   - component: {fileID: 889557452}
   - component: {fileID: 889557451}
   m_Layer: 0
-  m_Name: Death
+  m_Name: NbPlay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

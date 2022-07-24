@@ -8,11 +8,13 @@ TODO
  + redo power up animations
  - add visual feedback on buttons
  - rethink background (no shader)
- - 
+ - clean credit 
+ + redraw succes icons
+ -
 
  BUG
  - plus de bonus passé un certains point
  - annim de bounce qui ne marche pas bien (bugué quand plusieur d'affilé)
  - reward qui comtinu tout droit un fois le magnet fini (plus de reward au bout d'un moment)
- - music qui start lors du premier load
+ + music qui start lors du premier load
  - 
