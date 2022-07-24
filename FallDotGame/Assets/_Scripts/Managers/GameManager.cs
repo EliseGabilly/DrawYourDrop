@@ -44,7 +44,7 @@ public class GameManager : Singleton<GameManager> {
             isInFrame = false;
             Ball.Instance.WentOutOfFrame();
         }
-        if (yRatio > 1.05f || yRatio < -.05f) {
+        if (yRatio > 1.1f || yRatio < -.1f) {
             isInFrame = false;
             if (Vector2.Equals(Vector2.zero, player.GetComponent<Rigidbody2D>().velocity)) {
                 GameManager.Instance.GameOver("Got stuck");

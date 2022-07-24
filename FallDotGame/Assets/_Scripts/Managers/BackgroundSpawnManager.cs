@@ -9,6 +9,9 @@ public class BackgroundSpawnManager : MonoBehaviour {
     [SerializeField]
     private Transform backgroundParent;
 
+    [SerializeField]
+    private Sprite[] backgrounds;
+
     private readonly Queue<GameObject> backgroundImgs = new Queue<GameObject>();
     private GameObject backgroundOnTop;
     private Camera mainCamera;
@@ -20,66 +23,44 @@ public class BackgroundSpawnManager : MonoBehaviour {
     #endregion
 
     private void Start() {
+
         mainCamera = Camera.main;
 
         Color baseColor = Player.Instance.colorBackground;
         Color.RGBToHSV(baseColor, out H, out S, out V);
 
-        Vector3 positionTop = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth/2, mainCamera.pixelHeight, -mainCamera.transform.position.z));
-        Vector3 positionBottom = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth/2, 0, -mainCamera.transform.position.z));
-        worldHeight = positionTop.y - positionBottom.y;
+        Vector3 positionTopLeft = mainCamera.ScreenToWorldPoint(new Vector3(0, mainCamera.pixelHeight, -mainCamera.transform.position.z));
+        Vector3 positionBottomRight = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth, 0, -mainCamera.transform.position.z));
+        float worldWidth = positionBottomRight.x - positionTopLeft.x ;
+        worldHeight = positionTopLeft.y - positionBottomRight.y;
 
-        position = new Vector3(position.x, position.y+1.5f*worldHeight, 4);
+        float scaleWidth = worldWidth / backgrounds[0].bounds.size.x * 1.1f;
+        float scaleHeight = worldHeight / backgrounds[0].bounds.size.y *1.1f;
+
+        position = new Vector3(position.x, position.y+1.5f*worldHeight, 0.1f);
         GameObject go;
         for(int i = 0; i<12; i++) {
             position.y -= worldHeight*Random.Range(0.1f, 0.6f);
             go = Instantiate(backgroundImg, position, Quaternion.identity) as GameObject;
             go.transform.SetParent(backgroundParent);
-            
-            Resize(go);
-            FullRestyle(go);
+            go.transform.localScale = new Vector3(scaleWidth, scaleHeight, 1);
+
+            Restyle(go);
 
             backgroundImgs.Enqueue(go);
         }
         backgroundOnTop = backgroundImgs.Dequeue();
     }
 
-    private void Resize(GameObject go) {
-        float worldWidth = mainCamera.pixelWidth;
-        float worldHeight = mainCamera.pixelHeight;
-        float scale = 40 * worldWidth / worldHeight;
-        go.transform.localScale = new Vector2(scale, scale*2);
-    }
-
-    private void FullRestyle(GameObject go) {
-        SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
-        float scale = go.transform.localScale.x;
-        
-        sr.material.shader = Shader.Find("Disolve");
-        sr.material.SetFloat("_NoiseScale", scale);
-        sr.material.SetFloat("_NoiseStrenght", scale/8);
-        sr.material.SetFloat("_EdgeHeight", scale/80);
-
-        Restyle(go);
-    }
-
     private void Restyle(GameObject go) {
         SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
 
-        sr.material.SetFloat("_CutOffHeight", position.y);
-        sr.material.SetFloat("_Shift", Random.Range(-100, 100));
-        Color[] colors = RandomColorFromOption();
-        sr.material.SetColor("_Color", colors[0]);
-        sr.material.SetColor("_ColorShift", colors[1]); 
+        sr.sprite = backgrounds[Random.Range(0, backgrounds.Length)];
+        Color color = Random.ColorHSV(H - 0.02f, H + 0.02f, S - 0.02f, S + 0.02f, V - 0.02f, V + 0.02f);
+        sr.color = color;
 
         sr.sortingOrder = layerOrder;
         layerOrder++;
-    }
-
-    private Color[] RandomColorFromOption() {
-        Color color = Random.ColorHSV(H - 0.02f, H + 0.02f, S - 0.02f, S + 0.02f, V - 0.02f, V + 0.02f);
-        Color darkerColor = new Color(color.r * 0.90f, color.g * 0.90f, color.b * 0.90f);
-        return new Color[] { color, darkerColor };
     }
 
     private void Update() {
