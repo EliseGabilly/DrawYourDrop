@@ -6213,6 +6213,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   score: {fileID: 1306637986}
+  hightScoreTitle: {fileID: 389160411}
   hightScore: {fileID: 1636355216}
   lastScore: {fileID: 2039919059}
   gameCanvas: {fileID: 639475574}

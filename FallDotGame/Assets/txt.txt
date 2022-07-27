@@ -6,11 +6,11 @@ TODO
  - avoid multiple pickup close
  + add "got stuck" death reason
  + redo power up animations
- - add visual feedback on buttons
+ + add visual feedback on buttons
  + rethink background (no shader)
  - clean credit 
  + redraw succes icons
- - Add menu screen for first game and new best
+ + add menu screen for first game and new best
  - 
 
  BUG
