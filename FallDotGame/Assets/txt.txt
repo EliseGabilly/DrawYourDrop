@@ -8,9 +8,11 @@ TODO
  + redo power up animations
  + add visual feedback on buttons
  + rethink background (no shader)
- - clean credit 
+ + clean credit 
  + redraw succes icons
  + add menu screen for first game and new best
+ - grey line will drawing 
+ - langage (add frech option)
  - 
 
  BUG
