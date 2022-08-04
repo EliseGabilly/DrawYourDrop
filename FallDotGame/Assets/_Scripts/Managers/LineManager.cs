@@ -10,6 +10,8 @@ public class LineManager : Singleton<LineManager> {
     [SerializeField]
     private float lineWidth = .1f;
     [SerializeField]
+    private Color lineColorDraw = Color.black;
+    [SerializeField]
     private Color lineColor = Color.black;
     [SerializeField]
     private int lineCapVertices = 5;
@@ -31,6 +33,7 @@ public class LineManager : Singleton<LineManager> {
 
     protected override void Awake() {
         base.Awake();
+        lineColorDraw.a = 0.5f;
         mainCamera = Camera.main;
     }
 
@@ -67,8 +70,8 @@ public class LineManager : Singleton<LineManager> {
         currentLinerRenderer.endWidth = lineWidth;
         currentLinerRenderer.numCapVertices = lineCapVertices;
         currentLinerRenderer.material = material;
-        currentLinerRenderer.startColor = lineColor;
-        currentLinerRenderer.endColor = lineColor;
+        currentLinerRenderer.startColor = lineColorDraw;
+        currentLinerRenderer.endColor = lineColorDraw;
         currentLinerRenderer.sortingOrder = 20;
     }
 
@@ -93,6 +96,8 @@ public class LineManager : Singleton<LineManager> {
 
     private void EndLine() {
         if(currentLine.Count > 1) {
+            currentLinerRenderer.startColor = lineColor;
+            currentLinerRenderer.endColor = lineColor;
             EdgeCollider2D lineEdgeTrigger = currentLinerRenderer.gameObject.AddComponent<EdgeCollider2D>();
             lineEdgeTrigger.edgeRadius = lineWidth / 2 ;
             lineEdgeTrigger.isTrigger = true;
