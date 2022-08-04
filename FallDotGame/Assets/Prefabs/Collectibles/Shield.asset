@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Shield
   m_EditorClassIdentifier: 
   objPrefab: {fileID: 4973573306711389303, guid: 930868e0cb8b7ee41a6bd7caac5ff1f2, type: 3}
-  minDiff: 0
-  maxDiff: 0
+  minDiff: 0.2
+  maxDiff: 0.2
   isPowerUp: 1

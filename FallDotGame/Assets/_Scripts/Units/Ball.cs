@@ -17,6 +17,10 @@ public class Ball : Singleton<Ball> {
     private GameObject goBounce;
     private Animator animBounce;
     public bool IsBounce { get; private set; } = false;
+
+    private IEnumerator shieldCoroutine;
+    private IEnumerator magnetCoroutine;
+    private IEnumerator bounceCoroutine;
     #endregion
 
     protected override void Awake() {
@@ -36,6 +40,10 @@ public class Ball : Singleton<Ball> {
 
         SpriteRenderer srBall = GetComponent<SpriteRenderer>();
         srBall.color = Player.Instance.colorBall;
+
+        shieldCoroutine = ShieldCountDown();
+        magnetCoroutine = MagnetCountDown();
+        bounceCoroutine = BounceCountDown();
     }
 
     public void TakeDamage() {
@@ -44,8 +52,9 @@ public class Ball : Singleton<Ball> {
     }
 
     public void TakeShield() {
-        StopCoroutine(ShieldCountDown());
-        StartCoroutine(ShieldCountDown());
+        StopCoroutine(shieldCoroutine);
+        shieldCoroutine = ShieldCountDown();
+        StartCoroutine(shieldCoroutine);
     }
 
     private IEnumerator ShieldCountDown() {
@@ -61,8 +70,9 @@ public class Ball : Singleton<Ball> {
     }
 
     public void TakeMagnet() {
-        StopCoroutine(MagnetCountDown());
-        StartCoroutine(MagnetCountDown());
+        StopCoroutine(magnetCoroutine);
+        magnetCoroutine = MagnetCountDown();
+        StartCoroutine(magnetCoroutine);
     }
 
     private IEnumerator MagnetCountDown() {
@@ -78,8 +88,9 @@ public class Ball : Singleton<Ball> {
     }
 
     public void TakeBounce() {
-        StopCoroutine(BounceCountDown());
-        StartCoroutine(BounceCountDown());
+        StopCoroutine(bounceCoroutine);
+        bounceCoroutine = BounceCountDown();
+        StartCoroutine(bounceCoroutine);
     }
 
     private IEnumerator BounceCountDown() {

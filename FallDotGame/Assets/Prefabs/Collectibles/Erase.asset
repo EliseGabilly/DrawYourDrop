@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Erase
   m_EditorClassIdentifier: 
   objPrefab: {fileID: 1005975345412908389, guid: fdba611afccc45a4c8926904a934dfe2, type: 3}
-  minDiff: 0
-  maxDiff: 0
+  minDiff: 0.2
+  maxDiff: 0.2
   isPowerUp: 1

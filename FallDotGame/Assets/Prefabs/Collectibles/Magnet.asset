@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Magnet
   m_EditorClassIdentifier: 
   objPrefab: {fileID: 3906081934833098337, guid: 3b007537deb30a948af4e8463da669e4, type: 3}
-  minDiff: 0
-  maxDiff: 0
+  minDiff: 0.2
+  maxDiff: 0.2
   isPowerUp: 1

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Bounce
   m_EditorClassIdentifier: 
   objPrefab: {fileID: 6936015043702527762, guid: b3fb39867ffd2574eb83c986b7b3f61b, type: 3}
-  minDiff: 0
-  maxDiff: 0
+  minDiff: 0.2
+  maxDiff: 0.2
   isPowerUp: 1
