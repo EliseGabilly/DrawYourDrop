@@ -30,7 +30,7 @@ public class Reward : Item {
             TweenManager.Instance.ScorePulseEffect();
             AudioSystem.Instance.PlayBonus();
             isMagnet = false;
-        } else if (collision.CompareTag("Magnet")) {
+        } else if (!isMagnet && collision.CompareTag("Magnet")) {
             isMagnet = Ball.Instance.IsMagnet;
         }
     }
