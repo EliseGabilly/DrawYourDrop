@@ -15,3 +15,5 @@ MonoBehaviour:
   objPrefab: {fileID: 489509710310951625, guid: 779e612eaf6edeb489dc595c39307b2c, type: 3}
   minDiff: 0.1
   maxDiff: 0.4
+  isPowerUp: 0
+  priority: 1

@@ -32,6 +32,8 @@ public class Reward : Item {
             isMagnet = false;
         } else if (!isMagnet && collision.CompareTag("Magnet")) {
             isMagnet = Ball.Instance.IsMagnet;
+        } else if (collision.gameObject.layer == 6 || collision.gameObject.layer == 7) {
+            ReplaceOnOverlap(collision.GetComponent<Item>());
         }
     }
 }

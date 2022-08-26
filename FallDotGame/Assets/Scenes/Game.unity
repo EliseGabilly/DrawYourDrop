@@ -4391,7 +4391,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &744480887
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5895,6 +5895,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lineSeparationDistance: 0.5
   lineWidth: 0.2
+  lineColorDraw: {r: 0, g: 0, b: 0, a: 1}
   lineColor: {r: 0, g: 0, b: 0, a: 1}
   lineCapVertices: 5
   linesContainer: {fileID: 120757844}
@@ -6934,11 +6935,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31d4d5a35b07a8a4ebf6bbeb883d4f54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  powersUps:
-  - {fileID: 11400000, guid: 31a4d674a835ba0478fc42e2ecd6a366, type: 2}
-  - {fileID: 11400000, guid: d7371d8c901bc7945a16d6d72f392286, type: 2}
-  - {fileID: 11400000, guid: f8c3f0b7fb92fea4cb2648cde5ce33be, type: 2}
+  PowersUps:
   - {fileID: 11400000, guid: 8ba3546abf0a6da44ad96a8f7e620bcc, type: 2}
+  - {fileID: 11400000, guid: f8c3f0b7fb92fea4cb2648cde5ce33be, type: 2}
+  - {fileID: 11400000, guid: d7371d8c901bc7945a16d6d72f392286, type: 2}
+  - {fileID: 11400000, guid: 31a4d674a835ba0478fc42e2ecd6a366, type: 2}
 --- !u!1 &1285121408
 GameObject:
   m_ObjectHideFlags: 0

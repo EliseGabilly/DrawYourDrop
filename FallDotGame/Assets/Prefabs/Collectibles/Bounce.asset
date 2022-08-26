@@ -16,3 +16,4 @@ MonoBehaviour:
   minDiff: 0.2
   maxDiff: 0.2
   isPowerUp: 1
+  priority: 6

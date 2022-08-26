@@ -10,6 +10,7 @@ public class ItemGroup : MonoBehaviour {
     public GameObject Prefab { get; private set; }
     public float MinDiff { get; private set; }
     public float MaxDiff { get; private set; }
+    public int Priority { get; private set; }
 
     public Queue<Item> ItemList { get; set; } = new Queue<Item>();
     public Item HighestItem { get; set; }
@@ -24,6 +25,7 @@ public class ItemGroup : MonoBehaviour {
         Prefab = items.GO;
         MinDiff = items.MinDiff;
         MaxDiff = items.MaxDiff;
+        Priority = items.Priority;
     }
 
     private void Update() {

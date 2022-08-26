@@ -5,8 +5,7 @@ public class ItemPowerUp : MonoBehaviour {
 
     #region Variables
     [SerializeField]
-    private List<Items> powersUps;
-    public List<GameObject> Prefabs { get; private set; }
+    public List<Items> PowersUps;
     public float MinDiff { get; } = 0.5f;
     public float MaxDiff { get; } = 1.5f;
 
@@ -20,11 +19,6 @@ public class ItemPowerUp : MonoBehaviour {
 
     private void Awake() {
         mainCamera = Camera.main;
-
-        Prefabs = new List<GameObject>();
-        foreach (Items itm in powersUps) {
-            Prefabs.Add(itm.GO);
-        }
     }
 
     private void Update() {

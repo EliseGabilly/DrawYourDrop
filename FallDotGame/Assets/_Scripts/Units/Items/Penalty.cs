@@ -7,6 +7,8 @@ public class Penalty : Item {
             SR.enabled = false;
             Collider.enabled = false;
             collision.gameObject.GetComponent<Ball>().TakeDamage();
+        } else if (collision.gameObject.layer == 6 || collision.gameObject.layer == 7) {
+            ReplaceOnOverlap(collision.GetComponent<Item>());
         }
     }
 

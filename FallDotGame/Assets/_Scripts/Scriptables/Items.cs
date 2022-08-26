@@ -19,4 +19,8 @@ public class Items : ScriptableObject {
     private bool isPowerUp = false;
     public bool IsPowerUp { get => isPowerUp; }
 
+    [SerializeField]
+    private int priority = 0;
+    public int Priority { get => priority; }
+
 }

@@ -3,7 +3,7 @@ TODO
  + music
  + success page
 	+ don't take <5 into acount
- - avoid multiple pickup close
+ + avoid multiple pickup close
  + add "got stuck" death reason
  + redo power up animations
  + add visual feedback on buttons
@@ -11,8 +11,9 @@ TODO
  + clean credit 
  + redraw succes icons
  + add menu screen for first game and new best
- - grey line will drawing 
+ + grey line will drawing 
  - langage (add frech option)
+ - magneted bonus stuck on obstacles 
  - 
 
  BUG
