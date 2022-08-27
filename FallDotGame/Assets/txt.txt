@@ -13,7 +13,7 @@ TODO
  + add menu screen for first game and new best
  + grey line will drawing 
  - langage (add frech option)
- - magneted bonus stuck on obstacles 
+ + magneted bonus stuck on obstacles 
  - 
 
  BUG

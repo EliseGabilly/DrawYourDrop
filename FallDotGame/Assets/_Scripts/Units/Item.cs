@@ -18,6 +18,10 @@ public abstract class Item : MonoBehaviour {
     }
 
     protected void ReplaceOnOverlap(Item collision) {
+        if((collision.gameObject.layer == 7 || gameObject.layer == 7) && Ball.Instance.IsMagnet) {
+            // ignore this is a magneted reward
+            return;
+        }
         if (Priority > collision.Priority) {
             Collider.enabled = false;
             Vector2 pos = gameObject.transform.position;
