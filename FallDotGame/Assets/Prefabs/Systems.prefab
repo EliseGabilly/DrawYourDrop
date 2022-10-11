@@ -88,7 +88,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -216,7 +216,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -354,8 +354,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 5ca7b3e7f223fd2478dd4a086589af90, type: 3}
   clic: {fileID: 8300000, guid: 866f2a4930d9f0e4abdb8cc4764cf06a, type: 3}
   hit: {fileID: 8300000, guid: 955856fcbc96b8e4c9e32fd3bbf22401, type: 3}
-  bonus: {fileID: 8300000, guid: 3d56d1c6806f0394d9a02531db13837e, type: 3}
-  item: {fileID: 8300000, guid: 866f2a4930d9f0e4abdb8cc4764cf06a, type: 3}
+  bonus: {fileID: 8300000, guid: 47c06d0f1db655b42b6f8fa501d703be, type: 3}
+  item: {fileID: 8300000, guid: 3d56d1c6806f0394d9a02531db13837e, type: 3}
   lose: {fileID: 8300000, guid: 5f90f0430c7ff6b48ae87388ccb46b6e, type: 3}
 --- !u!1 &1163341471010937456
 GameObject:
@@ -367,6 +367,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1163341471010937462}
   - component: {fileID: 1163341471010937457}
+  - component: {fileID: 382458283}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -401,5 +402,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 43d77f66bed06434aa69ab044787ae7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &382458283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163341471010937456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7db1e604ef366884aa6959e24cc47c93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

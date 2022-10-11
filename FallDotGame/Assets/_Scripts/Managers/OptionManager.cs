@@ -14,15 +14,30 @@ public class OptionManager : MonoBehaviour {
     [Header("Colors")]
     [SerializeField]
     private Image colorMagic;
-    private readonly Color[] colorsMagic = new Color[]{ Const.ColorBlue, Const.ColorPink, Const.ColorRed, Const.ColorYellow, Const.ColorGreen};
+    private readonly Color[] colorsMagic = new Color[]{ 
+        Const.ColorBlue, 
+        Const.ColorPink, 
+        Const.ColorRed, 
+        Const.ColorYellow, 
+        Const.ColorGreen
+    };
     private int countMagic = 0;
     [SerializeField]
     private Image colorBall;
-    private readonly Color[] colorsBall = new Color[] { Const.ColorWhite, Const.ColorBlack, Const.ColorBlue, Const.ColorRed, Const.ColorGreen };
+    private readonly Color[] colorsBall = new Color[] { 
+        Const.ColorWhite, 
+        Const.ColorBlack
+    };
     private int countBall = 0;
     [SerializeField]
     private Image colorBg;
-    private readonly Color[] colorsBg = new Color[] { Const.ColorBlueLight, Const.ColorPinkLight, Const.ColorRedLight, Const.ColorYellowLight, Const.ColorGreenLight };
+    private readonly Color[] colorsBg = new Color[] { 
+        Const.ColorBlueLight, 
+        Const.ColorPinkLight, 
+        Const.ColorRedLight, 
+        Const.ColorYellowLight, 
+        Const.ColorGreenLight 
+    };
     private int countBg = 0;
     #endregion
 

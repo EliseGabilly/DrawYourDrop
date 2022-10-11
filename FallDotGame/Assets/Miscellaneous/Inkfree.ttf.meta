@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 6c9aaddf22b05234bb163567ae44e08b
+guid: 68d3b731c93435d47a7c11486dc4189e
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Acadian Runes
+  - Ink Free
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
