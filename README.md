@@ -1,5 +1,5 @@
-# FallDot
-Fall dot is a casual mobile game made with Unity that will challange your reflexe.
+# Draw your Drop
+Draw your Drop is a casual mobile game made with Unity that will challange your reflexe.
 
 
 
