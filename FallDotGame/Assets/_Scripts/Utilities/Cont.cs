@@ -2,8 +2,8 @@ using UnityEngine;
 
 public static class Const { 
 
-    public static Color SuccesColorDone;
-    public static Color SuccesColorInProgress;
+    public static Color ColorSelected;
+    public static Color ColorUnselected;
 
     public static Color ColorBlue;
     public static Color ColorPink;
@@ -21,9 +21,8 @@ public static class Const {
     public static Color ColorGreenLight;
 
     static Const() {
-        SuccesColorDone = Color.white;
-        SuccesColorInProgress = Color.white;
-        SuccesColorInProgress.a = 0.5f;
+        ColorSelected = new Color32(56, 56, 56, 255);
+        ColorUnselected = new Color32(56, 56, 56, 125);
 
         ColorBlue = new Color32(72, 107, 250, 255);
         ColorPink = new Color32(250, 72, 222, 255);

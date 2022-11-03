@@ -10,6 +10,12 @@ public class TweenManager : Singleton<TweenManager> {
     private GameObject success_general;
     [SerializeField]
     private GameObject score;
+    [SerializeField]
+    private GameObject info_rules;
+    [SerializeField]
+    private GameObject info_runes;
+    [SerializeField]
+    private GameObject info_credit;
 
     private bool isSwitch = true;
     private float width;
@@ -31,6 +37,24 @@ public class TweenManager : Singleton<TweenManager> {
             .DOMoveX(isSwitch ? 0 : 2*width, 0.4f)
             .SetEase(Ease.InOutQuad);
         isSwitch = !isSwitch;
+    }
+
+    public void SlideInfoRules(bool isAppear) {
+        info_rules.transform
+            .DOMoveX(isAppear ? 0 : 2*width, 0.4f)
+            .SetEase(Ease.InOutQuad);
+    }
+
+    public void SlideInfoRunes(bool isAppear) {
+        info_runes.transform
+            .DOMoveX(isAppear ? 0 : 2*width, 0.4f)
+            .SetEase(Ease.InOutQuad);
+    }
+
+    public void SlideInfoCredit(bool isAppear) {
+        info_credit.transform
+            .DOMoveX(isAppear ? 0 : 2*width, 0.4f)
+            .SetEase(Ease.InOutQuad);
     }
 
     public void ScorePulseEffect() {
