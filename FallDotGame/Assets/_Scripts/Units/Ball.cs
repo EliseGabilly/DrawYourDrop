@@ -30,16 +30,16 @@ public class Ball : Singleton<Ball> {
         animBounce = goBounce.GetComponent<Animator>();
 
         SpriteRenderer srShield = goShield.GetComponent<SpriteRenderer>();
-        srShield.color = Player.Instance.colorMagic;
+        srShield.color = Const.ColorBlue;
         SpriteRenderer srMagnet = goMagnet.GetComponent<SpriteRenderer>();
-        srMagnet.color = Player.Instance.colorMagic;
+        srMagnet.color = Const.ColorBlue;
         Image imgBounceA = goBounce.GetComponentsInChildren<Image>()[0];
         Image imgBounceB = goBounce.GetComponentsInChildren<Image>()[1];
-        imgBounceA.color = Player.Instance.colorMagic;
-        imgBounceB.color = Player.Instance.colorMagic;
+        imgBounceA.color = Const.ColorBlue;
+        imgBounceB.color = Const.ColorBlue;
 
         SpriteRenderer srBall = GetComponent<SpriteRenderer>();
-        srBall.color = Player.Instance.colorBall;
+        srBall.color = Color.white;
 
         shieldCoroutine = ShieldCountDown();
         magnetCoroutine = MagnetCountDown();

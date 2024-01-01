@@ -42,13 +42,15 @@ public class AudioSystem : StaticInstance<AudioSystem> {
         }
     }
 
-    public void SetSourcesVolume(float musicVolume, float soundVolume) {
-        if(_soundsSource==null || _musicSource == null) {
+    public void SetSourcesVolume() {
+        bool musicOn = Player.Instance.musicOn;
+
+        if (_soundsSource==null || _musicSource == null) {
             _soundsSource = GetComponentsInChildren<AudioSource>()[0];
             _musicSource = GetComponentsInChildren<AudioSource>()[1];
         }
-        _musicSource.volume = musicVolume;
-        _soundsSource.volume = soundVolume;
+        _musicSource.volume = musicOn ? 0 : 1;
+        _soundsSource.volume = musicOn ? 0 : 1;
     }
 
     private void PlayNextSong() {

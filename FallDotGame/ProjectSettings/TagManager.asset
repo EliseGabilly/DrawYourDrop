@@ -45,6 +45,9 @@ TagManager:
   - name: Background
     uniqueID: 2031105575
     locked: 0
+  - name: Pipe
+    uniqueID: 3166620461
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0

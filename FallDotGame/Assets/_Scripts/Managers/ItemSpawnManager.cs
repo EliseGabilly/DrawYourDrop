@@ -64,11 +64,11 @@ public class ItemSpawnManager : Singleton<ItemSpawnManager> {
     private void ColorItem(GameObject go) {
         SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
         if(sr != null) {
-            sr.color = Player.Instance.colorMagic;
+            sr.color = Const.ColorBlue;
         } else {
             SpriteRenderer[] srList = go.GetComponentsInChildren<SpriteRenderer>();
             foreach(SpriteRenderer aSr in srList){
-                aSr.color = Player.Instance.colorMagic;
+                aSr.color = Const.ColorBlue;
             }
         }
     }

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -57,6 +58,7 @@ public class GameManager : Singleton<GameManager> {
 
     public void GameOver(string death) {
         AudioSystem.Instance.PlayLose();
+        //yield return AnimManager.Instance.FadeIn();
         Player.Instance.ChangGameStats(
             RewardScore + DistanceScore,
             DistanceScore,

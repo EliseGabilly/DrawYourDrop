@@ -30,7 +30,7 @@ public class ItemGroup : MonoBehaviour {
 
     private void Update() {
         Vector3 positionTop = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth / 2, mainCamera.pixelHeight, -mainCamera.transform.position.z));
-        if (HighestItem.transform.position.y > positionTop.y+1) {
+        if (HighestItem.transform.position.y > positionTop.y + mainCamera.pixelHeight) {
             SwitchHighestItemPosition();
         }
     }

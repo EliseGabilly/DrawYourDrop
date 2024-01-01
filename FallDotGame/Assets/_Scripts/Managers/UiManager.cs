@@ -21,15 +21,11 @@ public class UiManager : Singleton<UiManager> {
     [SerializeField]
     private Canvas succesCanvas;
     [SerializeField]
-    private Canvas optionCanvas;
-    [SerializeField]
     private Canvas creditsCanvas;
 
     [Header("Background")]
     [SerializeField]
     private Image succesBg;
-    [SerializeField]
-    private Image optionBg;
     [SerializeField]
     private Image creditsBg;
     #endregion
@@ -51,9 +47,8 @@ public class UiManager : Singleton<UiManager> {
             lastScore.text = string.Format("Last game : {0}", Player.Instance.lastScore.ToString());
         }
         score.text = "0";
-        succesBg.color = Player.Instance.colorBackground;
-        optionBg.color = Player.Instance.colorBackground;
-        creditsBg.color = Player.Instance.colorBackground;
+        succesBg.color = Const.ColorBlueLight;
+        creditsBg.color = Const.ColorBlueLight;
     }
 
     private void Update() {
@@ -83,14 +78,12 @@ public class UiManager : Singleton<UiManager> {
     public void CloseCanvases() {
         menuCanvas.enabled = false;
         succesCanvas.enabled = false;
-        optionCanvas.enabled = false;
         creditsCanvas.enabled = false; 
     }
 
     public void StartGame() {
         menuCanvas.enabled = false;
         succesCanvas.enabled = false;
-        optionCanvas.enabled = false;
         creditsCanvas.enabled = false;
         gameCanvas.enabled = true;
         GameManager.Instance.SetGravity(true);

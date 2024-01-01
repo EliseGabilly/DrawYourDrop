@@ -40,8 +40,10 @@ public class LineManager : Singleton<LineManager> {
     private void Update() {
         if (((Input.touchCount > 0 && !isDrawing) || Input.GetMouseButtonDown(0)) && GameManager.Instance.UseGravity) {
             StartCoroutine(nameof(Drawing));
+            Time.timeScale = 0.6f;
         } else if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended || Input.GetMouseButtonUp(0)) {
             isDrawing = false;
+            Time.timeScale = 1f;
         }
     }
 

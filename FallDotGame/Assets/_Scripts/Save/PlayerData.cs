@@ -22,12 +22,7 @@ public class PlayerData {
     public int gamePlayed;
     public int[] scoreHistory;
 
-    public float volumeMusic;
-    public float volumeSound;
-
-    public float[] colorBall;
-    public float[] colorMagic;
-    public float[] colorBackground;
+    public bool musicOn;
     #endregion
 
     public PlayerData(Player player) {
@@ -48,11 +43,6 @@ public class PlayerData {
         this.gamePlayed = player.gamePlayed;
         this.scoreHistory = player.scoreHistory.ToArray();
 
-        this.volumeMusic = player.volumeMusic;
-        this.volumeSound = player.volumeSound;
-
-        this.colorBall = new float[] { player.colorBall.r, player.colorBall.g, player.colorBall.b };
-        this.colorMagic = new float[] { player.colorMagic.r, player.colorMagic.g, player.colorMagic.b };
-        this.colorBackground = new float[] { player.colorBackground.r, player.colorBackground.g, player.colorBackground.b };
+        this.musicOn = player.musicOn;
     }
 }
