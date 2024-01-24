@@ -28,6 +28,8 @@ public class AudioSystem : StaticInstance<AudioSystem> {
     #endregion
 
     private void Start() {
+        SetSourcesVolume();
+
         _soundsSource = GetComponentsInChildren<AudioSource>()[0];
         _musicSource = GetComponentsInChildren<AudioSource>()[1];
 
@@ -43,14 +45,14 @@ public class AudioSystem : StaticInstance<AudioSystem> {
     }
 
     public void SetSourcesVolume() {
-        bool musicOn = Player.Instance.musicOn;
+        int musicLevel = Player.Instance.musicLevel;
 
         if (_soundsSource==null || _musicSource == null) {
             _soundsSource = GetComponentsInChildren<AudioSource>()[0];
             _musicSource = GetComponentsInChildren<AudioSource>()[1];
         }
-        _musicSource.volume = musicOn ? 0 : 1;
-        _soundsSource.volume = musicOn ? 0 : 1;
+        _musicSource.volume = musicLevel > 1 ? 1 : 0;
+        _soundsSource.volume = musicLevel > 0 ? 1 : 0;
     }
 
     private void PlayNextSong() {

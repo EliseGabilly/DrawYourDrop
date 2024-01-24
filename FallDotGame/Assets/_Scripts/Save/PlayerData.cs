@@ -22,7 +22,7 @@ public class PlayerData {
     public int gamePlayed;
     public int[] scoreHistory;
 
-    public bool musicOn;
+    public int musicLevel;
     #endregion
 
     public PlayerData(Player player) {
@@ -43,6 +43,6 @@ public class PlayerData {
         this.gamePlayed = player.gamePlayed;
         this.scoreHistory = player.scoreHistory.ToArray();
 
-        this.musicOn = player.musicOn;
+        this.musicLevel = player.musicLevel;
     }
 }

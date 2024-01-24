@@ -47,8 +47,8 @@ public class UiManager : Singleton<UiManager> {
             lastScore.text = string.Format("Last game : {0}", Player.Instance.lastScore.ToString());
         }
         score.text = "0";
-        succesBg.color = Const.ColorBlueLight;
-        creditsBg.color = Const.ColorBlueLight;
+        succesBg.color = Const.ColorBlueBackground;
+        creditsBg.color = Const.ColorBlueBackground;
     }
 
     private void Update() {

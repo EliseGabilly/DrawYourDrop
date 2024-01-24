@@ -27,7 +27,7 @@ public class Player : Singleton<Player> {
     public int gamePlayed = 0;
     public List<int> scoreHistory = new List<int>();
 
-    public bool musicOn = true;
+    public int musicLevel = 0;
     #endregion
 
     protected override void Awake() {
@@ -53,7 +53,7 @@ public class Player : Singleton<Player> {
         this.gamePlayed = data.gamePlayed;
         this.scoreHistory = new List<int>(data.scoreHistory);
 
-        this.musicOn = data.musicOn;
+        this.musicLevel = data.musicLevel;
 
         return this;
     }
@@ -91,7 +91,7 @@ public class Player : Singleton<Player> {
     }
 
     public void ChangeOptionsMusic() {
-        this.musicOn = !this.musicOn;
+        this.musicLevel = this.musicLevel+1>2 ? 0 : this.musicLevel+1;
 
         SaveSystem.SavePlayer(this);
 
