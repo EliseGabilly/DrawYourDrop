@@ -8,12 +8,8 @@ public class AnimManager : StaticInstance<AnimManager> {
     private Animator fade;
     #endregion
 
-    public IEnumerator FadeIn() {
+    public void FadeIn() {
         fade.Play("fade_in");
-
-        while (!fade.IsInTransition(0)) {
-            yield return null;
-        }
     }
 
 }

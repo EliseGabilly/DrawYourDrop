@@ -36,7 +36,7 @@ public class UiManager : Singleton<UiManager> {
         if (hScore == 0 && lScore == 0) {
             hightScoreTitle.enabled = false;
             hightScore.text = "Welcome";
-            lastScore.text = "Start drawing to play";
+            lastScore.text = "Start drawing to play\nAnd try to keep in frame";
         } else if (hScore == lScore) {
             hightScoreTitle.enabled = true;
             hightScore.text = Player.Instance.highScore.ToString();

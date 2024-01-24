@@ -58,7 +58,8 @@ public class GameManager : Singleton<GameManager> {
 
     public void GameOver(string death) {
         AudioSystem.Instance.PlayLose();
-        //yield return AnimManager.Instance.FadeIn();
+        AnimManager.Instance.FadeIn();
+
         Player.Instance.ChangGameStats(
             RewardScore + DistanceScore,
             DistanceScore,
@@ -68,7 +69,8 @@ public class GameManager : Singleton<GameManager> {
             PickUpCount,
             LineManager.Instance.LineCount
         );
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void IncreaseScore(int addedScore) {
