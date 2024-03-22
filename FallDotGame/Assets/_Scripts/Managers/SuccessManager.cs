@@ -9,6 +9,9 @@ public class SuccessManager : Singleton<SuccessManager> {
     #region Variables
     [Header("Last game stats")]
     [SerializeField]
+    private GameObject lastGameStats;
+
+    [SerializeField]
     private Text score;
     [SerializeField]
     private Text bonus;
@@ -25,6 +28,9 @@ public class SuccessManager : Singleton<SuccessManager> {
     private Text lines;
 
     [Header("General stats")]
+    [SerializeField]
+    private GameObject genaralStats;
+
     [SerializeField]
     private Text best_score;
     [SerializeField]
@@ -44,6 +50,8 @@ public class SuccessManager : Singleton<SuccessManager> {
 
     public void LoadSuccess() {
         Player playerInstance = Player.Instance;
+
+        genaralStats.SetActive(false);
 
         //Last game
         score.text = string.Format("Last score\n{0}", playerInstance.lastScore.ToString());
@@ -91,4 +99,8 @@ public class SuccessManager : Singleton<SuccessManager> {
         }
     }
 
+    public void SwitchStats() {
+        genaralStats.SetActive(!genaralStats.activeSelf);
+        lastGameStats.SetActive(!lastGameStats.activeSelf);
+    }
 }

@@ -14,13 +14,21 @@ public class GameManager : Singleton<GameManager> {
     public bool UseGravity { get; private set; }
     public int PickUpCount { get; set; } = 0;
     public float StartTime { get; set; } = 0;
-    #endregion
 
+    public float WorldHeight { get; private set; }
+    public float WorldWidth { get; private set; }
+    #endregion
 
     protected override void Awake() {
         base.Awake();
         player = GameObject.FindWithTag("Player");
         mainCamera = Camera.main;
+
+        Vector3 positionTopLeft = mainCamera.ScreenToWorldPoint(new Vector3(0, mainCamera.pixelHeight, -mainCamera.transform.position.z));
+        Vector3 positionBottomRight = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth, 0, -mainCamera.transform.position.z));
+        WorldWidth = positionBottomRight.x - positionTopLeft.x;
+        WorldHeight = positionTopLeft.y - positionBottomRight.y;
+
         SetGravity(false);
     }
 

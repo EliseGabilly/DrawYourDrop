@@ -30,7 +30,10 @@ public class ItemPowerUp : MonoBehaviour {
                 FreeItems.Add(usedItm);
 
                 //place random power up in the bottom
-                LowestPos = new Vector3(Random.Range(-(ItemSpawnManager.Instance.WorldWidth / 2) * 0.8f, (ItemSpawnManager.Instance.WorldWidth / 2) * 0.8f), LowestPos.y - ItemSpawnManager.Instance.WorldHeight * Random.Range(MinDiff, MaxDiff), 0);
+                LowestPos = new Vector3(
+                    Random.Range(-(GameManager.Instance.WorldWidth / 2) * 0.8f, (GameManager.Instance.WorldWidth / 2) * 0.8f),
+                    LowestPos.y - GameManager.Instance.WorldHeight * Random.Range(MinDiff, MaxDiff),
+                    0);
                 Item freeItm = GetRdmFreeItem();
                 freeItm.transform.position = LowestPos;
                 freeItm.SR.enabled = true;
@@ -52,7 +55,10 @@ public class ItemPowerUp : MonoBehaviour {
         LowestPos = pos;
         for(int i=0; i<4; i++) {
             Item itm = GetRdmFreeItem();
-            LowestPos = new Vector3(Random.Range(-(ItemSpawnManager.Instance.WorldWidth / 2) * 0.8f, (ItemSpawnManager.Instance.WorldWidth / 2) * 0.8f), LowestPos.y - ItemSpawnManager.Instance.WorldHeight * Random.Range(MinDiff, MaxDiff), 0);
+            LowestPos = new Vector3(
+                Random.Range(-(GameManager.Instance.WorldWidth / 2) * 0.8f, (GameManager.Instance.WorldWidth / 2) * 0.8f),
+                LowestPos.y - GameManager.Instance.WorldHeight * Random.Range(MinDiff, MaxDiff),
+                0);
             itm.transform.position = LowestPos;
             itm.SR.enabled = true;
             itm.Collider.enabled = true;

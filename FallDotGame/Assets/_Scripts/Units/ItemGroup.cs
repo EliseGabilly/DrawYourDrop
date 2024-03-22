@@ -20,7 +20,7 @@ public class ItemGroup : MonoBehaviour {
 
     private Camera mainCamera;
 
-    private void Awake() {
+    private void Start() {
         mainCamera = Camera.main;
         Prefab = items.GO;
         MinDiff = items.MinDiff;
@@ -30,14 +30,19 @@ public class ItemGroup : MonoBehaviour {
 
     private void Update() {
         Vector3 positionTop = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth / 2, mainCamera.pixelHeight, -mainCamera.transform.position.z));
-        if (HighestItem.transform.position.y > positionTop.y + mainCamera.pixelHeight) {
+
+        if (HighestItem.transform.position.y > positionTop.y + GameManager.Instance.WorldHeight * 1.5f) {
+            Debug.Log("update " + items.GetType());
             SwitchHighestItemPosition();
         }
     }
 
     private void SwitchHighestItemPosition() {
         //change position to bottom
-        LowestPos = new Vector3(Random.Range(-(ItemSpawnManager.Instance.WorldWidth / 2) * 0.8f, (ItemSpawnManager.Instance.WorldWidth / 2) * 0.8f), LowestPos.y - ItemSpawnManager.Instance.WorldHeight * Random.Range(MinDiff, MaxDiff), 0);
+        LowestPos = new Vector3(
+            Random.Range(-(GameManager.Instance.WorldWidth / 2) * 0.8f, (GameManager.Instance.WorldWidth / 2) * 0.8f), 
+            LowestPos.y - GameManager.Instance.WorldHeight * Random.Range(MinDiff, MaxDiff), 
+            0);
         HighestItem.transform.position = LowestPos;
         HighestItem.SR.enabled = true;
         HighestItem.Collider.enabled = true;
