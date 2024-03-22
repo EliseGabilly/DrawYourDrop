@@ -52,13 +52,15 @@ public class GameManager : Singleton<GameManager> {
         if (xRatio > 1.05f || xRatio < -.05f) {
             isInFrame = false;
             Ball.Instance.WentOutOfFrame();
+        } else {
+            Ball.Instance.IsBouncing = false;
         }
         if (yRatio > 1.2f || yRatio < -.1f) {
             isInFrame = false;
             if (Vector2.Equals(Vector2.zero, player.GetComponent<Rigidbody2D>().velocity)) {
-                GameManager.Instance.GameOver("Got stuck");
+                GameOver("Got stuck");
             } else {
-                GameManager.Instance.GameOver("Too slow");
+                GameOver("Too slow");
             }
         }
         return isInFrame;

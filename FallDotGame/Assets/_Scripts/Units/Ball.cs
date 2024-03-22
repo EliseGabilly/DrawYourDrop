@@ -17,6 +17,7 @@ public class Ball : Singleton<Ball> {
     private GameObject goBounce;
     private Animator animBounce;
     public bool IsBounce { get; private set; } = false;
+    public bool IsBouncing { get; set; } = false;
 
     private IEnumerator shieldCoroutine;
     private IEnumerator magnetCoroutine;
@@ -110,9 +111,10 @@ public class Ball : Singleton<Ball> {
     public void WentOutOfFrame() {
         if (!IsBounce) {
             GameManager.Instance.GameOver("Out of frame");
-        } else {
+        } else if (!IsBouncing) {
             Rigidbody2D rb = GetComponent<Rigidbody2D>();
-            rb.velocity = new Vector2(-transform.position.normalized.x*40, rb.velocity.y);
+            rb.velocity = new Vector2(-rb.velocity.x * 0.8f, rb.velocity.y);
+            IsBouncing = true;
         }
     }
 }

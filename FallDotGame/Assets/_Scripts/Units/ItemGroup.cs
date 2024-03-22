@@ -32,7 +32,6 @@ public class ItemGroup : MonoBehaviour {
         Vector3 positionTop = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth / 2, mainCamera.pixelHeight, -mainCamera.transform.position.z));
 
         if (HighestItem.transform.position.y > positionTop.y + GameManager.Instance.WorldHeight * 1.5f) {
-            Debug.Log("update " + items.GetType());
             SwitchHighestItemPosition();
         }
     }
