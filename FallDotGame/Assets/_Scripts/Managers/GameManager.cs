@@ -14,6 +14,7 @@ public class GameManager : Singleton<GameManager> {
     public bool UseGravity { get; private set; }
     public int PickUpCount { get; set; } = 0;
     public float StartTime { get; set; } = 0;
+    private string DeathCause;
 
     public float WorldHeight { get; private set; }
     public float WorldWidth { get; private set; }
@@ -67,6 +68,11 @@ public class GameManager : Singleton<GameManager> {
     }
 
     public void GameOver(string death) {
+        if(DeathCause!=null) {
+            return;
+        }
+        DeathCause = death;
+
         AudioSystem.Instance.PlayLose();
         AnimManager.Instance.FadeIn();
 
