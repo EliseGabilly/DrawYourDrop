@@ -71,6 +71,8 @@ public class UiManager : Singleton<UiManager> {
         canvas.enabled = true;
         if (canvas.Equals(succesCanvas)) {
             SuccessManager.Instance.LoadSuccess();
+        } else if (canvas.Equals(creditsCanvas)) {
+            InfosManager.Instance.LoadInfo();
         }
         AudioSystem.Instance.PlayClic();
     }

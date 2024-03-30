@@ -73,29 +73,23 @@ public class SuccessManager : Singleton<SuccessManager> {
         average.text = string.Format("Average : {0}", avg);
         total_power_up.text = string.Format("Pick up : {0}", playerInstance.ttPickUp.ToString());
         total_lines.text = string.Format("Line drawns : {0}", playerInstance.ttLinesDrawn.ToString());
-
-        StartCoroutine(SetTextSize());
+        
+        SetTextSize();
     }
 
-    private IEnumerator SetTextSize() {
-        yield return null; 
+    private void SetTextSize() {
         Text[] txtBoxes = new Text[] { bonus, distance, death, clock, power_up, lines, best_bonus, best_distance, game_count, average, total_power_up, total_lines };
 
-        int sameSizeCounter = 0;
         int minSize = bonus.cachedTextGenerator.fontSizeUsedForBestFit;
 
-        for (int i = 0; i < txtBoxes.Length; i++) {
-            if (minSize > txtBoxes[i].cachedTextGenerator.fontSizeUsedForBestFit) {
-                minSize = txtBoxes[i].cachedTextGenerator.fontSizeUsedForBestFit;
-            } else if (minSize == txtBoxes[i].cachedTextGenerator.fontSizeUsedForBestFit) {
-                sameSizeCounter++;
-            } 
+        foreach (Text txt in txtBoxes) {
+            if (minSize > txt.cachedTextGenerator.fontSizeUsedForBestFit) {
+                minSize = txt.cachedTextGenerator.fontSizeUsedForBestFit;
+            }
         }
 
-        if (sameSizeCounter != txtBoxes.Length) {
-            for (int i = 0; i < txtBoxes.Length; i++) {
-                txtBoxes[i].resizeTextMaxSize = minSize/2;
-            }
+        foreach (Text txt in txtBoxes) {
+            txt.resizeTextMaxSize = minSize;
         }
     }
 

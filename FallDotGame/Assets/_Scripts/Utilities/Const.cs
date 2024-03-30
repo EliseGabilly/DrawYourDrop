@@ -12,6 +12,7 @@ public static class Const {
     public static Color ColorBlueBackground;
 
     public static Color ColorWhite;
+    public static Color ColorGrey;
     public static Color ColorBlack;
 
     static Const() {
@@ -25,6 +26,7 @@ public static class Const {
         ColorBlueBackground = new Color32(215, 229, 238, 255);
 
         ColorWhite = Color.white;
+        ColorGrey = new Color32(88, 88, 88, 255);
         ColorBlack = Color.black;
 
     }
