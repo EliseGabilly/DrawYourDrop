@@ -1,8 +1,6 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
-using System;
 
 public class SuccessManager : Singleton<SuccessManager> {
 
@@ -46,6 +44,7 @@ public class SuccessManager : Singleton<SuccessManager> {
     private Text total_power_up;
     [SerializeField]
     private Text total_lines;
+    private int textSize;
     #endregion
 
     public void LoadSuccess() {
@@ -73,8 +72,13 @@ public class SuccessManager : Singleton<SuccessManager> {
         average.text = string.Format("Average : {0}", avg);
         total_power_up.text = string.Format("Pick up : {0}", playerInstance.ttPickUp.ToString());
         total_lines.text = string.Format("Line drawns : {0}", playerInstance.ttLinesDrawn.ToString());
-        
-        SetTextSize();
+
+        genaralStats.SetActive(false);
+        lastGameStats.SetActive(true);
+
+        if (textSize == 0) {
+            SetTextSize();
+        }
     }
 
     private void SetTextSize() {
@@ -88,11 +92,11 @@ public class SuccessManager : Singleton<SuccessManager> {
             }
         }
 
+        textSize = minSize;
         foreach (Text txt in txtBoxes) {
             txt.resizeTextMaxSize = minSize;
         }
     }
-
     public void SwitchStats() {
         genaralStats.SetActive(!genaralStats.activeSelf);
         lastGameStats.SetActive(!lastGameStats.activeSelf);

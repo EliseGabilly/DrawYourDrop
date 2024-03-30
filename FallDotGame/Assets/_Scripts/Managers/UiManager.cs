@@ -72,7 +72,7 @@ public class UiManager : Singleton<UiManager> {
         if (canvas.Equals(succesCanvas)) {
             SuccessManager.Instance.LoadSuccess();
         } else if (canvas.Equals(creditsCanvas)) {
-            InfosManager.Instance.LoadInfo();
+            InfosManager.Instance.LoadInfos();
         }
         AudioSystem.Instance.PlayClic();
     }

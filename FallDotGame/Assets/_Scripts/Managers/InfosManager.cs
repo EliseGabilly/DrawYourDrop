@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
@@ -32,6 +31,7 @@ public class InfosManager : Singleton<InfosManager> {
 
 
     [Header("Text")]
+    private int textSize;
     private string DEFAULT_TITLE = "Collectables";
     private string DEFAULT_TXT = "Select a collectible to see more informations about his use.";
     private string ERASER_TITLE = "Eraser";
@@ -48,8 +48,10 @@ public class InfosManager : Singleton<InfosManager> {
     private string PENALTY_TXT = "Be careful ! The path is full of pitfalls, a penalty could put an end to your fall.";
     #endregion
 
-    public void LoadInfo() {
-        SetTextSize();
+    public void LoadInfos() {
+        if (textSize == 0) {
+            SetTextSize();
+        }
 
         title.text = DEFAULT_TITLE;
         text.text = DEFAULT_TXT;
@@ -71,6 +73,8 @@ public class InfosManager : Singleton<InfosManager> {
                 minSize = text.cachedTextGenerator.fontSizeUsedForBestFit;
             }
         }
+
+        textSize = minSize;
         foreach (Text holder in txtHolder) {
             holder.resizeTextMaxSize = minSize;
         }
