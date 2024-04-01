@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 public abstract class Item : MonoBehaviour {
 
@@ -19,7 +18,7 @@ public abstract class Item : MonoBehaviour {
 
     protected void ReplaceOnOverlap(Item collision) {
         if((collision.gameObject.layer == 7 || gameObject.layer == 7) && Ball.Instance.IsMagnet) {
-            // ignore this is a magneted reward
+            // ignore this if it's a magnet reward
             return;
         }
         if (Priority > collision.Priority) {

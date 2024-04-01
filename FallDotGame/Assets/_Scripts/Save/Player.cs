@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 
 /// <summary>
-/// Player class containing the information that are "translated" in playerdata then saved
+/// Player class containing the information that are "translated" in player data then saved
 /// </summary>
 public class Player : Singleton<Player> {
 

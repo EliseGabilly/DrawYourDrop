@@ -4,7 +4,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 /// <summary>
-/// Save and load information fro player in the persistente data directory
+/// Save and load information fro player in the persistent data directory
 /// </summary>
 public static class SaveSystem {
 
@@ -25,7 +25,7 @@ public static class SaveSystem {
             return LoadDataFromPath();
         } else {
             try {
-                //try to write a new player if first conection
+                //try to write a new player if first connection
                 Debug.Log("Save a new file for player data (" + PATH + ") ");
                 SavePlayer(Player.Instance);
                 return LoadDataFromPath();

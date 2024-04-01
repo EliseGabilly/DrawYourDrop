@@ -8,7 +8,7 @@ public class Ball : Singleton<Ball> {
     [SerializeField]
     private GameObject goShield;
     private Animator animShield;
-    private bool IsImune = false;
+    private bool IsImmune = false;
     [SerializeField]
     private GameObject goMagnet;
     private Animator animMagnet;
@@ -48,7 +48,7 @@ public class Ball : Singleton<Ball> {
     }
 
     public void TakeDamage() {
-        if (!IsImune) GameManager.Instance.GameOver("Took damage");
+        if (!IsImmune) GameManager.Instance.GameOver("Took damage");
         else EndShield();
     }
 
@@ -59,15 +59,15 @@ public class Ball : Singleton<Ball> {
     }
 
     private IEnumerator ShieldCountDown() {
-        IsImune = true;
-        animShield.SetBool("isActive", IsImune);
+        IsImmune = true;
+        animShield.SetBool("isActive", IsImmune);
         yield return new WaitForSeconds(10f);
         EndShield();
     }
 
     private void EndShield() {
-        IsImune = false;
-        animShield.SetBool("isActive", IsImune);
+        IsImmune = false;
+        animShield.SetBool("isActive", IsImmune);
     }
 
     public void TakeMagnet() {

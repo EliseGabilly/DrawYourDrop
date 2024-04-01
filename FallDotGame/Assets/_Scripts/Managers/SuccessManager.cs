@@ -27,7 +27,7 @@ public class SuccessManager : Singleton<SuccessManager> {
 
     [Header("General stats")]
     [SerializeField]
-    private GameObject genaralStats;
+    private GameObject generalStats;
 
     [SerializeField]
     private Text best_score;
@@ -50,7 +50,7 @@ public class SuccessManager : Singleton<SuccessManager> {
     public void LoadSuccess() {
         Player playerInstance = Player.Instance;
 
-        genaralStats.SetActive(false);
+        generalStats.SetActive(false);
 
         //Last game
         score.text = string.Format("Last score\n{0}", playerInstance.lastScore.ToString());
@@ -60,9 +60,9 @@ public class SuccessManager : Singleton<SuccessManager> {
         death.text = string.Format("Death reason : {0}", playerInstance.deathReason);
         clock.text = string.Format("Time played : {0}", playerInstance.timePlayed);
         power_up.text = string.Format("Pick up : {0}", playerInstance.pickUp.ToString());
-        lines.text = string.Format("Line drawns : {0}", playerInstance.linesDrawn.ToString());
+        lines.text = string.Format("Line drawn : {0}", playerInstance.linesDrawn.ToString());
 
-        // Genaral
+        // General
         best_score.text = string.Format("Personal best\n{0}", playerInstance.highScore.ToString());
         best_bonus.text = string.Format("{0}\nBonus", playerInstance.highBonusScore.ToString());
         best_distance.text = string.Format("{0}\nDistance", playerInstance.highDistanceScore.ToString());
@@ -71,9 +71,9 @@ public class SuccessManager : Singleton<SuccessManager> {
         string avg = playerInstance.scoreHistory.Count == 0 ? "" : playerInstance.scoreHistory.Average().ToString("F2");
         average.text = string.Format("Average : {0}", avg);
         total_power_up.text = string.Format("Pick up : {0}", playerInstance.ttPickUp.ToString());
-        total_lines.text = string.Format("Line drawns : {0}", playerInstance.ttLinesDrawn.ToString());
+        total_lines.text = string.Format("Line drawn : {0}", playerInstance.ttLinesDrawn.ToString());
 
-        genaralStats.SetActive(false);
+        generalStats.SetActive(false);
         lastGameStats.SetActive(true);
 
         if (textSize == 0) {
@@ -98,7 +98,7 @@ public class SuccessManager : Singleton<SuccessManager> {
         }
     }
     public void SwitchStats() {
-        genaralStats.SetActive(!genaralStats.activeSelf);
+        generalStats.SetActive(!generalStats.activeSelf);
         lastGameStats.SetActive(!lastGameStats.activeSelf);
     }
 }

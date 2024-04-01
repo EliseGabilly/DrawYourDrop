@@ -23,7 +23,6 @@ public class TestFps : MonoBehaviour {
             int frameCount = Time.frameCount - lastFrameCount;
 
             // Display it
-
             fps.text = string.Format("FPS: {0}", Mathf.RoundToInt(frameCount / timeSpan));
         }
     }

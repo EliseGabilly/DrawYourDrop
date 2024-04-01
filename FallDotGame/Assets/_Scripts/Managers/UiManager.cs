@@ -7,9 +7,9 @@ public class UiManager : Singleton<UiManager> {
     [SerializeField]
     private Text score;
     [SerializeField]
-    private Text hightScoreTitle;
+    private Text heightScoreTitle;
     [SerializeField]
-    private Text hightScore;
+    private Text heightScore;
     [SerializeField]
     private Text lastScore;
 
@@ -19,13 +19,14 @@ public class UiManager : Singleton<UiManager> {
     [SerializeField]
     private Canvas menuCanvas;
     [SerializeField]
-    private Canvas succesCanvas;
+
+    private Canvas successCanvas;
     [SerializeField]
     private Canvas creditsCanvas;
 
     [Header("Background")]
     [SerializeField]
-    private Image succesBg;
+    private Image successBg;
     [SerializeField]
     private Image creditsBg;
     #endregion
@@ -34,20 +35,20 @@ public class UiManager : Singleton<UiManager> {
         int hScore = Player.Instance.highScore;
         int lScore = Player.Instance.lastScore;
         if (hScore == 0 && lScore == 0) {
-            hightScoreTitle.enabled = false;
-            hightScore.text = "Welcome";
+            heightScoreTitle.enabled = false;
+            heightScore.text = "Welcome";
             lastScore.text = "Start drawing to play\nAnd try to keep in frame";
         } else if (hScore == lScore) {
-            hightScoreTitle.enabled = true;
-            hightScore.text = Player.Instance.highScore.ToString();
+            heightScoreTitle.enabled = true;
+            heightScore.text = Player.Instance.highScore.ToString();
             lastScore.text = "New personal best !";
         } else {
-            hightScoreTitle.enabled = true;
-            hightScore.text = Player.Instance.highScore.ToString();
+            heightScoreTitle.enabled = true;
+            heightScore.text = Player.Instance.highScore.ToString();
             lastScore.text = string.Format("Last game : {0}", Player.Instance.lastScore.ToString());
         }
         score.text = "0";
-        succesBg.color = Const.ColorBlueBackground;
+        successBg.color = Const.ColorBlueBackground;
         creditsBg.color = Const.ColorBlueBackground;
     }
 
@@ -69,23 +70,23 @@ public class UiManager : Singleton<UiManager> {
     public void OpenCanvas(Canvas canvas) {
         CloseCanvases();
         canvas.enabled = true;
-        if (canvas.Equals(succesCanvas)) {
+        if (canvas.Equals(successCanvas)) {
             SuccessManager.Instance.LoadSuccess();
         } else if (canvas.Equals(creditsCanvas)) {
             InfosManager.Instance.LoadInfos();
         }
-        AudioSystem.Instance.PlayClic();
+        AudioSystem.Instance.PlayClick();
     }
 
     public void CloseCanvases() {
         menuCanvas.enabled = false;
-        succesCanvas.enabled = false;
+        successCanvas.enabled = false;
         creditsCanvas.enabled = false; 
     }
 
     public void StartGame() {
         menuCanvas.enabled = false;
-        succesCanvas.enabled = false;
+        successCanvas.enabled = false;
         creditsCanvas.enabled = false;
         gameCanvas.enabled = true;
         GameManager.Instance.SetGravity(true);
@@ -95,7 +96,7 @@ public class UiManager : Singleton<UiManager> {
     }
 
     public void Quit() {
-        AudioSystem.Instance.PlayClic();
+        AudioSystem.Instance.PlayClick();
         Application.Quit();
     }
 }

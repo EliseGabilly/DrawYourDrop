@@ -47,7 +47,7 @@ public class GameManager : Singleton<GameManager> {
         bool isInFrame = true;
         Vector3 screenPos = mainCamera.WorldToScreenPoint(player.transform.position);
         float xRatio = screenPos.x / mainCamera.pixelWidth; //horizontal check
-        float yRatio = screenPos.y / mainCamera.pixelHeight; //vertical chack
+        float yRatio = screenPos.y / mainCamera.pixelHeight; //vertical check
         if (xRatio > 1.05f || xRatio < -.05f) {
             isInFrame = false;
             Ball.Instance.WentOutOfFrame();

@@ -16,7 +16,7 @@ public class AudioSystem : StaticInstance<AudioSystem> {
     private List<AudioClip> music;
     private int musicIndex = 0;
     [SerializeField]
-    private AudioClip clic;
+    private AudioClip click;
     [SerializeField]
     private AudioClip hit;
     [SerializeField]
@@ -75,8 +75,8 @@ public class AudioSystem : StaticInstance<AudioSystem> {
         _soundsSource.PlayOneShot(clip, vol);
     }
 
-    public void PlayClic() {
-        PlaySound(clic);
+    public void PlayClick() {
+        PlaySound(click);
     }
 
     public void PlayHit() {

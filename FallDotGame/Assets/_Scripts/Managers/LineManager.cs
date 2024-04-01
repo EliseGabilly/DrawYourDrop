@@ -53,7 +53,7 @@ public class LineManager : Singleton<LineManager> {
         LineCount++;
         StartLine();
         while (isDrawing) {
-            AddPoint(GetCurrentWorldPoitn());
+            AddPoint(GetCurrentWorldPoint());
             yield return null;
         }
         EndLine();
@@ -77,7 +77,7 @@ public class LineManager : Singleton<LineManager> {
         currentLinerRenderer.sortingOrder = 20;
     }
 
-    private Vector2 GetCurrentWorldPoitn() {
+    private Vector2 GetCurrentWorldPoint() {
         Vector3 screenPosDepth = Input.mousePosition;
         screenPosDepth.z = -mainCamera.transform.position.z; // Give it camera depth
         Vector3 mousePos = mainCamera.ScreenToWorldPoint(screenPosDepth);

@@ -11,7 +11,7 @@ public class InfosManager : Singleton<InfosManager> {
     [SerializeField]
     private Text text;
     [SerializeField]
-    private Text sumeryTxt;
+    private Text summeryTxt;
     [SerializeField]
     private Text thanksTxt;
 
@@ -33,9 +33,9 @@ public class InfosManager : Singleton<InfosManager> {
     [Header("Text")]
     private int textSize;
     private string DEFAULT_TITLE = "Collectables";
-    private string DEFAULT_TXT = "Select a collectible to see more informations about his use.";
+    private string DEFAULT_TXT = "Select a collectible to see more information about his use.";
     private string ERASER_TITLE = "Eraser";
-    private string ERASER_TXT = "The eraser remove approching obstacles, making it briefly easier to move through the drop.";
+    private string ERASER_TXT = "The eraser remove approaching obstacles, making it briefly easier to move through the drop.";
     private string MAGNET_TITLE = "Magnet";
     private string MAGNET_TXT = "The magnet attracts bonuses to you for a few seconds, making it easier to collect points.";
     private string BOUNCE_TITLE = "Bounce";
@@ -60,7 +60,7 @@ public class InfosManager : Singleton<InfosManager> {
     private void SetTextSize() {
         int minSize = (int) Math.Floor(title.cachedTextGenerator.fontSizeUsedForBestFit * 0.8f);
 
-        Text[] txtHolder = new Text[] {text, sumeryTxt, thanksTxt};
+        Text[] txtHolder = new Text[] {text, summeryTxt, thanksTxt};
         foreach(Text holder in txtHolder) {
             if (minSize > holder.cachedTextGenerator.fontSizeUsedForBestFit) {
                 minSize = holder.cachedTextGenerator.fontSizeUsedForBestFit;
