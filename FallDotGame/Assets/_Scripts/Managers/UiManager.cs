@@ -7,9 +7,9 @@ public class UiManager : Singleton<UiManager> {
     [SerializeField]
     private Text score;
     [SerializeField]
-    private Text heightScoreTitle;
+    private Text highScoreTitle;
     [SerializeField]
-    private Text heightScore;
+    private Text highScore;
     [SerializeField]
     private Text lastScore;
 
@@ -35,16 +35,16 @@ public class UiManager : Singleton<UiManager> {
         int hScore = Player.Instance.highScore;
         int lScore = Player.Instance.lastScore;
         if (hScore == 0 && lScore == 0) {
-            heightScoreTitle.enabled = false;
-            heightScore.text = "Welcome";
+            highScoreTitle.enabled = false;
+            highScore.text = "Welcome";
             lastScore.text = "Start drawing to play\nAnd try to keep in frame";
         } else if (hScore == lScore) {
-            heightScoreTitle.enabled = true;
-            heightScore.text = Player.Instance.highScore.ToString();
+            highScoreTitle.enabled = true;
+            highScore.text = Player.Instance.highScore.ToString();
             lastScore.text = "New personal best !";
         } else {
-            heightScoreTitle.enabled = true;
-            heightScore.text = Player.Instance.highScore.ToString();
+            highScoreTitle.enabled = true;
+            highScore.text = Player.Instance.highScore.ToString();
             lastScore.text = string.Format("Last game : {0}", Player.Instance.lastScore.ToString());
         }
         score.text = "0";

@@ -5200,14 +5200,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   score: {fileID: 1306637986}
-  hightScoreTitle: {fileID: 389160411}
-  hightScore: {fileID: 1636355216}
+  highScoreTitle: {fileID: 389160411}
+  highScore: {fileID: 1636355216}
   lastScore: {fileID: 2039919059}
   gameCanvas: {fileID: 639475574}
   menuCanvas: {fileID: 789639306}
-  succesCanvas: {fileID: 887780384}
+  successCanvas: {fileID: 887780384}
   creditsCanvas: {fileID: 1907808413}
-  succesBg: {fileID: 2132996145}
+  successBg: {fileID: 2132996145}
   creditsBg: {fileID: 406490005}
 --- !u!114 &1189463402
 MonoBehaviour:
@@ -5229,7 +5229,7 @@ MonoBehaviour:
   clock: {fileID: 1585490434}
   power_up: {fileID: 2033814555}
   lines: {fileID: 550426125}
-  genaralStats: {fileID: 404265612}
+  generalStats: {fileID: 404265612}
   best_score: {fileID: 2008176927}
   best_bonus: {fileID: 2081201069}
   best_distance: {fileID: 782697847}
@@ -5279,7 +5279,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   title: {fileID: 1372261932}
   text: {fileID: 28212550}
-  sumeryTxt: {fileID: 904105912}
+  summeryTxt: {fileID: 28212550}
   thanksTxt: {fileID: 3517470}
   eraser: {fileID: 1428895456}
   shield: {fileID: 1239257680}
@@ -8842,7 +8842,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 1}
+  m_Color: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
