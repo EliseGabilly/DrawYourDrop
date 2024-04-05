@@ -39,7 +39,7 @@ public class ItemGroup : MonoBehaviour {
     private void SwitchHighestItemPosition() {
         //change position to bottom
         LowestPos = new Vector3(
-            Random.Range(-(GameManager.Instance.WorldWidth / 2) * 0.8f, (GameManager.Instance.WorldWidth / 2) * 0.8f), 
+            Random.Range(-(GameManager.Instance.WorldWidth / 2) * 0.9f, GameManager.Instance.WorldWidth / 2 * 0.9f), 
             LowestPos.y - GameManager.Instance.WorldHeight * Random.Range(MinDiff, MaxDiff), 
             0);
         HighestItem.transform.position = LowestPos;
