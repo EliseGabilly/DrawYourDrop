@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class CameraManager : MonoBehaviour {
@@ -5,6 +6,17 @@ public class CameraManager : MonoBehaviour {
     #region Variables
     private Camera mainCamera;
     private Transform playerTransform; 
+    [SerializeField]
+    private float MaxAcceleration = 8.5f; 
+    [SerializeField]
+    private float BaseSpeed = 4; 
+    [SerializeField]
+    private float StartAccelerationDistance = 25; 
+    private float AccelerationCoefficient = 0.05f; 
+    [SerializeField]
+    private float Acceleration; 
+    [SerializeField]
+    private float MovingSpeed; 
     #endregion
 
     private void Awake() {
@@ -20,9 +32,9 @@ public class CameraManager : MonoBehaviour {
             Vector3 playerPos = v3;
 
             // find constant movement
-            float acceleration = GameManager.Instance.DistanceScore > 30 ? GameManager.Instance.DistanceScore - 30 : 0;
-            float movingSpeed = Mathf.Min(6 + acceleration / 25, 10);
-            Vector3 constMovePos = mainCamera.transform.position + Vector3.down * Time.deltaTime * movingSpeed;
+            Acceleration = Mathf.Min(Mathf.Max( AccelerationCoefficient * (GameManager.Instance.DistanceScore - StartAccelerationDistance), 0), MaxAcceleration);
+            MovingSpeed = BaseSpeed + Acceleration;
+            Vector3 constMovePos = mainCamera.transform.position + Vector3.down * Time.deltaTime * MovingSpeed;
 
             //Camera match either the constant movement or the player position if he is faster
             Vector3 lowestPos = playerPos.y < constMovePos.y ? playerPos : constMovePos;

@@ -33,7 +33,7 @@ public class GameManager : Singleton<GameManager> {
 
     private void Update() {
         if (IsPlayerInFrame()) {
-            DistanceScore = Mathf.Max(DistanceScore, -Mathf.FloorToInt(player.transform.position.y / 5));
+            DistanceScore = Mathf.Max(DistanceScore, -Mathf.FloorToInt(player.transform.position.y / 3));
             int score = RewardScore + DistanceScore;
             UiManager.Instance.UpdateScore(score);
             if (score >= Hundred) {
