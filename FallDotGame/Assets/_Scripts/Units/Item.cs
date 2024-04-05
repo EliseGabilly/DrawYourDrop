@@ -17,6 +17,7 @@ public abstract class Item : MonoBehaviour {
     }
 
     protected void ReplaceOnOverlap(Item collision) {
+        Debug.Log(collision.gameObject.layer + " " + gameObject.layer + " " + Ball.Instance.IsMagnet);
         if((collision.gameObject.layer == 7 || gameObject.layer == 7) && Ball.Instance.IsMagnet) {
             // ignore this if it's a magnet reward
             return;

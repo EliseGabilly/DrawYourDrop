@@ -10,7 +10,9 @@ public class Ball : Singleton<Ball> {
     private Animator animShield;
     private bool IsImmune = false;
     [SerializeField]
-    private GameObject goMagnet;
+    private CircleCollider2D magnetCollider;
+    [SerializeField]
+    private GameObject goAnimMagnet;
     private Animator animMagnet;
     public bool IsMagnet { get; private set; } = false;
     [SerializeField]
@@ -27,12 +29,12 @@ public class Ball : Singleton<Ball> {
     protected override void Awake() {
         base.Awake();
         animShield = goShield.GetComponent<Animator>();
-        animMagnet = goMagnet.GetComponent<Animator>();
+        animMagnet = goAnimMagnet.GetComponent<Animator>();
         animBounce = goBounce.GetComponent<Animator>();
 
         SpriteRenderer srShield = goShield.GetComponent<SpriteRenderer>();
         srShield.color = Const.ColorBlue;
-        SpriteRenderer srMagnet = goMagnet.GetComponent<SpriteRenderer>();
+        SpriteRenderer srMagnet = goAnimMagnet.GetComponent<SpriteRenderer>();
         srMagnet.color = Const.ColorBlue;
         Image imgBounceA = goBounce.GetComponentsInChildren<Image>()[0];
         Image imgBounceB = goBounce.GetComponentsInChildren<Image>()[1];
@@ -79,11 +81,13 @@ public class Ball : Singleton<Ball> {
     private IEnumerator MagnetCountDown() {
         IsMagnet = true;
         animMagnet.SetBool("isActive", IsMagnet);
+        magnetCollider.radius = 1.5f;
         yield return new WaitForSeconds(10f);
         EndMagnet();
     }
 
     private void EndMagnet() {
+        magnetCollider.radius = 0f;
         IsMagnet = false;
         animMagnet.SetBool("isActive", IsMagnet);
     }
