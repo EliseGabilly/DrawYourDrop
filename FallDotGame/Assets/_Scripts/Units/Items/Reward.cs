@@ -17,7 +17,7 @@ public class Reward : Item {
 
     private void Update() {
         if (isMagnet) {
-            direction = (player.transform.position - this.transform.position).normalized * 10;
+            direction = (player.transform.position - this.transform.position).normalized * 12;
             rb.velocity = direction;
         }
     }
