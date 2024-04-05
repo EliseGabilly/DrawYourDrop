@@ -58,7 +58,8 @@ public class ItemGroup : MonoBehaviour {
     }
 
     private IEnumerator EraseWithDelay() {
-        for (int i = 0; i < 10; i++) {
+        float eraseUpTo = GameManager.Instance.GetPlayerPosition().y - GameManager.Instance.WorldHeight;
+        while (HighestItem.transform.position.y > eraseUpTo) {
             SwitchHighestItemPosition();
             yield return new WaitForSeconds(0.05f);
         }

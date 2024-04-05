@@ -65,6 +65,10 @@ public class GameManager : Singleton<GameManager> {
         return isInFrame;
     }
 
+    public Vector3 GetPlayerPosition() {
+        return player.transform.position;
+    }
+
     public void GameOver(string death) {
         if(DeathCause!=null) {
             return;
