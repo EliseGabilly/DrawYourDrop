@@ -7095,8 +7095,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   goShield: {fileID: 804985731}
-  magnetCollider: {fileID: 0}
-  goAnimMagnet: {fileID: 0}
+  magnetCollider: {fileID: 1052957041}
+  goAnimMagnet: {fileID: 1980843605}
   goBounce: {fileID: 885097242}
 --- !u!1 &1675245659
 GameObject:
