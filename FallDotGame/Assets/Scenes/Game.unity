@@ -5543,9 +5543,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PowersUps:
-  - {fileID: 11400000, guid: d7371d8c901bc7945a16d6d72f392286, type: 2}
-  - {fileID: 11400000, guid: 31a4d674a835ba0478fc42e2ecd6a366, type: 2}
   - {fileID: 11400000, guid: f8c3f0b7fb92fea4cb2648cde5ce33be, type: 2}
+  - {fileID: 11400000, guid: 31a4d674a835ba0478fc42e2ecd6a366, type: 2}
+  - {fileID: 11400000, guid: d7371d8c901bc7945a16d6d72f392286, type: 2}
   - {fileID: 11400000, guid: 8ba3546abf0a6da44ad96a8f7e620bcc, type: 2}
 --- !u!1 &1287856590
 GameObject:
@@ -8418,7 +8418,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 10
+  m_Radius: 2.5
 --- !u!1 &1982574328
 GameObject:
   m_ObjectHideFlags: 0
