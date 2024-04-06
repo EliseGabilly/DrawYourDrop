@@ -13,6 +13,8 @@ public class InfosManager : Singleton<InfosManager> {
     [SerializeField]
     private Text summeryTxt;
     [SerializeField]
+    private Text musicTxt;
+    [SerializeField]
     private Text thanksTxt;
 
     [Header("Buttons")]
@@ -60,7 +62,7 @@ public class InfosManager : Singleton<InfosManager> {
     private void SetTextSize() {
         int minSize = (int) Math.Floor(title.cachedTextGenerator.fontSizeUsedForBestFit * 0.8f);
 
-        Text[] txtHolder = new Text[] {text, summeryTxt, thanksTxt};
+        Text[] txtHolder = new Text[] {text, summeryTxt, musicTxt, thanksTxt};
         foreach(Text holder in txtHolder) {
             if (minSize > holder.cachedTextGenerator.fontSizeUsedForBestFit) {
                 minSize = holder.cachedTextGenerator.fontSizeUsedForBestFit;
