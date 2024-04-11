@@ -81,7 +81,7 @@ public class Ball : Singleton<Ball> {
     private IEnumerator MagnetCountDown() {
         IsMagnet = true;
         animMagnet.SetBool("isActive", IsMagnet);
-        magnetCollider.radius = 1.5f;
+        magnetCollider.radius = 2.0f;
         yield return new WaitForSeconds(10f);
         EndMagnet();
     }
