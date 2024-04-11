@@ -17,25 +17,25 @@ public class ItemSpawnManager : Singleton<ItemSpawnManager> {
         Vector3 positionTopLeft = mainCamera.ScreenToWorldPoint(
             new Vector3(mainCamera.pixelWidth, mainCamera.pixelHeight, -mainCamera.transform.position.z));
 
-        InitialObjectSpawn(positionTopLeft);
-        InitialPowerupSpawn(positionTopLeft);
+        InitialObjectSpawn();
+        InitialPowerupSpawn();
     }
 
-    private void InitialObjectSpawn(Vector3 positionTopLeft) {
+    private void InitialObjectSpawn() {
         ItemGroup[] itemGroups = itemParent.GetComponentsInChildren<ItemGroup>();
         GameObject go;
 
         //spawn reward, penalty and obstacles
         foreach (ItemGroup itemGroup in itemGroups) {
             GameObject prefab = itemGroup.Prefab;
-            itemGroup.LowestPos = new Vector3(0, positionTopLeft.y - GameManager.Instance.WorldHeight / 2, 0);
+            itemGroup.LowestPos = new Vector3(0, 0, 0);
 
             for (int i = 0; i < ItemNbSpawn; i++) {
                 itemGroup.LowestPos = new Vector3(
                     Random.Range(GameManager.Instance.WorldLeft, GameManager.Instance.WorldRight),
                     itemGroup.LowestPos.y - GameManager.Instance.WorldHeight * Random.Range(itemGroup.MinDiff, itemGroup.MaxDiff),
                     0);
-                go = Instantiate(prefab, itemGroup.LowestPos, Quaternion.identity) as GameObject;
+                go = Instantiate(prefab, itemGroup.LowestPos, Quaternion.identity);
                 go.transform.parent = itemGroup.gameObject.transform;
                 go.name = go.name + i;
                 Item itm = go.GetComponent<Item>();
@@ -46,16 +46,16 @@ public class ItemSpawnManager : Singleton<ItemSpawnManager> {
         }
     }
 
-    private void InitialPowerupSpawn(Vector3 positionTopLeft) {
+    private void InitialPowerupSpawn() {
         GameObject go;
 
         //spawn multiple of each power ups out of frame
-        Vector3 positionTopLeftPlus = new Vector3(positionTopLeft.x + 10, positionTopLeft.y + 10, positionTopLeft.z + 10);
+        Vector3 positionTopLeftPlus = new Vector3(GameManager.Instance.WorldLeft + 10, GameManager.Instance.WorldHeight + 10, 10);
         ItemPowerUp powerUp = itemParent.GetComponentInChildren<ItemPowerUp>();
         foreach (Items items in powerUp.PowersUps) {
             GameObject obj = items.GO;
             for (int i = 0; i < ItemNbSpawn; i++) {
-                go = Instantiate(obj, positionTopLeftPlus, Quaternion.identity) as GameObject;
+                go = Instantiate(obj, positionTopLeftPlus, Quaternion.identity);
                 go.transform.parent = powerUp.gameObject.transform;
                 go.name = go.name + i;
                 ColorItem(go);
@@ -66,7 +66,7 @@ public class ItemSpawnManager : Singleton<ItemSpawnManager> {
         }
 
         //replace four of them randomly
-        powerUp.SetFirstUsedItems(new Vector3(0, positionTopLeft.y - GameManager.Instance.WorldHeight / 2, 0));
+        powerUp.SetFirstUsedItems(new Vector3(0, 0, 0));
     }
 
     private void ColorItem(GameObject go) {
