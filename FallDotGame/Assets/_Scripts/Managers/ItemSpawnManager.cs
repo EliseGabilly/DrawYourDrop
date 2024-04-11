@@ -32,7 +32,7 @@ public class ItemSpawnManager : Singleton<ItemSpawnManager> {
 
             for (int i = 0; i < ItemNbSpawn; i++) {
                 itemGroup.LowestPos = new Vector3(
-                    Random.Range(-(GameManager.Instance.WorldWidth / 2) * 0.9f, GameManager.Instance.WorldWidth / 2 * 0.9f),
+                    Random.Range(GameManager.Instance.WorldLeft, GameManager.Instance.WorldRight),
                     itemGroup.LowestPos.y - GameManager.Instance.WorldHeight * Random.Range(itemGroup.MinDiff, itemGroup.MaxDiff),
                     0);
                 go = Instantiate(prefab, itemGroup.LowestPos, Quaternion.identity) as GameObject;

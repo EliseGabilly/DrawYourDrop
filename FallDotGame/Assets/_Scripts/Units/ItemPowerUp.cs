@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ItemPowerUp : MonoBehaviour {
@@ -31,7 +32,7 @@ public class ItemPowerUp : MonoBehaviour {
 
                 //place random power up in the bottom
                 LowestPos = new Vector3(
-                    Random.Range(-(GameManager.Instance.WorldWidth / 2) * 0.8f, (GameManager.Instance.WorldWidth / 2) * 0.8f),
+                    Random.Range(GameManager.Instance.WorldLeft, GameManager.Instance.WorldRight),
                     LowestPos.y - GameManager.Instance.WorldHeight * Random.Range(MinDiff, MaxDiff),
                     0);
                 Item freeItm = GetRdmFreeItem();
@@ -53,10 +54,10 @@ public class ItemPowerUp : MonoBehaviour {
 
     public void SetFirstUsedItems(Vector3 pos) {
         LowestPos = pos;
-        for(int i=0; i<4; i++) {
+        while(FreeItems.Any()) {
             Item itm = GetRdmFreeItem();
             LowestPos = new Vector3(
-                Random.Range(-(GameManager.Instance.WorldWidth / 2) * 0.8f, (GameManager.Instance.WorldWidth / 2) * 0.8f),
+                Random.Range(GameManager.Instance.WorldLeft, GameManager.Instance.WorldRight),
                 LowestPos.y - GameManager.Instance.WorldHeight * Random.Range(MinDiff, MaxDiff),
                 0);
             itm.transform.position = LowestPos;

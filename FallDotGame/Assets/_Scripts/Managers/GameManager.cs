@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 public class GameManager : Singleton<GameManager> {
@@ -8,14 +9,17 @@ public class GameManager : Singleton<GameManager> {
 
     public int RewardScore { get; set; }
     public int DistanceScore { get; set; }
-    public int Hundred = 100;
     public bool UseGravity { get; private set; }
     public int PickUpCount { get; set; } = 0;
     public float StartTime { get; set; } = 0;
     private string DeathCause;
 
+    public int Hundred = 100;
+
     public float WorldHeight { get; private set; }
     public float WorldWidth { get; private set; }
+    public float WorldLeft { get; private set; }
+    public float WorldRight { get; private set; }
     #endregion
 
     protected override void Awake() {
@@ -23,12 +27,18 @@ public class GameManager : Singleton<GameManager> {
         player = GameObject.FindWithTag("Player");
         mainCamera = Camera.main;
 
-        Vector3 positionTopLeft = mainCamera.ScreenToWorldPoint(new Vector3(0, mainCamera.pixelHeight, -mainCamera.transform.position.z));
-        Vector3 positionBottomRight = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth, 0, -mainCamera.transform.position.z));
-        WorldWidth = positionBottomRight.x - positionTopLeft.x;
-        WorldHeight = positionTopLeft.y - positionBottomRight.y;
-
         SetGravity(false);
+    }
+
+    public void AdjustWorldSize() {
+        Vector3 bottomLeft = mainCamera.ScreenToWorldPoint(new Vector3(0, 0, -mainCamera.transform.position.z));
+        Vector3 topRight = mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth, mainCamera.pixelHeight, -mainCamera.transform.position.z));
+
+        WorldWidth = topRight.x - bottomLeft.x;
+        WorldHeight = topRight.y - bottomLeft.y;
+
+        WorldLeft = -WorldWidth/2;
+        WorldRight = WorldWidth/2;
     }
 
     private void Update() {
@@ -45,16 +55,14 @@ public class GameManager : Singleton<GameManager> {
 
     private bool IsPlayerInFrame() {
         bool isInFrame = true;
-        Vector3 screenPos = mainCamera.WorldToScreenPoint(player.transform.position);
-        float xRatio = screenPos.x / mainCamera.pixelWidth; //horizontal check
-        float yRatio = screenPos.y / mainCamera.pixelHeight; //vertical check
-        if (xRatio > 1.05f || xRatio < -.05f) {
+        if (GetPlayerPosition().x > WorldRight+0.6 || GetPlayerPosition().x < WorldLeft-0.6) {
             isInFrame = false;
             Ball.Instance.WentOutOfFrame();
         } else {
             Ball.Instance.IsBouncing = false;
         }
-        if (yRatio > 1.2f || yRatio < -.1f) {
+
+        if (GetPlayerPosition().y > mainCamera.transform.position.y + WorldHeight/2 + 1) {
             isInFrame = false;
             if (Vector2.Equals(Vector2.zero, player.GetComponent<Rigidbody2D>().velocity)) {
                 GameOver("Got stuck");

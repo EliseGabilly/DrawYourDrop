@@ -49,7 +49,7 @@ public class BackgroundSpawnManager : MonoBehaviour {
             Sprite sprite = backgrounds[Random.Range(0, backgrounds.Length)];
             float height = sprite.bounds.size.y / 2;
             backgroundPosition.y -= height + backgroundPreviousHeight + Random.Range(1, 5);
-            backgroundPosition.x = Random.Range(-GameManager.Instance.WorldWidth / 2, GameManager.Instance.WorldWidth / 2);
+            backgroundPosition.x = Random.Range(GameManager.Instance.WorldLeft, GameManager.Instance.WorldRight);
             go = Instantiate(backgroundObject, backgroundPosition, Quaternion.identity) as GameObject;
             go.transform.SetParent(backgroundParent);
 
@@ -109,7 +109,7 @@ public class BackgroundSpawnManager : MonoBehaviour {
         Sprite sprite = backgrounds[Random.Range(0, backgrounds.Length)];
         float height = sprite.bounds.size.y / 2;
         backgroundPosition.y -= height + backgroundPreviousHeight + Random.Range(1, 5);
-        backgroundPosition.x = Random.Range(-GameManager.Instance.WorldWidth / 2, GameManager.Instance.WorldWidth / 2);
+        backgroundPosition.x = Random.Range(GameManager.Instance.WorldLeft, GameManager.Instance.WorldRight);
         backgroundOnTop.transform.position = backgroundPosition;
 
         Restyle(backgroundOnTop, sprite);
