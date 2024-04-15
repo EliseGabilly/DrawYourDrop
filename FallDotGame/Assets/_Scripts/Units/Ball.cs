@@ -21,7 +21,6 @@ public class Ball : Singleton<Ball> {
     public bool IsBounce { get; private set; } = false;
     public bool IsBouncing { get; set; } = false;
 
-    private IEnumerator shieldCoroutine;
     private IEnumerator magnetCoroutine;
     private IEnumerator bounceCoroutine;
     #endregion
@@ -44,7 +43,6 @@ public class Ball : Singleton<Ball> {
         SpriteRenderer srBall = GetComponent<SpriteRenderer>();
         srBall.color = Color.white;
 
-        shieldCoroutine = ShieldCountDown();
         magnetCoroutine = MagnetCountDown();
         bounceCoroutine = BounceCountDown();
     }
@@ -55,16 +53,8 @@ public class Ball : Singleton<Ball> {
     }
 
     public void TakeShield() {
-        StopCoroutine(shieldCoroutine);
-        shieldCoroutine = ShieldCountDown();
-        StartCoroutine(shieldCoroutine);
-    }
-
-    private IEnumerator ShieldCountDown() {
         IsImmune = true;
         animShield.SetBool("isActive", IsImmune);
-        yield return new WaitForSeconds(10f);
-        EndShield();
     }
 
     private void EndShield() {
