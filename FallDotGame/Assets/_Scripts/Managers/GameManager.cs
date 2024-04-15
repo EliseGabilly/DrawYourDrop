@@ -62,7 +62,7 @@ public class GameManager : Singleton<GameManager> {
             Ball.Instance.IsBouncing = false;
         }
 
-        if (GetPlayerPosition().y > mainCamera.transform.position.y + WorldHeight/2 + 1) {
+        if (GetPlayerPosition().y > mainCamera.transform.position.y + WorldHeight/2 + WorldHeight*0.05) {
             isInFrame = false;
             if (Vector2.Equals(Vector2.zero, player.GetComponent<Rigidbody2D>().velocity)) {
                 GameOver("Got stuck");
