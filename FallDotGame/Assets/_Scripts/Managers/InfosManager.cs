@@ -27,6 +27,8 @@ public class InfosManager : Singleton<InfosManager> {
     [SerializeField]
     private Image bounce;
     [SerializeField]
+    private Image slow;
+    [SerializeField]
     private Image penalty;
     [SerializeField]
     private Image bonus;
@@ -43,7 +45,9 @@ public class InfosManager : Singleton<InfosManager> {
     private string BOUNCE_TITLE = "Bounce";
     private string BOUNCE_TXT = "The wall gives a temporary immunity to side screen exit, while active the ball will bounce.";
     private string SHIELD_TITLE = "Shield";
-    private string SHIELD_TXT = "The shield gives immunity a penalty, a mistake can happen so you have to anticipate. ";
+    private string SHIELD_TXT = "The shield gives immunity for one penalty, a mistake can happen so you have to anticipate. ";
+    private string SLOW_TITLE = "Slow";
+    private string SLOW_TXT = "This power-up give you ten seconds to catch up to a slower camera, make good use of this time. ";
     private string BONUS_TITLE = "Bonus";
     private string BONUS_TXT = "You want to score more points? Collect the bonuses along the way to earn 10 extra points.";
     private string PENALTY_TITLE = "Penalty";
@@ -68,7 +72,7 @@ public class InfosManager : Singleton<InfosManager> {
                 minSize = holder.cachedTextGenerator.fontSizeUsedForBestFit;
             }
         }
-        string[] texts = new string[]{DEFAULT_TXT, ERASER_TXT, SHIELD_TXT, MAGNET_TXT, BOUNCE_TXT, PENALTY_TXT, BONUS_TXT };
+        string[] texts = new string[]{DEFAULT_TXT, ERASER_TXT, SHIELD_TXT, MAGNET_TXT, BOUNCE_TXT, PENALTY_TXT, BONUS_TXT, SLOW_TXT};
         foreach (string txt in texts) {
             text.text = txt;
             if (minSize > text.cachedTextGenerator.fontSizeUsedForBestFit) {
@@ -84,7 +88,7 @@ public class InfosManager : Singleton<InfosManager> {
     }
 
     public void SelectItem(string item) {
-        Image[] imgs = new Image[] { eraser, magnet, bounce, shield, bonus, penalty };
+        Image[] imgs = new Image[] { eraser, magnet, bounce, shield, bonus, penalty, slow};
         foreach (Image img in imgs) {
             img.color = Const.ColorGrey;
         }
@@ -109,6 +113,11 @@ public class InfosManager : Singleton<InfosManager> {
                 title.text = SHIELD_TITLE;
                 text.text = SHIELD_TXT;
                 shield.color = Color.black;
+                break;
+            case "slow":
+                title.text = SLOW_TITLE;
+                text.text = SLOW_TXT;
+                slow.color = Color.black;
                 break;
             case "bonus":
                 title.text = BONUS_TITLE;
