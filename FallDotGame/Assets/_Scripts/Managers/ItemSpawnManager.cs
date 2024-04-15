@@ -6,17 +6,10 @@ public class ItemSpawnManager : Singleton<ItemSpawnManager> {
     [SerializeField]
     private Transform itemParent;
 
-    private Camera mainCamera;
-
     private int ItemNbSpawn = 30;
     #endregion
 
-    protected void Start() {
-        mainCamera = Camera.main;
-
-        Vector3 positionTopLeft = mainCamera.ScreenToWorldPoint(
-            new Vector3(mainCamera.pixelWidth, mainCamera.pixelHeight, -mainCamera.transform.position.z));
-
+    protected void Start() {        
         InitialObjectSpawn();
         InitialPowerupSpawn();
     }
@@ -29,10 +22,11 @@ public class ItemSpawnManager : Singleton<ItemSpawnManager> {
         foreach (ItemGroup itemGroup in itemGroups) {
             GameObject prefab = itemGroup.Prefab;
             itemGroup.LowestPos = new Vector3(0, 0, 0);
-
+            float margin = prefab.GetComponent<Item>() is Obstacle ? 0 : GameManager.Instance.WorldWidth*0.1f;
+            Debug.Log("itm "+prefab.GetComponent<Item>()+ " "+(prefab.GetComponent<Item>() is Obstacle ));
             for (int i = 0; i < ItemNbSpawn; i++) {
                 itemGroup.LowestPos = new Vector3(
-                    Random.Range(GameManager.Instance.WorldLeft, GameManager.Instance.WorldRight),
+                    Random.Range(GameManager.Instance.WorldLeft + margin, GameManager.Instance.WorldRight - margin),
                     itemGroup.LowestPos.y - GameManager.Instance.WorldHeight * Random.Range(itemGroup.MinDiff, itemGroup.MaxDiff),
                     0);
                 go = Instantiate(prefab, itemGroup.LowestPos, Quaternion.identity);
@@ -65,7 +59,7 @@ public class ItemSpawnManager : Singleton<ItemSpawnManager> {
             }
         }
 
-        //replace four of them randomly
+        //replace all of them randomly
         powerUp.SetFirstUsedItems(new Vector3(0, 0, 0));
     }
 

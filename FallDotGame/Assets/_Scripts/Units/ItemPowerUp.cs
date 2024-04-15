@@ -13,6 +13,7 @@ public class ItemPowerUp : MonoBehaviour {
     public List<Item> FreeItems { get; set; } = new List<Item>();
     public List<Item> UsedItems { get; set; } = new List<Item>();
     public Vector3 LowestPos { get; set; }
+    private float margin;
     #endregion
 
 
@@ -20,6 +21,7 @@ public class ItemPowerUp : MonoBehaviour {
 
     private void Awake() {
         mainCamera = Camera.main;
+        margin = GameManager.Instance.WorldWidth*0.1f;
     }
 
     private void Update() {
@@ -32,7 +34,7 @@ public class ItemPowerUp : MonoBehaviour {
 
                 //place random power up in the bottom
                 LowestPos = new Vector3(
-                    Random.Range(GameManager.Instance.WorldLeft, GameManager.Instance.WorldRight),
+                    Random.Range(GameManager.Instance.WorldLeft+margin, GameManager.Instance.WorldRight-margin),
                     LowestPos.y - GameManager.Instance.WorldHeight * Random.Range(MinDiff, MaxDiff),
                     0);
                 Item freeItm = GetRdmFreeItem();
@@ -57,7 +59,7 @@ public class ItemPowerUp : MonoBehaviour {
         while(FreeItems.Any()) {
             Item itm = GetRdmFreeItem();
             LowestPos = new Vector3(
-                Random.Range(GameManager.Instance.WorldLeft, GameManager.Instance.WorldRight),
+                Random.Range(GameManager.Instance.WorldLeft + margin, GameManager.Instance.WorldRight-margin),
                 LowestPos.y - GameManager.Instance.WorldHeight * Random.Range(MinDiff, MaxDiff),
                 0);
             itm.transform.position = LowestPos;
