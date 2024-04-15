@@ -23,7 +23,7 @@ public class ItemSpawnManager : Singleton<ItemSpawnManager> {
             GameObject prefab = itemGroup.Prefab;
             itemGroup.LowestPos = new Vector3(0, 0, 0);
             float margin = prefab.GetComponent<Item>() is Obstacle ? 0 : GameManager.Instance.WorldWidth*0.1f;
-            Debug.Log("itm "+prefab.GetComponent<Item>()+ " "+(prefab.GetComponent<Item>() is Obstacle ));
+            
             for (int i = 0; i < ItemNbSpawn; i++) {
                 itemGroup.LowestPos = new Vector3(
                     Random.Range(GameManager.Instance.WorldLeft + margin, GameManager.Instance.WorldRight - margin),

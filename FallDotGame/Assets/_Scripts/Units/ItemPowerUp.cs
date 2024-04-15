@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class ItemPowerUp : MonoBehaviour {
 
@@ -21,6 +22,9 @@ public class ItemPowerUp : MonoBehaviour {
 
     private void Awake() {
         mainCamera = Camera.main;
+    }
+
+    private void Start() {
         margin = GameManager.Instance.WorldWidth*0.1f;
     }
 

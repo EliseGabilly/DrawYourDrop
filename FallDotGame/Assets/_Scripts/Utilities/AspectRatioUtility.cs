@@ -1,23 +1,37 @@
 using UnityEngine;
  
 public class AspectRatioUtility : MonoBehaviour {
-    
+    #region Variables
     private float scaleHeight;
+
+
+    private float minAspect = 9.0f / 19.0f;
+    private float maxAspect = 9.0f / 16.0f;
+
+    #endregion
     
     void Awake() {
-        float targetAspect = 9.0f / 16.0f;
-        float windowAspect = (float)Screen.width / (float)Screen.height;
-        float newScaleHeight = windowAspect / targetAspect;
+        float newScaleHeight = FindNewScaleHeight();
         Adjust(newScaleHeight);
     }
 
     void Update() {
-        float targetAspect = 9.0f / 16.0f;
-        float windowAspect = (float)Screen.width / (float)Screen.height;
-        float newScaleHeight = windowAspect / targetAspect;
+        float newScaleHeight = FindNewScaleHeight();
         if(scaleHeight != newScaleHeight) {
             Adjust(newScaleHeight);
         }
+    }
+
+    private float FindNewScaleHeight(){
+        float windowAspect = Screen.width / (float) Screen.height;
+        float targetAspect = windowAspect;
+        if (windowAspect<minAspect) {
+            targetAspect = minAspect;
+        } else if (windowAspect>maxAspect){
+            targetAspect = maxAspect;
+        }
+
+        return windowAspect / targetAspect;
     }
  
     public void Adjust(float newScaleHeight) {
