@@ -29,13 +29,10 @@ public class BackgroundSpawnManager : MonoBehaviour {
 
     private Camera mainCamera;
     private int layerOrder = 0;
-    Color baseColor;
     #endregion
 
     private void Start() {
         mainCamera = Camera.main;
-
-        baseColor = Const.ColorBlueLight;
 
         InitialBackgroundSpawn();
         InitialPipeSpawn();
@@ -84,11 +81,7 @@ public class BackgroundSpawnManager : MonoBehaviour {
         SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
 
         sr.sprite = sprite;
-        Color color = baseColor;
-        if (isDarker) {
-            color = new Color(baseColor.r - 0.1f, baseColor.g - 0.1f, baseColor.b - 0.1f);
-        }
-        sr.color = color;
+        sr.color = isDarker ? Const.ColorBackgroundDark : Const.ColorBackgroundMid;
 
         sr.sortingOrder = layerOrder;
         layerOrder++;
