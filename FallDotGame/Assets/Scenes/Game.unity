@@ -5626,7 +5626,7 @@ MonoBehaviour:
   shield: {fileID: 1239257680}
   magnet: {fileID: 829741940}
   bounce: {fileID: 730743695}
-  slow: {fileID: 0}
+  slow: {fileID: 1979750306}
   penalty: {fileID: 930727650}
   bonus: {fileID: 1786935128}
 --- !u!1 &1223814030

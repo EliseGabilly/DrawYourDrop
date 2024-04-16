@@ -47,7 +47,7 @@ public class InfosManager : Singleton<InfosManager> {
     private string SHIELD_TITLE = "Shield";
     private string SHIELD_TXT = "The shield gives immunity for one penalty, a mistake can happen so you have to anticipate. ";
     private string SLOW_TITLE = "Slow";
-    private string SLOW_TXT = "This power-up give you ten seconds to catch up to a slower camera, make good use of this time. ";
+    private string SLOW_TXT = "This power-up give you a few seconds to catch up to a slower camera, make good use of this time. ";
     private string BONUS_TITLE = "Bonus";
     private string BONUS_TXT = "You want to score more points? Collect the bonuses along the way to earn 10 extra points.";
     private string PENALTY_TITLE = "Penalty";

@@ -5,8 +5,8 @@ public class AspectRatioUtility : MonoBehaviour {
     private float scaleHeight;
 
 
-    private float minAspect = 9.0f / 19.0f;
-    private float maxAspect = 9.0f / 16.0f;
+    private float minAspect = 9.0f / 19.5f;
+    private float maxAspect = 9.0f / 16.5f;
 
     #endregion
     
