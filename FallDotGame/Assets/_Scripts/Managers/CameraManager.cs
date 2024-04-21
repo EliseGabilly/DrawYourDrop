@@ -61,7 +61,6 @@ public class CameraManager : Singleton<CameraManager> {
         SlowCoefficient = 0.5f;
         animSlow.SetTrigger("start");
         yield return new WaitForSeconds(5f);
-        animSlow.SetTrigger("start");
         for(int i = 0; i<10; i++) {
             SlowCoefficient+= 0.05f;
             yield return new WaitForSeconds(0.5f);
