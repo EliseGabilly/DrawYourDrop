@@ -1,6 +1,8 @@
 # Draw your Drop
 Draw your Drop is a casual mobile game made with Unity that will challange your reflexe.
 
+The game is accessible on the play store or on a web version here : https://kyofa.itch.io/falldot
+
 
 
 Start drawing and try to keep the ball in frame. A bad bounce and you might have to start all over.
